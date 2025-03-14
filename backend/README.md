@@ -10,3 +10,6 @@ new requirements -> add to requirements.txt: `pip freeze > requirements.txt`
 `venv\Scripts\activate      # For Windows`
 
 `pip install -r requirements.txt`
+
+## testing vscode github extension
+## - Jason
