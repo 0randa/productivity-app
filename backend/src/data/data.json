@@ -1,6 +1,6 @@
 {
   "next_user_id": 1,
-  "next_session_id": 3,
+  "next_session_id": 1,
   "next_task_id": 0,
   "users": [
     {
@@ -8,21 +8,15 @@
       "username": "default",
       "email": "generic.gmail.com",
       "password": "amongus",
+      "pet": null,
       "tracker": [],
-      "past_xp": []
+      "past_xp": [],
+      "active_task_id": -1
     }
   ],
   "tokens": [
     {
       "session_id": 0,
-      "user_id": 0
-    },
-    {
-      "session_id": 1,
-      "user_id": 0
-    },
-    {
-      "session_id": 2,
       "user_id": 0
     }
   ]

@@ -5,6 +5,7 @@ import logging
 import functools
 import urllib.parse
 from dataclasses import asdict, is_dataclass
+import json
 
 # =========================================================================================
 # ==== Global Variables ===================================================================
@@ -37,7 +38,13 @@ def encode_token(token):
 
 # Decodes a token
 def decode_token(token_str):
-    return json.loads(urllib.parse.unquote(encoded_json))
+    print("\n\n\n")
+    print(token_str)
+    print("\n\n\n")
+    print(f"|{urllib.parse.unquote(token_str)}|")
+    print("\n\n\n")
+    print(json.loads(urllib.parse.unquote(token_str)[1:-1].strip()))
+    return json.loads(urllib.parse.unquote(token_str))
 
 # =========================================================================================
 # ==== HTTP Endpoints =====================================================================
@@ -93,7 +100,6 @@ def add_task():
     token_str = request.headers.get("token")
     task = request.json.get("task")
     tags = request.json.get("tags")
-    
     try:
         data.add_task(decode_token(token_str)["user_id"], task, tags)
     except ValueError as error:

@@ -93,6 +93,7 @@ class Data:
             username=username,
             email=email,
             password=password,
+            pet=None,
             tracker=[],
             past_xp=[]
         )

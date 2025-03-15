@@ -90,12 +90,16 @@ class User:
     # Takes in a user dictionary and outputs a User instance
     @classmethod
     def from_dict(cls, user):
+        if user["pet"] is not None:
+            pet = Pet.from_dict(user["pet"])
+        else:
+            pet = None
         return cls(
             user_id=user["user_id"],
             username=user["username"],
             email=user["email"],
             password=user["password"],
-            pet=Pet.from_dict(user["pet"]),
+            pet=pet,
             active_task_id=user["active_task_id"],
             tracker=[Task.from_dict(task) for task in user["tracker"]],
             past_xp=[PastXp.from_dict(past_xp) for past_xp in user["past_xp"]],
