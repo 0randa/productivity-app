@@ -33,6 +33,7 @@ const timerMinutes = document.querySelector('#timer-minutes');
 const timerColonRight = document.querySelector('#timer-colon-right');
 const timerSeconds = document.querySelector('#timer-seconds');
 const btns = document.querySelectorAll(".btn");
+const audio = document.getElementById("play-audio");
 
 btns.forEach(function (btn) {
     btn.addEventListener("click", function (e) {
@@ -152,7 +153,6 @@ btns.forEach(function (btn) {
             }
             updateDisplay();
         }
-
         function updateDisplay() {
             if (minutesLeft < 10) {
                 timerColonLeft.textContent = ":0";
@@ -167,6 +167,9 @@ btns.forEach(function (btn) {
             timerHours.textContent = hoursLeft;
             timerMinutes.textContent = minutesLeft;
             timerSeconds.textContent = secondsLeft;
+        }
+        if (styles.contains('audio')) {
+            if (audio.paused ? audio.play() : audio.pause());
         }
     });
 });
