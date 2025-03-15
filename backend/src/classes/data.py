@@ -1,18 +1,19 @@
 from dataclasses import dataclass
-from user import User
-from token import Token
+from classes.user import User
+from classes.token import Token
+from typing import Dict, List
 import json
 import os
 import logging
 
 # Constants
-DATA_DIR = "../data/data.json"
+DATA_DIR = "./data/data.json"
 DEFAULT_DICT = {
-    next_user_id: 0,
-    next_session_id: 0,
-    next_task_id: 0,
-    users: [],
-    tokens: []
+    "next_user_id": 0,
+    "next_session_id": 0,
+    "next_task_id": 0,
+    "users": [],
+    "tokens": []
 }
 
 # Loads data from data.json into a Data object
