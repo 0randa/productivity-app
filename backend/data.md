@@ -33,6 +33,7 @@ let data = {
             username: "Generic_Username",
             email: "generic_email@unsw.edu.au",
             password: 'Password1',
+            active_task_id: -1,
             tracker: [
                 {
                     task_id: 0
