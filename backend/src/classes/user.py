@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Dict, List
 from task import Task
 from past_xp import PastXp
 
@@ -10,5 +12,3 @@ class User:
     password: str
     tracker: List[Task]
     past_xp: List[PastXp]
-
-    
