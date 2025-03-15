@@ -21,6 +21,7 @@ def signup():
     email = request.json["email"]
     password = request.json["password"]
 
+    #
     print({email}, {password})
     logging.info(f"Signed up with email: {email}, password: {password}.")
 
