@@ -56,12 +56,13 @@ def signup():
     try:
         token = data.add_user(new_user)
     except ValueError as error:
-        logging.error(f"Error: {error}")
+        logging.error(f"Signup error: {error}")
         return jsonify({"Error": str(error)}), 400
 
-    return jsonify({"token": token}), 200
+    return jsonify({"Token": token}), 200
 
 @app.route("/login", methods=["POST"])
+@save_data
 def login():
     email = request.json["email"]
     password = request.json["password"]
@@ -69,10 +70,10 @@ def login():
     try:
         token = data.login(email, password)
     except ValueError as error:
-        logging.error(f"Error: {error}")
-        return jsonify({"Error": error}), 400
+        logging.error(f"Login error: {error}")
+        return jsonify({"Error": str(error)}), 400
 
-    return jsonify({"token": token}), 200
+    return jsonify({"Token": token}), 200
 
 @app.route('/')
 def index():
