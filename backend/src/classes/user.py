@@ -70,7 +70,7 @@ class User:
         # Update xp for the day
         today_xp = [xp for xp in self.past_xp if xp["date"] == get_date()]
         if len(today_xp) == 0:
-            past_xp.append(PastXp(date=get_date(), xp=self.get_xp()))
+            self.past_xp.append(PastXp(date=get_date(), xp=self.get_xp()))
         else:
             today_xp.xp = self.get_xp()
 
@@ -79,7 +79,7 @@ class User:
     # Gets the summary of all of a certain date's tasks
     def get_summary(self, date):
         tasks = [task for task in self.tracker if task.date == get_date()]
-        xp = [past_xp for past_xp in self.past_xp if past_xp.date == get_date()][0]
+        xp = [xp for xp in self.past_xp if xp.date == get_date()][0]
         return {tracker: tasks, xp: xp}
 
     def create_pet(self, pet):
