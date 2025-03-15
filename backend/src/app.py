@@ -102,6 +102,7 @@ def end_task():
         return jsonify({"Error in end task": str(error)}), 400
     
     return jsonify({}), 200
+
 @app.route("/createPet", methods=["POST"])
 @save_data
 def create_pet():
@@ -119,7 +120,7 @@ def create_pet():
     return jsonify({}), 200
 
 """Route for the pet page"""
-@app.route("/pet", methods=["Get"])
+@app.route("/pet", methods=["GET"])
 @save_data
 def get_pet():
     token = request.headers.get("token")
