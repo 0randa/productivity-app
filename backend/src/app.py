@@ -38,12 +38,6 @@ def encode_token(token):
 
 # Decodes a token
 def decode_token(token_str):
-    # print("\n\n\n")
-    # print(token_str)
-    # print("\n\n\n")
-    # print(f"|{urllib.parse.unquote(token_str)}|")
-    # print("\n\n\n")
-    # print(json.loads(urllib.parse.unquote(token_str)[1:-1].strip()))
     return json.loads(urllib.parse.unquote(token_str))
 
 # =========================================================================================
@@ -125,12 +119,12 @@ def end_task():
 @save_data
 def create_pet():
     token_str = request.headers.get("token")
-    name = request.json.get("pet")
-
+    name = request.json.get("pet_name")
+    
     try:
         data.create_pet(decode_token(token_str)["user_id"], name)
     except ValueError as error:
-        logging.error(f"Login error: {error}")
+        logging.error(f"Create pet error: {error}")
         return jsonify({"Error": str(error)}), 400
     
     return jsonify({}), 200
