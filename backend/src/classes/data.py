@@ -45,12 +45,12 @@ class Data:
     tokens: List[Token]
 
     # method to check if a user is valid, else, append to to the array
-    def check_user(self, player):
-        for user in self.users:
-            if player.email == user.email:
+    def check_user(self, user):
+        for curr_user in self.users:
+            if user.email == curr_user.email:
                 return False
-            
-        self.users.append(player)
+        
+        self.users.append(user)
         return True
     
     def check_login(self, player):
@@ -61,7 +61,8 @@ class Data:
             
         return False
 
-
+    def add_user(self, player):
+        self.users.append(player)
 
     @classmethod
     def from_dict(cls, data):

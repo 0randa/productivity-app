@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from classes.data import Data, read_data, write_data
+from classes.user import User
 import logging
 
 # Global variables
@@ -21,9 +22,17 @@ def signup():
     email = request.json["email"]
     password = request.json["password"]
 
-    #
-    print({email}, {password})
+    new_user = User(user_id = 1, username = "john cena", email = email, password = password, tracker = [], past_xp = [])
+    
+    print(new_user)
+
+    sign_up = data.check_user(new_user)
+
+    if not sign_up:
+        return jsonify({}), 400
+
     logging.info(f"Signed up with email: {email}, password: {password}.")
+    data.add_user(new_user)
 
     return jsonify({
         "email": email,
