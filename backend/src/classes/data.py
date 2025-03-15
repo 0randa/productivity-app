@@ -30,7 +30,9 @@ def read_data():
 
 # Saves the data object into data.json
 def write_data(data):
-    pass
+    data_dict = asdict(data)
+    with open(DATA_DIR, "w") as data_file:
+        json.dump(data_dict)
 
 # Data.json is directly loaded into this class
 @dataclass
@@ -50,3 +52,4 @@ class Data:
             users=[User.from_dict(user) for user in data["users"]],
             tokens=[Token.from_dict(token) for token in data["tokens"]]
         )
+    
