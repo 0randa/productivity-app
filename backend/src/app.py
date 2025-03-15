@@ -39,9 +39,9 @@ def members():
 @app.route("/signup", methods=["POST"])
 @save_data
 def signup():
-    email = request.json["email"]
-    password = request.json["password"]
-    username = request.json["username"]
+    email = request.json.get("email")
+    password = request.json.get("password")
+    username = request.json.get("username")
 
     try:
         token = data.add_user(username, email, password)
@@ -54,8 +54,8 @@ def signup():
 @app.route("/login", methods=["POST"])
 @save_data
 def login():
-    email = request.json["email"]
-    password = request.json["password"]
+    email = request.json.get("email")
+    password = request.json.get("password")
 
     try:
         token = data.login(email, password)
@@ -65,13 +65,20 @@ def login():
 
     return jsonify({"Token": token}), 200
 
-# @app.route("/add-task", methods=["POST"])
-# @save_data
-# def add_task():
-#     task = request.json["task"]
-#     tags = request.json["tags"]
-
-#     new_task = 
+@app.route("/add-task", methods=["POST"])
+@save_data
+def add_task():
+    token = request.headers.get("token")
+    task = request.json.get("task")
+    tags = request.json.get("tags")
+    
+    try:
+        data.add_task(token["user_id"], task, tags)
+    except ValueError as error:
+        logging.error(f"Login error: {error}")
+        return jsonify({"Error": str(error)}), 400
+    
+    return jsonify({}), 200
 
 
 @app.route('/')

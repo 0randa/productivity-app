@@ -115,7 +115,13 @@ class Data:
             
         raise ValueError("Email does not exist")
 
-    # Get summary functiong
+    # Logic for add_task route
+    def add_task(self, user_id, task, tags):
+        user = self.get_user_by_id(user_id)
+        task_id = self.get_next_task_id()
+        user.add_task(task_id, task, tags)
+
+    # Logic for get_summary function
     def get_summary(self, user_id, date=datetime.now().date()):
         user = self.get_user_by_id(user_id)
 

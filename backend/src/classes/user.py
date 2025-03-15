@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Dict, List
-from classes.task import Task
+from classes.task import Task, get_timestamp, get_date
 from classes.past_xp import PastXp
 
 @dataclass
@@ -12,6 +12,13 @@ class User:
     password: str
     tracker: List[Task]
     past_xp: List[PastXp]
+
+    # Adds a task
+    def add_task(self, task_id, task, tags):
+        new_task = Task(
+            task_id, task, tags, date=get_date(), start_time=get_timestamp()
+        )
+        tracker.append(new_task)
 
     # Takes in a user dictionary and outputs a User instance
     @classmethod
