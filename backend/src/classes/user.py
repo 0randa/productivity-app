@@ -95,7 +95,7 @@ class User:
             username=user["username"],
             email=user["email"],
             password=user["password"],
-            pet=user["pet"],
+            pet=Pet.from_dict(user["pet"]),
             active_task_id=user["active_task_id"],
             tracker=[Task.from_dict(task) for task in user["tracker"]],
             past_xp=[PastXp.from_dict(past_xp) for past_xp in user["past_xp"]],
