@@ -20,7 +20,7 @@ class User:
     username: str
     email: str
     password: str
-    pet: Pet
+    pet: Pet | None
     tracker: List[Task]
     past_xp: List[PastXp]
     active_task_id: int = -1
@@ -86,10 +86,10 @@ class User:
             xp = xp[0]
         return {tracker: tasks, xp: xp}
 
-    def create_pet(self, pet):
-        if pet is not None:
+    def create_pet(self, name):
+        if self.pet is not None:
             raise ValueError("User already has a pet")
-        self.pet = pet
+        self.pet = Pet(name, 0, 0, 0)
 
     # Takes in a user dictionary and outputs a User instance
     @classmethod
