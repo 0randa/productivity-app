@@ -4,13 +4,33 @@ from classes.data import Data, read_data, write_data
 from classes.user import User
 import logging
 
-# Global variables
+# =========================================================================================
+# ==== Global Variables ===================================================================
+# =========================================================================================
+
 app = Flask(__name__)
 cors = CORS(app)
 
 data = read_data()
 
-# HTTP Endpoints
+# =========================================================================================
+# ==== Helper Functions and Decorators ====================================================
+# =========================================================================================
+
+# Runs write_data() after the provided function is called
+def save_data(function):
+
+    def wrapper():
+        response = function()
+        write_data(data)
+        return response
+
+    return wrapper
+
+# =========================================================================================
+# ==== HTTP Endpoints =====================================================================
+# =========================================================================================
+
 @app.route("/members", methods=['GET'])
 def members():
     return jsonify(
@@ -18,6 +38,7 @@ def members():
     )
 
 @app.route("/signup", methods=["POST"])
+@save_data
 def signup():
     email = request.json["email"]
     password = request.json["password"]
@@ -36,7 +57,7 @@ def signup():
         token = data.add_user(new_user)
     except ValueError as error:
         logging.error(f"Error: {error}")
-        return jsonify({"Error": error}), 400
+        return jsonify({"Error": str(error)}), 400
 
     return jsonify({"token": token}), 200
 

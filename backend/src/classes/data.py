@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from classes.user import User
 from classes.token import Token
 from typing import Dict, List
@@ -22,7 +22,7 @@ def read_data():
     # If data file does not exist, create it
     if not os.path.exists(DATA_DIR) or os.path.getsize(DATA_DIR) == 0:
         with open(DATA_DIR, "w") as data_file:
-            json.dump(DEFAULT_DICT)
+            json.dump(DEFAULT_DICT, data_file, indent=2)
         logging.info(f"No {DATA_DIR} file found or is empty. Created one.")
 
     with open(DATA_DIR, "r") as data_file:
@@ -33,7 +33,7 @@ def read_data():
 def write_data(data):
     data_dict = asdict(data)
     with open(DATA_DIR, "w") as data_file:
-        json.dump(data_dict)
+        json.dump(data_dict, data_file, indent=2)
 
 # Data.json is directly loaded into this class
 @dataclass
@@ -89,6 +89,7 @@ class Data:
             
         return False
 
+    # Given a dictionary, returns a class
     @classmethod
     def from_dict(cls, data):
         return cls(
