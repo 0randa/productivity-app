@@ -66,7 +66,7 @@ def login():
 
     return jsonify({"Token": token}), 200
 
-@app.route("/get-summary", methods=["GET"])
+@app.route("/getSummary", methods=["GET"])
 def get_summary():
     token = request.headers.get("token")
     date = request.json.get("date")
@@ -75,7 +75,7 @@ def get_summary():
 
     return jsonify(summary), 200
 
-@app.route("/add-task", methods=["POST"])
+@app.route("/addTask", methods=["POST"])
 @save_data
 def add_task():
     token = request.headers.get("token")
