@@ -9,7 +9,7 @@ import os
 import logging
 
 # Constants
-DATA_DIR = "./data/data.json"
+DATA_DIR = "data.json"
 DEFAULT_DICT = {
     "next_user_id": 0,
     "next_session_id": 0,
