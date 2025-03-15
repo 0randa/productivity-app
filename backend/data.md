@@ -1,4 +1,5 @@
-```javascript
+<!-- Singleplayer -->
+<!-- ```javascript
 let data = {
     username: "Generic_Username",
     today_xp: 0,
@@ -18,11 +19,14 @@ let data = {
         xp: 100
     }
 }
-```
+``` -->
 
 <!-- Support for Multiplayer -->
 ```javascript
 let data = {
+    next_user_id: 1,
+    next_session_id: 1,
+    next_task_id: 1,
     users: [
         {
             user_id: 0,
@@ -50,9 +54,6 @@ let data = {
             session_id: 0,
             user_id: 0
         }
-    ],
-    next_user_id: 1,
-    next_session_id: 1,
-    next_task_id: 1
+    ]
 }
 ```
