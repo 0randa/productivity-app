@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from classes.data import Data, read_data, write_data
 import logging
@@ -148,7 +148,7 @@ def get_pet():
 
 @app.route('/')
 def index():
-    return "We are the goat team! Heheheha!"
+    return render_template('homepage.html')
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.ERROR)

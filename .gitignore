@@ -3,7 +3,7 @@ venv
 .env
 
 # Data.json
-backend/src/data.json
+data.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
