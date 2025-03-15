@@ -127,10 +127,8 @@ def create_pet():
     token_str = request.headers.get("token")
     name = request.json.get("pet")
 
-    user = data.get_user_by_id(decode_token(token_str)["user_id"])
-
     try:
-        user.create_pet(name)
+        data.create_pet(decode_token(token_str)["user_id"], name)
     except ValueError as error:
         logging.error(f"Login error: {error}")
         return jsonify({"Error": str(error)}), 400

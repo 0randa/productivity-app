@@ -135,6 +135,11 @@ class Data:
         user = self.get_user_by_id(user_id)
         return user.get_summary(date)
 
+    # Create a pet
+    def create_pet(self, user_id, name):
+        user = self.get_user_by_id(user_id)
+        user.create_pet(name)
+
     # Given a dictionary, returns a class
     @classmethod
     def from_dict(cls, data):
