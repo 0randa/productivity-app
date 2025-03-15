@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './styles.css'; // Use your existing styles.css for all styling
+import './styles.css'; // your main CSS
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+import Hero from './components/Hero';
+import Modal from './components/Modal';
+import MainCounter from './components/MainCounter';
 
 function App() {
   // State for data fetch
@@ -9,12 +14,11 @@ function App() {
   // State for toggling sidebar
   const [showSidebar, setShowSidebar] = useState(false);
 
-  // State for counter
+  // State for counters
   const [count, setCount] = useState(0);
 
   // State for modal open/close
-  const [isModalOpen, setIsModalOpen] = useState(true); 
-  // defaulting to `true` to match homepage.js behavior (where modal opens on load)
+  const [isModalOpen, setIsModalOpen] = useState(true);
 
   // ============ Data Fetch ============
   const fetchAPI = async () => {
@@ -34,7 +38,6 @@ function App() {
   const toggleSidebar = () => {
     setShowSidebar((prev) => !prev);
   };
-
   const closeSidebar = () => {
     setShowSidebar(false);
   };
@@ -52,199 +55,57 @@ function App() {
   };
 
   // ============ Modal Handlers ============
-  // These two replicate the “close” and “continue as guest” behavior
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
-  // If you really want the same “looping open/close” effect from homepage.js,
-  // you can replicate that with setInterval + setTimeout. Be aware it’s not
-  // typical React usage and can be jarring to the user.
-  // Below is a direct mimic of that logic.
+  // This replicates the repeated open/close logic from your original homepage.js
   const handleModalOpenWithLoop = () => {
-    // repeated opening
     const intervalId = setInterval(() => {
       setIsModalOpen(true);
     }, 200);
-    // repeated closing
     for (let i = 1; i < 1000; i++) {
       setTimeout(() => {
         setIsModalOpen(false);
       }, i * 400);
     }
-    // Just for safety, clear the interval after some time
     setTimeout(() => {
       clearInterval(intervalId);
-    }, 400 * 1000); // e.g. 400s later
+    }, 400 * 1000);
   };
 
   return (
     <div>
-      {/* ============ NAVBAR ============ */}
-      <nav>
-        <div className="nav-center">
-          <h4>homepage</h4>
-          <ul className="nav-links">
-            <li>
-              <a href="#homepage">homepage</a>
-            </li>
-            <li>
-              <a href="#sidebar">sidebar</a>
-            </li>
-            <li>
-              <a href="#modal">modal</a>
-            </li>
-            <li>
-              <a href="#questions">questions</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+      <Navbar />
 
-      {/* ============ SIDEBAR TOGGLE BUTTON ============ */}
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         <i className="fas fa-bars"></i>
       </button>
+      <Sidebar showSidebar={showSidebar} closeSidebar={closeSidebar} />
 
-      {/* ============ SIDEBAR ============ */}
-      <aside className={`sidebar ${showSidebar ? 'show-sidebar' : ''}`}>
-        <div className="sidebar-header">
-          <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCZi-GG6-Q6s3rQsM1ckoZ6c0-qdVoXBa7uw&s"
-            className="logo"
-            alt="logo"
-          />
-          <button className="close-btn" onClick={closeSidebar}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-        {/* links */}
-        <ul className="links">
-          <li>
-            <a href="#homepage">homepage</a>
-          </li>
-          <li>
-            <a href="#reviews">reviews</a>
-          </li>
-          <li>
-            <a href="#modal">modal</a>
-          </li>
-          <li>
-            <a href="#questions">questions</a>
-          </li>
-        </ul>
-        {/* social media */}
-        <ul className="social-icons">
-          <li>
-            <a href="https://www.facebook.com">
-              <i className="fab fa-facebook"></i>
-            </a>
-          </li>
-          <li>
-            <a href="https://www.twitter.com">
-              <i className="fab fa-twitter"></i>
-            </a>
-          </li>
-          <li>
-            <a href="https://www.behance.net">
-              <i className="fab fa-behance"></i>
-            </a>
-          </li>
-          <li>
-            <a href="https://www.linkedin.com">
-              <i className="fab fa-linkedin"></i>
-            </a>
-          </li>
-          <li>
-            <a href="https://www.sketch.com">
-              <i className="fab fa-sketch"></i>
-            </a>
-          </li>
-        </ul>
-      </aside>
+      <Hero
+        count={count}
+        handleDecrease={handleDecrease}
+        handleReset={handleReset}
+        handleIncrease={handleIncrease}
+        getCountColor={getCountColor}
+      />
 
-      {/* ============ HERO SECTION ============ */}
-      <header className="hero" id="homepage">
-        <div className="banner">
-          <h1>counter</h1>
-          <span
-            id="value"
-            style={{
-              fontSize: '5rem',
-              color: getCountColor(),
-              display: 'block',
-              margin: '1rem 0',
-            }}
-          >
-            {count}
-          </span>
-          <div className="button-container">
-            <button className="btn decrease" onClick={handleDecrease}>
-              decrease
-            </button>
-            <button className="btn reset" onClick={handleReset}>
-              reset
-            </button>
-            <button className="btn increase" onClick={handleIncrease}>
-              increase
-            </button>
-          </div>
-        </div>
-      </header>
+      <Modal
+        isModalOpen={isModalOpen}
+        handleModalOpenWithLoop={handleModalOpenWithLoop}
+        handleCloseModal={handleCloseModal}
+      />
 
-      {/* ============ MODAL ============ */}
-      <div className={`modal-overlay ${isModalOpen ? 'open-modal' : ''}`}>
-        <div className="modal-container">
-          <h1>POMODORO TIMER</h1>
+      <MainCounter
+        count={count}
+        handleDecrease={handleDecrease}
+        handleReset={handleReset}
+        handleIncrease={handleIncrease}
+        getCountColor={getCountColor}
+      />
 
-          {/* Buttons inside modal */}
-          <button
-            className="btn modal-login-btn"
-            onClick={handleModalOpenWithLoop}
-          >
-            Login
-          </button>
-          <button
-            className="btn modal-register-btn"
-            onClick={handleModalOpenWithLoop}
-          >
-            Create account
-          </button>
-          <button className="btn modal-guest-btn" onClick={handleCloseModal}>
-            Continue as guest
-          </button>
-
-          <button className="btn modal-close-btn" onClick={handleCloseModal}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-
-      {/* ============ MAIN SECTION (SECOND COUNTER EXAMPLE) ============ */}
-      <main>
-        <div className="container">
-          <h1>counter</h1>
-          <span
-            id="value"
-            style={{ fontSize: '5rem', color: getCountColor() }}
-          >
-            {count}
-          </span>
-          <div className="button-container">
-            <button className="btn decrease" onClick={handleDecrease}>
-              decrease
-            </button>
-            <button className="btn reset" onClick={handleReset}>
-              reset
-            </button>
-            <button className="btn increase" onClick={handleIncrease}>
-              increase
-            </button>
-          </div>
-        </div>
-      </main>
-
-      {/* ============ DATA FETCHED ============ */}
+      {/* Display fetched data */}
       <div style={{ marginTop: '4rem', textAlign: 'center' }}>
         <h2>Fetched Users</h2>
         <p>
