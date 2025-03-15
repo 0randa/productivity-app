@@ -3,6 +3,8 @@ from flask_cors import CORS
 from classes.data import Data, read_data, write_data
 import logging
 import functools
+import urllib.parse
+from dataclasses import asdict, is_dataclass
 
 # =========================================================================================
 # ==== Global Variables ===================================================================
@@ -27,6 +29,16 @@ def save_data(function):
 
     return wrapper
 
+# Encodes a token
+def encode_token(token):
+    if is_dataclass(token):
+        token = asdict(token)
+    return urllib.parse.quote(json.dumps(token))
+
+# Decodes a token
+def decode_token(token_str):
+    return json.loads(urllib.parse.unquote(encoded_json))
+
 # =========================================================================================
 # ==== HTTP Endpoints =====================================================================
 # =========================================================================================
@@ -50,7 +62,7 @@ def signup():
         logging.error(f"Signup error: {error}")
         return jsonify({"Signup error": str(error)}), 400
 
-    return jsonify({"Token": token}), 200
+    return jsonify({"Token": encode_token(token)}), 200
 
 @app.route("/login", methods=["POST"])
 @save_data
@@ -64,26 +76,26 @@ def login():
         logging.error(f"Login error: {error}")
         return jsonify({"Login error": str(error)}), 400
 
-    return jsonify({"Token": token}), 200
+    return jsonify({"Token": encode_token(token)}), 200
 
 @app.route("/getSummary", methods=["GET"])
 def get_summary():
-    token = request.headers.get("token")
+    token_str = request.headers.get("token")
     date = request.json.get("date")
 
-    summary = data.get_summary(token["user_id"], date)
+    summary = data.get_summary(decode_token(token_str)["user_id"], date)
 
     return jsonify(summary), 200
 
 @app.route("/addTask", methods=["POST"])
 @save_data
 def add_task():
-    token = request.headers.get("token")
+    token_str = request.headers.get("token")
     task = request.json.get("task")
     tags = request.json.get("tags")
     
     try:
-        data.add_task(token["user_id"], task, tags)
+        data.add_task(decode_token(token_str)["user_id"], task, tags)
     except ValueError as error:
         logging.error(f"Error when adding task: {error}")
         return jsonify({"Error when adding task": str(error)}), 400
@@ -93,10 +105,10 @@ def add_task():
 @app.route("/endTask", methods=["PUT"])
 @save_data
 def end_task():
-    token = request.headers.get("token")
+    token_str = request.headers.get("token")
     
     try:
-        data.end_task(token["user_id"])
+        data.end_task(decode_token(token_str)["user_id"])
     except ValueError as error:
         logging.error(f"Error in end task")
         return jsonify({"Error in end task": str(error)}), 400
@@ -106,10 +118,10 @@ def end_task():
 @app.route("/createPet", methods=["POST"])
 @save_data
 def create_pet():
-    token = request.headers.get("token")
+    token_str = request.headers.get("token")
     name = request.json.get("pet")
 
-    user = data.get_user_by_id(token["user_id"])
+    user = data.get_user_by_id(decode_token(token_str)["user_id"])
 
     try:
         user.create_pet(name)
@@ -123,8 +135,8 @@ def create_pet():
 @app.route("/pet", methods=["GET"])
 @save_data
 def get_pet():
-    token = request.headers.get("token")
-    user = data.get_user_by_id(token["user_id"])
+    token_str = request.headers.get("token")
+    user = data.get_user_by_id(decode_token(token_str)["user_id"])
 
     pet_data = {
         "name": user.pet.name,

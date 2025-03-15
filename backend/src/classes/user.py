@@ -21,9 +21,9 @@ class User:
     email: str
     password: str
     pet: Pet
-    active_task_id: int = -1
     tracker: List[Task]
     past_xp: List[PastXp]
+    active_task_id: int = -1
 
     def get_xp(self, date=get_date()):
         # Get total seconds
