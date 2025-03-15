@@ -90,6 +90,38 @@ def add_task():
     
     return jsonify({}), 200
 
+@app.route("/createPet", methods=["POST"])
+@save_data
+def create_pet():
+    token = request.headers.get("token")
+    name = request.json.get("pet")
+
+    user = data.get_user_by_id(token["user_id"])
+
+    try:
+        user.create_pet(name)
+    except ValueError as error:
+        logging.error(f"Login error: {error}")
+        return jsonify({"Error": str(error)}), 400
+    
+    return jsonify({}), 200
+
+"""Route for the pet page"""
+@app.route("/pet", methods=["Get"])
+@save_data
+def get_pet():
+    token = request.headers.get("token")
+    user = data.get_user_by_id(token["user_id"])
+
+    pet_data = {
+        "name": user.pet.name,
+        "xp": user.pet.xp,
+        "level": user.pet.level,
+        "happiness": user.pet.happiness,
+    }
+    
+    return jsonify({"pet": pet_data}), 200
+
 
 @app.route('/')
 def index():
