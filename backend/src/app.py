@@ -21,23 +21,24 @@ def members():
 def signup():
     email = request.json["email"]
     password = request.json["password"]
+    username = request.json["username"]
 
-    new_user = User(user_id = 1, username = "john cena", email = email, password = password, tracker = [], past_xp = [])
-    
-    print(new_user)
+    new_user = User(
+        user_id=data.next_user_id, 
+        username=username, 
+        email=email, 
+        password=password, 
+        tracker=[], 
+        past_xp=[]
+    )
 
-    sign_up = data.check_user(new_user)
+    try:
+        token = data.add_user(new_user)
+    except ValueError as error:
+        logging.error(f"Error: {error}")
+        return jsonify({"Error": error}), 400
 
-    if not sign_up:
-        return jsonify({}), 400
-
-    logging.info(f"Signed up with email: {email}, password: {password}.")
-    data.add_user(new_user)
-
-    return jsonify({
-        "email": email,
-        "password": password,
-    }), 200
+    return jsonify({"token": token}), 200
 
 
 @app.route('/')
@@ -45,4 +46,5 @@ def index():
     return "We are the goat team! Heheheha!"
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.ERROR)
     app.run(debug=True)

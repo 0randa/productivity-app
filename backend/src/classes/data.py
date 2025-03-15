@@ -44,14 +44,42 @@ class Data:
     users: List[User]
     tokens: List[Token]
 
-    # method to check if a user is valid, else, append to to the array
-    def check_user(self, user):
+    # get user id
+    def get_next_user_id(self):
+        user_id = self.next_user_id
+        self.next_user_id += 1
+        return user_id
+    
+    # get session id
+    def get_next_session_id(self):
+        session_id = self.next_session_id
+        self.next_session_id += 1
+        return session_id
+
+    # get task id
+    def get_next_task_id(self):
+        task_id = self.next_task_id
+        self.next_task_id += 1
+        return task_id
+
+    # Checks if user is valid, if so append to users list
+    def add_user(self, user):
         for curr_user in self.users:
             if user.email == curr_user.email:
-                return False
-        
+                raise ValueError("Email already exists.")
+            if user.username == curr_user.username:
+                raise ValueError("Username already exists.")
+
+        # Make a token
+        token = Token(self.get_next_session_id(), user.user_id)
+        self.tokens.append(token)
+
         self.users.append(user)
-        return True
+        self.next_user_id += 1
+
+        logging.info(f"Signed up with email: {user.email}, password: {user.password}.")
+
+        return token
     
     def check_login(self, player):
         # check if user exists in the list
@@ -60,9 +88,6 @@ class Data:
                 return player.password == user.password
             
         return False
-
-    def add_user(self, player):
-        self.users.append(player)
 
     @classmethod
     def from_dict(cls, data):
