@@ -48,7 +48,7 @@ def signup():
         token = data.add_user(username, email, password)
     except ValueError as error:
         logging.error(f"Signup error: {error}")
-        return jsonify({"Error": str(error)}), 400
+        return jsonify({"Signup error": str(error)}), 400
 
     return jsonify({"Token": token}), 200
 
@@ -62,7 +62,7 @@ def login():
         token = data.login(email, password)
     except ValueError as error:
         logging.error(f"Login error: {error}")
-        return jsonify({"Error": str(error)}), 400
+        return jsonify({"Login error": str(error)}), 400
 
     return jsonify({"Token": token}), 200
 
@@ -85,11 +85,23 @@ def add_task():
     try:
         data.add_task(token["user_id"], task, tags)
     except ValueError as error:
-        logging.error(f"Login error: {error}")
-        return jsonify({"Error": str(error)}), 400
+        logging.error(f"Error when adding task: {error}")
+        return jsonify({"Error when adding task": str(error)}), 400
     
     return jsonify({}), 200
 
+@app.route("/endTask", methods=["PUT"])
+@save_data
+def end_task():
+    token = request.headers.get("token")
+    
+    try:
+        data.end_task(token["user_id"])
+    except ValueError as error:
+        logging.error(f"Error in end task")
+        return jsonify({"Error in end task": str(error)}), 400
+    
+    return jsonify({}), 200
 
 @app.route('/')
 def index():

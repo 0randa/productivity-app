@@ -121,6 +121,11 @@ class Data:
         user = self.get_user_by_id(user_id)
         task_id = self.get_next_task_id()
         user.add_task(task_id, task, tags)
+    
+    # Logic for ending a task
+    def end_task(self, user_id):
+        user = self.get_user_by_id(user_id)
+        user.end_current_task()
 
     # Logic for get_summary function
     def get_summary(self, user_id, date=get_date()):

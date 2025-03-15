@@ -10,8 +10,12 @@ class User:
     username: str
     email: str
     password: str
+    active_task_id: int = -1
     tracker: List[Task]
     past_xp: List[PastXp]
+
+    def get_xp(self, date=get_date()):
+        pass
 
     # Adds a task
     def add_task(self, task_id, task, tags):
@@ -19,6 +23,24 @@ class User:
             task_id, task, tags, date=get_date(), start_time=get_timestamp()
         )
         tracker.append(new_task)
+        self.active_task_id = task_id
+
+    def end_current_task(self):
+        if self.active_task_id == -1:
+            raise ValueError("Error: No active task.")
+        
+        # Find the task based off task_id
+        task = [task for task in self.tracker if task.task_id == self.active_task_id][0]
+        task.end_task()
+
+        # Update xp for the day
+        today_xp = [xp for xp in self.past_xp if xp["date"] == get_date()]
+        if len(today_xp) == 0:
+            past_xp.append(PastXp(date=get_date(), xp=self.get_xp()))
+        else:
+            today_xp.xp = self.get_xp()
+
+        self.active_task_id = -1
 
     # Gets the summary of all of a certain date's tasks
     def get_summary(self, date):
@@ -34,6 +56,7 @@ class User:
             username=user["username"],
             email=user["email"],
             password=user["password"],
+            active_task_id=user["active_task_id"],
             tracker=[Task.from_dict(task) for task in user["tracker"]],
             past_xp=[PastXp.from_dict(past_xp) for past_xp in user["past_xp"]],
         )
