@@ -69,7 +69,7 @@ def signup():
         logging.error(f"Signup error: {error}")
         return jsonify({"Signup error": str(error)}), 400
 
-    return jsonify({"Token": encode_token(token)}), 200
+    return jsonify({"token": encode_token(token)}), 200
 
 @app.route("/login", methods=["POST"])
 @save_data
@@ -83,7 +83,7 @@ def login():
         logging.error(f"Login error: {error}")
         return jsonify({"Login error": str(error)}), 400
 
-    return jsonify({"Token": encode_token(token)}), 200
+    return jsonify({"token": encode_token(token)}), 200
 
 @app.route("/getSummary", methods=["GET"])
 def get_summary():
