@@ -46,7 +46,7 @@ class User:
 
         base_xp = 0.14 * seconds  # XP per second
         fatigue_penalty = 0.0005 * (max(seconds - 21600, 0)) ** 1.3  # Slight slowdown after 6 hours
-        streak_bonus = min(streak_days * 100, 500)  # Max bonus at 10 days
+        streak_bonus = min(streak * 100, 500)  # Max bonus at 10 days
 
         total_xp = base_xp - fatigue_penalty + streak_bonus
         return int(max(total_xp, 0))  # Ensure XP is never negative
@@ -95,7 +95,7 @@ class User:
             username=user["username"],
             email=user["email"],
             password=user["password"],
-            pet=user["pet"],
+            pet=Pet.from_dict(user["pet"]),
             active_task_id=user["active_task_id"],
             tracker=[Task.from_dict(task) for task in user["tracker"]],
             past_xp=[PastXp.from_dict(past_xp) for past_xp in user["past_xp"]],
