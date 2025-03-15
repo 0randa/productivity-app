@@ -1,14 +1,15 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from data import Data, load_data, save_data
-
-# Constants local to this file
-DATA_DIR = "data/data.json"
+from data import Data, read_data, write_data
+import logging
 
 # Global variables
 app = Flask(__name__)
 cors = CORS(app)
-data = load_data()
+
+data = read_data()
+
+# HTTP Endpoints
 
 @app.route("")
 
