@@ -1,9 +1,18 @@
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from typing import Dict, List
 from classes.task import Task, get_timestamp, get_date
 from classes.pet import Pet
 from classes.past_xp import PastXp
+
+# Checks if two dates are consequtive
+def are_consecutive(date1_str, date2_str, date_format="%Y-%m-%d"):
+    # Convert strings to date objects
+    date1 = datetime.strptime(date1_str, date_format).date()
+    date2 = datetime.strptime(date2_str, date_format).date()
+
+    # Check if the absolute difference is exactly 1 day
+    return abs((date2 - date1).days) == 1
 
 @dataclass
 class User:
@@ -17,7 +26,30 @@ class User:
     past_xp: List[PastXp]
 
     def get_xp(self, date=get_date()):
-        pass
+        # Get total seconds
+        seconds = sum([task.elapsed for task in self.tracker])
+
+        # Find number of consecutive days recorded
+        streak = 0
+        if len(self.past_x) > 1:
+            for i in range(len(self.past_xp) - 1, 0, -1):
+                current_day = self.past_xp[i]
+                prev_day = self.past_xp[i - 1]
+                if are_consecutive(current_day["date"], prev_day["date"]):
+                    if streak == 0:
+                        streak = 2
+                    else:
+                        streak += 1
+
+        if seconds <= 0:
+            return 0
+
+        base_xp = 0.14 * seconds  # XP per second
+        fatigue_penalty = 0.0005 * (max(seconds - 21600, 0)) ** 1.3  # Slight slowdown after 6 hours
+        streak_bonus = min(streak_days * 100, 500)  # Max bonus at 10 days
+
+        total_xp = base_xp - fatigue_penalty + streak_bonus
+        return int(max(total_xp, 0))  # Ensure XP is never negative
 
     # Adds a task
     def add_task(self, task_id, task, tags):
