@@ -12,4 +12,5 @@ new requirements -> add to requirements.txt: `pip freeze > requirements.txt`
 To run the server
 
 `cd src`
+
 `python3 app.py`
