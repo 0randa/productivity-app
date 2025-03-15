@@ -89,9 +89,9 @@ class Data:
                     token = Token(self.get_next_session_id(), user.user_id)
                     self.tokens.append(token)
                     return token
-                raise ValueError("password not valid")
+                raise ValueError("Password not valid")
             
-        raise ValueError("email does not exist")
+        raise ValueError("Email does not exist")
 
     # Given a dictionary, returns a class
     @classmethod
