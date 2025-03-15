@@ -28,6 +28,7 @@ def read_data():
         data_dict = json.load(data_file)
 
 
+
 # Saves the data object into data.json
 def write_data(data):
     pass
@@ -40,3 +41,14 @@ class Data:
     next_task_id: int
     users: List[User]
     tokens: List[Token]
+
+    @classmethod
+    def from_dict(cls, data):
+        tokens = [Token.from_dict(token) for token in data["tokens"]]
+        return cls(
+            next_user_id=data["next_user_id"],
+            next_session_id=data["next_session_id"],
+            next_task_id=data["next_task_id"],
+            users=[User.from_dict(user) for user in data["users"]],
+            tokens=[Token.from_dict(token) for token in data["tokens"]]
+        )
