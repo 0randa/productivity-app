@@ -62,25 +62,37 @@ class Data:
         self.next_task_id += 1
         return task_id
 
-    # Checks if user is valid, if so append to users list
-    def add_user(self, user):
-        for curr_user in self.users:
-            if user.email == curr_user.email:
+    # Checks if user is valid, if so append to users list, and also logs in a user
+    def add_user(self, username, email, password):
+        for user in self.users:
+            if user.email == email:
                 raise ValueError("Email already exists.")
-            if user.username == curr_user.username:
+            if user.username == username:
                 raise ValueError("Username already exists.")
+        
+        user_id = self.get_next_user_id()
 
         # Make a token
-        token = Token(self.get_next_session_id(), user.user_id)
+        token = Token(self.get_next_session_id(), user_id)
         self.tokens.append(token)
 
-        self.users.append(user)
-        self.next_user_id += 1
+        # Make a user
+        new_user = User(
+            user_id=user_id,
+            username=username,
+            email=email,
+            password=password,
+            tracker=[],
+            past_xp=[]
+        )
 
-        logging.info(f"Signed up with email: {user.email}, password: {user.password}.")
+        self.users.append(new_user)
+
+        logging.info(f"Signed up with email: {email}, password: {password}.")
 
         return token
     
+    # Logs in a user
     def login(self, email, password):
         # check if user exists in the list
         for user in self.users:

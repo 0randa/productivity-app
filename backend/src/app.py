@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from classes.data import Data, read_data, write_data
-from classes.user import User
 import logging
 
 # =========================================================================================
@@ -44,17 +43,8 @@ def signup():
     password = request.json["password"]
     username = request.json["username"]
 
-    new_user = User(
-        user_id=data.next_user_id, 
-        username=username, 
-        email=email, 
-        password=password, 
-        tracker=[], 
-        past_xp=[]
-    )
-
     try:
-        token = data.add_user(new_user)
+        token = data.add_user(username, email, password)
     except ValueError as error:
         logging.error(f"Signup error: {error}")
         return jsonify({"Error": str(error)}), 400
@@ -74,6 +64,15 @@ def login():
         return jsonify({"Error": str(error)}), 400
 
     return jsonify({"Token": token}), 200
+
+# @app.route("/add-task", methods=["POST"])
+# @save_data
+# def add_task():
+#     task = request.json["task"]
+#     tags = request.json["tags"]
+
+#     new_task = 
+
 
 @app.route('/')
 def index():
