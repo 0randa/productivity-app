@@ -250,23 +250,23 @@ main {
 }
 #timer-hours {
   font-family: 'Pusab', sans-serif;
-  font-size: 12rem;
+  font-size: 11rem;
 }
 #timer-colon-left {
   font-family: 'Pusab', sans-serif;
-  font-size: 12rem;
+  font-size: 11rem;
 }
 #timer-minutes {
   font-family: 'Pusab', sans-serif;
-  font-size: 12rem;
+  font-size: 11rem;
 }
 #timer-colon-right {
   font-family: 'Pusab', sans-serif;
-  font-size: 12rem;
+  font-size: 11rem;
 }
 #timer-seconds {
   font-family: 'Pusab', sans-serif;
-  font-size: 12rem;
+  font-size: 11rem;
 }
 .btn {
   text-transform: uppercase;
@@ -1519,19 +1519,3 @@ Slider
     height: 65vh;
   }
 }
-/* .slide:nth-child(1){
-  left: 0;
-}
-.slide:nth-child(2){
-  left: 100%;
-}
-.slide:nth-child(3){
-  left: 200%;
-}
-.slide:nth-child(4){
-  left: 300%;
-}
-.slide{
-  transform: translateX(-100%);
-} */
-/* negative value moves to left *
