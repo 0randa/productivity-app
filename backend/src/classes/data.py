@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict
+from datetime import datetime
 from classes.user import User
 from classes.token import Token
 from typing import Dict, List
@@ -61,6 +62,15 @@ class Data:
         task_id = self.next_task_id
         self.next_task_id += 1
         return task_id
+    
+
+    def get_user_by_id(self, id):
+        for user in self.users:
+            if user.id == id:
+                return user
+        raise ValueError("Username does not exist")
+        
+        
 
     # Checks if user is valid, if so append to users list, and also logs in a user
     def add_user(self, username, email, password):
@@ -104,6 +114,28 @@ class Data:
                 raise ValueError("Password not valid")
             
         raise ValueError("Email does not exist")
+
+    # Get summary functiong
+    def get_summary(self, user_id, date=datetime.now().date()):
+        user = self.get_user_by_id(user_id)
+
+        ret_dict = {
+            "date": date
+        }
+        # find a tracker that has today's date
+        for tracker in user.tracker:
+            if tracker.date == date:
+                ret_dict["task_id"] = tracker.task_id
+                ret_dict["start_time"] = tracker.start_time
+                ret_dict["end_time"] = tracker.end_time
+                ret_dict["tags"] = tracker.tags
+
+        for xp in user.past_xp:
+            if xp.date == date:
+                ret_dict["xp"] = xp.xp
+        
+        return ret_dict
+
 
     # Given a dictionary, returns a class
     @classmethod
