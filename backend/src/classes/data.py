@@ -81,13 +81,17 @@ class Data:
 
         return token
     
-    def check_login(self, player):
+    def login(self, email, password):
         # check if user exists in the list
         for user in self.users:
-            if player.email == user.email:
-                return player.password == user.password
+            if email == user.email:
+                if password == user.password:
+                    token = Token(self.get_next_session_id(), user.user_id)
+                    self.tokens.append(token)
+                    return token
+                raise ValueError("password not valid")
             
-        return False
+        raise ValueError("email does not exist")
 
     @classmethod
     def from_dict(cls, data):

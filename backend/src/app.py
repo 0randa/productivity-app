@@ -40,6 +40,18 @@ def signup():
 
     return jsonify({"token": token}), 200
 
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.json["email"]
+    password = request.json["password"]
+
+    try:
+        token = data.login(email, password)
+    except ValueError as error:
+        logging.error(f"Error: {error}")
+        return jsonify({"Error": error}), 400
+
+    return jsonify({"token": token}), 200
 
 @app.route('/')
 def index():
