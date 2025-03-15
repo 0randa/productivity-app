@@ -53,29 +53,13 @@ btns.forEach(function (btn) {
             hoursLeft = defaultHours;
             minutesLeft = defaultMinutes;
             secondsLeft = defaultSeconds;
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
             timerOn = 0;
+            updateDisplay();
         } else if (styles.contains('clear')) {
             hoursLeft = 0;
             minutesLeft = 0;
             secondsLeft = 0;
-            timerColonLeft.textContent = ":0";
-            timerColonRight.textContent = ":0";
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         } else if (styles.contains('+hour')) {
             if (hoursLeft == 99) {
                 hoursLeft = 0;
@@ -84,19 +68,7 @@ btns.forEach(function (btn) {
             } else {
                 hoursLeft++;
             }
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         } else if (styles.contains('-hour')) {
             if (hoursLeft == 0) {
                 minutesLeft = 0;
@@ -104,19 +76,7 @@ btns.forEach(function (btn) {
             } else {
                 hoursLeft--;
             }
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         } else if (styles.contains('+minute')) {
             if (hoursLeft == 99 && minutesLeft == 59) {
                 hoursLeft = 0;
@@ -128,19 +88,7 @@ btns.forEach(function (btn) {
             } else {
                 minutesLeft++;
             }
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         } else if (styles.contains('-minute')) {
             if (hoursLeft == 0 && minutesLeft == 0) {
                 secondsLeft = 0;
@@ -150,19 +98,7 @@ btns.forEach(function (btn) {
             } else {
                 minutesLeft--;
             }
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         } else if (styles.contains('+second')) {
             if (hoursLeft == 99 && minutesLeft == 59 &&
                 secondsLeft == 59) {
@@ -179,19 +115,7 @@ btns.forEach(function (btn) {
             } else {
                 secondsLeft++;
             }
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         } else if (styles.contains('-second')) {
             if (hoursLeft == 0 && minutesLeft == 0 &&
                 secondsLeft == 0) {
@@ -206,19 +130,7 @@ btns.forEach(function (btn) {
             } else {
                 secondsLeft--;
             }
-            if (minutesLeft < 10) {
-                timerColonLeft.textContent = ":0";
-            } else {
-                timerColonLeft.textContent = ":";
-            }
-            if (secondsLeft < 10) {
-                timerColonRight.textContent = ":0";
-            } else {
-                timerColonRight.textContent = ":";
-            }
-            timerHours.textContent = hoursLeft;
-            timerMinutes.textContent = minutesLeft;
-            timerSeconds.textContent = secondsLeft;
+            updateDisplay();
         }
         function timer() {
             if (!timerOn) {
@@ -238,6 +150,10 @@ btns.forEach(function (btn) {
             } else {
                 secondsLeft--;
             }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
             if (minutesLeft < 10) {
                 timerColonLeft.textContent = ":0";
             } else {
