@@ -38,8 +38,9 @@ let data = {
                     task_id: 0
                     date: "1/1/2000",
                     task: "Homework"
-                    start_time: "1:00:00",
-                    end_time: "2:00:00",
+                    start_time: 0,
+                    end_time: 1000,
+                    elapsed: 1000,
                     tags: ["Study"]
                 }
             ],
