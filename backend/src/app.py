@@ -1,8 +1,16 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from data import Data, load_data, save_data
 
+# Constants local to this file
+DATA_DIR = "data/data.json"
+
+# Global variables
 app = Flask(__name__)
 cors = CORS(app)
+data = load_data()
+
+@app.route("")
 
 @app.route("/members", methods=['GET'])
 def members():
