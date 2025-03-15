@@ -1,7 +1,13 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Dict, List
 from task import Task
 
 @dataclass
 class User:
-    def __init__(self):
-        pass
+    user_id: int
+    username: str
+    email: str
+    password: str
+    tracker: Task
+    past_xp: Dict
