@@ -54,9 +54,9 @@ class User:
     # Adds a task
     def add_task(self, task_id, task, tags):
         new_task = Task(
-            task_id, task, tags, date=get_date(), start_time=get_timestamp()
+            task_id, task, tags, date=str(get_date()), start_time=get_timestamp()
         )
-        tracker.append(new_task)
+        self.tracker.append(new_task)
         self.active_task_id = task_id
 
     def end_current_task(self):

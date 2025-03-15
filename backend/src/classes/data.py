@@ -67,7 +67,7 @@ class Data:
 
     def get_user_by_id(self, id):
         for user in self.users:
-            if user.id == id:
+            if user.user_id == id:
                 return user
         raise ValueError("Username does not exist")
         

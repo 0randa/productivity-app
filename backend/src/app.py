@@ -38,12 +38,12 @@ def encode_token(token):
 
 # Decodes a token
 def decode_token(token_str):
-    print("\n\n\n")
-    print(token_str)
-    print("\n\n\n")
-    print(f"|{urllib.parse.unquote(token_str)}|")
-    print("\n\n\n")
-    print(json.loads(urllib.parse.unquote(token_str)[1:-1].strip()))
+    # print("\n\n\n")
+    # print(token_str)
+    # print("\n\n\n")
+    # print(f"|{urllib.parse.unquote(token_str)}|")
+    # print("\n\n\n")
+    # print(json.loads(urllib.parse.unquote(token_str)[1:-1].strip()))
     return json.loads(urllib.parse.unquote(token_str))
 
 # =========================================================================================
@@ -105,7 +105,7 @@ def add_task():
     except ValueError as error:
         logging.error(f"Error when adding task: {error}")
         return jsonify({"Error when adding task": str(error)}), 400
-    
+        
     return jsonify({}), 200
 
 @app.route("/endTask", methods=["PUT"])
