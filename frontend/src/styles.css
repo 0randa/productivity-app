@@ -248,9 +248,25 @@ main {
 .container {
   text-align: center;
 }
-#value {
-  font-size: 30rem;
-  font-weight: bold;
+#timer-hours {
+  font-family: 'Pusab', sans-serif;
+  font-size: 12rem;
+}
+#timer-colon-left {
+  font-family: 'Pusab', sans-serif;
+  font-size: 12rem;
+}
+#timer-minutes {
+  font-family: 'Pusab', sans-serif;
+  font-size: 12rem;
+}
+#timer-colon-right {
+  font-family: 'Pusab', sans-serif;
+  font-size: 12rem;
+}
+#timer-seconds {
+  font-family: 'Pusab', sans-serif;
+  font-size: 12rem;
 }
 .btn {
   text-transform: uppercase;
@@ -519,13 +535,16 @@ Modal
   place-items: center;
 }
 .banner {
+  opacity: 0.9;
   background: var(--clr-white);
-  padding: 4rem 0;
+  padding: 8rem 0;
   border-radius: var(--radius);
   box-shadow: var(--light-shadow);
   text-align: center;
+  height: 60vh;
+  max-height: 60%;
   width: 90vw;
-  max-width: var(--fixed-width);
+  max-width: 60%;
 }
 .modal-btn {
   margin-top: 2rem;
