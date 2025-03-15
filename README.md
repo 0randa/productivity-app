@@ -8,3 +8,8 @@ new requirements -> add to requirements.txt: `pip freeze > requirements.txt`
 `venv\Scripts\activate      # For Windows`
 
 `pip install -r requirements.txt`
+
+To run the server
+
+`cd src`
+`python3 app.py`
