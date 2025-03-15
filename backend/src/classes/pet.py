@@ -10,3 +10,12 @@ class Pet:
     xp: int
     level: int
     happiness: int
+
+    @classmethod
+    def from_dict(cls, pet):
+        return cls(
+            name=pet["name"],
+            xp=pet["xp"],
+            level=pet["level"],
+            happiness=pet["happiness"],
+        )
