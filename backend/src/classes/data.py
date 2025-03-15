@@ -27,12 +27,13 @@ def read_data():
 
     with open(DATA_DIR, "r") as data_file:
         data_dict = json.load(data_file)
-
-
+        return Data.from_dict(data_dict)
 
 # Saves the data object into data.json
 def write_data(data):
-    pass
+    data_dict = asdict(data)
+    with open(DATA_DIR, "w") as data_file:
+        json.dump(data_dict)
 
 # Data.json is directly loaded into this class
 @dataclass
@@ -45,7 +46,6 @@ class Data:
 
     @classmethod
     def from_dict(cls, data):
-        tokens = [Token.from_dict(token) for token in data["tokens"]]
         return cls(
             next_user_id=data["next_user_id"],
             next_session_id=data["next_session_id"],
@@ -53,3 +53,4 @@ class Data:
             users=[User.from_dict(user) for user in data["users"]],
             tokens=[Token.from_dict(token) for token in data["tokens"]]
         )
+    
