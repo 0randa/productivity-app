@@ -31,7 +31,7 @@ let data = {
         {
             user_id: 0,
             username: "Generic_Username",
-            email: 'generic_email@unsw.edu.au',
+            email: "generic_email@unsw.edu.au",
             password: 'Password1',
             tracker: [
                 {
