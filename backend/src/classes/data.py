@@ -1,7 +1,8 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, is_dataclass
 from datetime import datetime
 from classes.user import User
 from classes.token import Token
+from classes.task import get_date
 from typing import Dict, List
 import json
 import os
@@ -122,26 +123,11 @@ class Data:
         user.add_task(task_id, task, tags)
 
     # Logic for get_summary function
-    def get_summary(self, user_id, date=datetime.now().date()):
+    def get_summary(self, user_id, date=get_date()):
+        if date == None:
+            date = get_date()
         user = self.get_user_by_id(user_id)
-
-        ret_dict = {
-            "date": date
-        }
-        # find a tracker that has today's date
-        for tracker in user.tracker:
-            if tracker.date == date:
-                ret_dict["task_id"] = tracker.task_id
-                ret_dict["start_time"] = tracker.start_time
-                ret_dict["end_time"] = tracker.end_time
-                ret_dict["tags"] = tracker.tags
-
-        for xp in user.past_xp:
-            if xp.date == date:
-                ret_dict["xp"] = xp.xp
-        
-        return ret_dict
-
+        return user.get_summary(date)
 
     # Given a dictionary, returns a class
     @classmethod

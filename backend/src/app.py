@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from classes.data import Data, read_data, write_data
 import logging
+import functools
 
 # =========================================================================================
 # ==== Global Variables ===================================================================
@@ -18,7 +19,7 @@ data = read_data()
 
 # Runs write_data() after the provided function is called
 def save_data(function):
-
+    @functools.wraps(function)  # Preserve function name
     def wrapper():
         response = function()
         write_data(data)
@@ -68,22 +69,12 @@ def login():
 @app.route("/get-summary", methods=["GET"])
 def get_summary():
     token = request.headers.get("token")
+    date = request.json.get("date")
 
-    user_id = token["user_id"]
-    date = request.json["date"]
-
-    summary = data.get_summary(user_id, date)
+    summary = data.get_summary(token["user_id"], date)
 
     return jsonify(summary), 200
 
-
-# @app.route("/add-task", methods=["POST"])
-# @save_data
-# def add_task():
-#     task = request.json["task"]
-#     tags = request.json["tags"]
-
-#     new_task = 
 @app.route("/add-task", methods=["POST"])
 @save_data
 def add_task():
