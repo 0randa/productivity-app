@@ -64,6 +64,14 @@
             </a>
             </li>
         </ul>
+        <ul class="social-icons">
+            <li>
+                <a class="btn audio">
+                    <audio id="play-audio" src="audio.mp3"></audio>
+                    <i class="fas fa-compact-disc"></i>
+                </a>
+            </li>
+        </ul>
         </aside>
     <nav>
         <div class="nav-center">
@@ -96,41 +104,27 @@
             <span id="timer-colon-right">:0</span>
             <span id="timer-seconds">0</span>
             <div class="button-container">
-                <button class="btn start">start</button>
-                <button class="btn pause">pause</button>
-                <button class="btn clear">clear</button>
-                <button class="btn default">save as default</button>
-                <button class="btn reset">reset to default</button>
+                <button class="btn btn-large start">start</button>
+                <button class="btn btn-large pause">pause</button>
+                <button class="btn btn-large clear">clear</button>
             </div>
             <div class="button-container">
                 <button class="btn +hour">➕hour</button>
-                <button class="btn -hour">➖hour</button>
                 <button class="btn +minute">➕minute</button>
-                <button class="btn -minute">➖minute</button>
                 <button class="btn +second">➕second</button>
+            </div>
+            <div class="button-container">
+                <button class="btn -hour">➖hour</button>
+                <button class="btn -minute">➖minute</button>
                 <button class="btn -second">➖second</button>
+            </div>
+            <div>
+                <button class="btn default">save as default</button>
+                <button class="btn reset">reset to default</button>
             </div>
         </div>
     </header>
     <!-- end of hero -->
-    <!-- modal -->
-    <div class="modal-overlay">
-        <div class="modal-container">
-            <h1>POMODORO TIMER</h1>
-            <button class="btn modal-login-btn">
-                Login
-            </button>
-            <button class="btn modal-register-btn">
-                Create account
-            </button>
-            <button class="btn modal-guest-btn">
-                Continue as guest
-            </button>
-            <button class="btn modal-close-btn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    </div>
     <!-- javascript -->
      <script src="homepage.js"></script>
 </body>
