@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Dict, List
 from classes.task import Task, get_timestamp, get_date
+from classes.pet import Pet
 from classes.past_xp import PastXp
 
 @dataclass
@@ -10,6 +11,7 @@ class User:
     username: str
     email: str
     password: str
+    pet: Pet
     tracker: List[Task]
     past_xp: List[PastXp]
 
@@ -26,6 +28,11 @@ class User:
         xp = [past_xp for past_xp in self.past_xp if past_xp.date == get_date()][0]
         return {tracker: tasks, xp: xp}
 
+    def create_pet(self, pet):
+        if pet is not None:
+            raise ValueError("User already has a pet")
+        self.pet = pet
+
     # Takes in a user dictionary and outputs a User instance
     @classmethod
     def from_dict(cls, user):
@@ -34,6 +41,7 @@ class User:
             username=user["username"],
             email=user["email"],
             password=user["password"],
+            pet=user["pet"],
             tracker=[Task.from_dict(task) for task in user["tracker"]],
             past_xp=[PastXp.from_dict(past_xp) for past_xp in user["past_xp"]],
         )
