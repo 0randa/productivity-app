@@ -79,7 +79,11 @@ class User:
     # Gets the summary of all of a certain date's tasks
     def get_summary(self, date):
         tasks = [task for task in self.tracker if task.date == get_date()]
-        xp = [xp for xp in self.past_xp if xp.date == get_date()][0]
+        xp = [xp for xp in self.past_xp if xp.date == get_date()]
+        if len(xp) == 0:
+            xp = 0
+        else:
+            xp = xp[0]
         return {tracker: tasks, xp: xp}
 
     def create_pet(self, pet):
