@@ -10,7 +10,6 @@ cors = CORS(app)
 data = read_data()
 
 # HTTP Endpoints
-
 @app.route("/members", methods=['GET'])
 def members():
     return jsonify(
@@ -22,12 +21,13 @@ def signup():
     email = request.json["email"]
     password = request.json["password"]
 
+    print({email}, {password})
+    logging.info(f"Signed up with email: {email}, password: {password}.")
+
     return jsonify({
         "email": email,
-        "password": password
-    })
-
-
+        "password": password,
+    }), 200
 
 
 @app.route('/')
