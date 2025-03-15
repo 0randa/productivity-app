@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from data import Data, read_data, write_data
+from classes.data import Data, read_data, write_data
 import logging
 
 # Global variables
@@ -11,13 +11,24 @@ data = read_data()
 
 # HTTP Endpoints
 
-@app.route("")
-
 @app.route("/members", methods=['GET'])
 def members():
     return jsonify(
         {"members": ["Member1", "Member2", "Member3"]}
     )
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    email = request.json["email"]
+    password = request.json["password"]
+
+    return jsonify({
+        "email": email,
+        "password": password
+    })
+
+
+
 
 @app.route('/')
 def index():

@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Dict, List
-from task import Task
-from past_xp import PastXp
+from classes.task import Task
+from classes.past_xp import PastXp
 
 @dataclass
 class User:
