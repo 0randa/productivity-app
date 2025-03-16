@@ -124,7 +124,7 @@ p {
     font-size: 1rem;
   }
   h1 {
-    line-height: 0.9;
+    line-height: 0.8;
   }
   h2,
   h3,
@@ -351,7 +351,7 @@ Sidebar
 .sidebar {
   position: fixed;
   top: 0;
-  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   background: var(--clr-white);
@@ -360,14 +360,14 @@ Sidebar
   row-gap: 1rem;
   box-shadow: var(--clr-red-dark);
   transition: var(--transition);
-  transform: translate(-100%);
+  transform: translate(0);
 }
 .show-sidebar {
-  transform: translate(0);
+  transform: translate(100%);
 }
 @media screen and (min-width: 676px) {
   .sidebar {
-    width: 400px;
+    width: 15vw;
   }
 }
 
@@ -377,7 +377,7 @@ Modal
 ===============
 */
 .hero {
-  min-height: 100vh;
+  min-height: 92.8vh;
   background: url("https://cdn3.whatculture.com/images/2015/05/4URn5kg0.gif") center/cover no-repeat;
   display: grid;
   place-items: center;
@@ -547,4 +547,78 @@ About
 }
 .content.active {
   display: block;
+}
+
+/*
+=============== 
+Questions
+===============
+*/
+.titleQuestions {
+  margin-top: 5vh;
+  margin-bottom: 5vh;
+}
+
+.titleQuestions h2 {
+  color: var(--clr-gold);
+  font-family: 'Minecraft', sans-serif;
+  text-align: center;
+}
+.section-center {
+  max-width: 10vw;
+}
+.question {
+  background: var(--clr-white);
+  border-radius: var(--radius);
+  box-shadow: var(--light-shadow);
+  padding: 0 2vw;
+  margin-bottom: 2rem;
+}
+.question-title {
+  font-family: 'Minecraft', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: capitalize;
+  padding-bottom: 1rem;
+}
+.question-title p {
+  margin-bottom: 0;
+  letter-spacing: var(--spacing);
+  color: var(--clr-grey-1);
+}
+.question-btn {
+  font-size: 1.5rem;
+  background: transparent;
+  border-color: transparent;
+  cursor: pointer;
+  color: var(--clr-gold);
+  transition: var(--transition);
+}
+.question-btn:hover {
+  transform: rotate(90deg);
+}
+.question-text {
+  font-family: 'Minecraft', sans-serif;
+  padding: 1rem 0 1.5rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+}
+.question-text p {
+  margin-bottom: 0;
+}
+/* hide text */
+.question-text {
+  display: none;
+}
+.show-text .question-text {
+  display: block;
+}
+.minus-icon {
+  display: none;
+}
+.show-text .minus-icon {
+  display: inline;
+}
+.show-text .plus-icon {
+  display: none;
 }
