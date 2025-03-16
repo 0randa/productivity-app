@@ -1,18 +1,22 @@
+const questions = document.querySelectorAll(".question");
+
+questions.forEach(function (question) {
+    const btn = question.querySelector(".question-btn");
+    btn.addEventListener("click", function () {
+        question.classList.toggle("show-text");
+    });
+});
+
 const toggleBtn = document.querySelector(".sidebar-toggle");
 const closeBtn = document.querySelector(".close-btn");
 const sidebar = document.querySelector(".sidebar");
 
 toggleBtn.addEventListener("click", function () {
-    // if (sidebar.classList.contains("show-sidebar")) {
-    //     sidebar.classList.remove("show-sidebar")
-    // } else {
-    //     sidebar.classList.add("show-sidebar")
-    // }
-    sidebar.classList.toggle("show-sidebar");
+    sidebar.classList.remove("show-sidebar");
 });
 
 closeBtn.addEventListener("click", function () {
-    sidebar.classList.remove("show-sidebar");
+    sidebar.classList.toggle("show-sidebar");
 });
 
 // set initial count

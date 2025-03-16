@@ -78,6 +78,7 @@ ul {
   list-style-type: none;
 }
 a {
+  font-family: 'Minecraft', sans-serif;
   text-decoration: none;
 }
 h1,
@@ -92,6 +93,7 @@ h4 {
 }
 h1 {
   font-size: 3rem;
+  font-family: 'Minecraft', sans-serif;
 }
 h2 {
   font-size: 2rem;
@@ -123,7 +125,7 @@ p {
     font-size: 1rem;
   }
   h1 {
-    line-height: 0.9;
+    line-height: 0.8;
   }
   h2,
   h3,
@@ -237,6 +239,7 @@ main {
   max-width: 20rem;
 }
 .btn {
+  font-family: 'Minecraft', sans-serif;
   text-transform: uppercase;
   background: transparent;
   color: var(--clr-black);
@@ -349,7 +352,7 @@ Sidebar
 .sidebar {
   position: fixed;
   top: 0;
-  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   background: var(--clr-white);
@@ -358,14 +361,14 @@ Sidebar
   row-gap: 1rem;
   box-shadow: var(--clr-red-dark);
   transition: var(--transition);
-  transform: translate(-100%);
+  transform: translate(0);
 }
 .show-sidebar {
-  transform: translate(0);
+  transform: translate(100%);
 }
 @media screen and (min-width: 676px) {
   .sidebar {
-    width: 400px;
+    width: 15vw;
   }
 }
 
@@ -375,7 +378,7 @@ Modal
 ===============
 */
 .hero {
-  min-height: 100vh;
+  min-height: 92.8vh;
   background: url("https://cdn3.whatculture.com/images/2015/05/4URn5kg0.gif") center/cover no-repeat;
   display: grid;
   place-items: center;
@@ -387,8 +390,8 @@ Modal
   border-radius: var(--radius);
   box-shadow: var(--light-shadow);
   text-align: center;
-  height: 80vh;
-  max-height: 80vw;
+  height: 60vw;
+  max-height: 80vh;
   width: 80vw;
   max-width: 1300px;
 }
@@ -545,4 +548,182 @@ About
 }
 .content.active {
   display: block;
+}
+
+/*
+=============== 
+Questions
+===============
+*/
+.titleQuestions {
+  margin-top: 5vh;
+  margin-bottom: 5vh;
+}
+
+.titleQuestions h2 {
+  color: var(--clr-gold);
+  font-family: 'Minecraft', sans-serif;
+  text-align: center;
+}
+.section-center {
+  max-width: 10vw;
+}
+.question {
+  background: var(--clr-white);
+  border-radius: var(--radius);
+  box-shadow: var(--light-shadow);
+  padding: 0 2vw;
+  margin-bottom: 2rem;
+}
+.question-title {
+  font-family: 'Minecraft', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: capitalize;
+  padding-bottom: 1rem;
+}
+.question-title p {
+  margin-bottom: 0;
+  letter-spacing: var(--spacing);
+  color: var(--clr-grey-1);
+}
+.question-btn {
+  font-size: 1.5rem;
+  background: transparent;
+  border-color: transparent;
+  cursor: pointer;
+  color: var(--clr-gold);
+  transition: var(--transition);
+}
+.question-btn:hover {
+  transform: rotate(90deg);
+}
+.question-text {
+  font-family: 'Minecraft', sans-serif;
+  padding: 1rem 0 1.5rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+}
+.question-text p {
+  margin-bottom: 0;
+}
+/* hide text */
+.question-text {
+  display: none;
+}
+.show-text .question-text {
+  display: block;
+}
+.minus-icon {
+  display: none;
+}
+.show-text .minus-icon {
+  display: inline;
+}
+.show-text .plus-icon {
+  display: none;
+}
+
+/*
+=============== 
+Login/Register
+===============
+*/
+form{
+  font-family: 'Minecraft', sans-serif;
+  font-size: 2.5vw;
+  width: 100%;
+  margin-top: 5vw;
+  margin-bottom: 2.5vw;
+  margin-left: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+form > div{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+form label{
+  flex-shrink: 0;
+  height: 50px;
+  width: 50px;
+  background-color: var(--accent-color);
+  fill: var(--base-color);
+  color: var(--base-color);
+  border-radius: 10px 0 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+form input{
+  box-sizing: border-box;
+  flex-grow: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 1em;
+  font: inherit;
+  border-radius: 0 10px 10px 0;
+  border: 2px solid var(--input-color);
+  border-left: none;
+  background-color: var(--input-color);
+  transition: 150ms ease;
+}
+form input:hover{
+  border-color: var(--accent-color);
+}
+form input:focus{
+  outline: none;
+  border-color: var(--text-color);
+}
+div:has(input:focus) > label{
+  background-color: var(--text-color);
+}
+form input::placeholder{
+  color: var(--text-color);
+}
+form button{
+  margin-top: 10px;
+  border: none;
+  border-radius: 1000px;
+  padding: .85em 4em;
+  background-color: var(--accent-color);
+  color: var(--base-color);
+  font: inherit;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+form button:hover{
+  background-color: var(--text-color);
+}
+form button:focus{
+  outline: none;
+  background-color: var(--text-color);
+}
+a{
+  text-decoration: none;
+  color: var(--accent-color);
+}
+a:hover{
+  text-decoration: underline;
+}
+@media(max-width: 1100px){
+  .wrapper{
+    width: min(600px, 100%);
+    border-radius: 0;
+  }
+}
+form div.incorrect label{
+  background-color: #f06272;
+}
+form div.incorrect input{
+  border-color: #f06272;
+}
+#error-message{
+  color:#f06272;
 }
