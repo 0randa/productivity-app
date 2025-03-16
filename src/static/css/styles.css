@@ -92,6 +92,7 @@ h4 {
 }
 h1 {
   font-size: 3rem;
+  font-family: 'Minecraft', sans-serif;
 }
 h2 {
   font-size: 2rem;
@@ -237,6 +238,7 @@ main {
   max-width: 20rem;
 }
 .btn {
+  font-family: 'Minecraft', sans-serif;
   text-transform: uppercase;
   background: transparent;
   color: var(--clr-black);
