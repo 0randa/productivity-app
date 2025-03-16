@@ -1,3 +1,31 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const taskForm = document.getElementById('task-form');
+    const taskList = document.getElementById('task-list');
+
+    if (!taskForm || !taskList) return; // Ensure elements exist
+
+    taskForm.addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevent page refresh
+
+        const taskInput = document.getElementById('task');
+        const taskText = taskInput.value.trim();
+
+        if (taskText === '') return; // Ignore empty input
+
+        // Create a new task item
+        const taskItem = document.createElement('li');
+        taskItem.textContent = taskText;
+        taskItem.classList.add('task-item');
+
+        // Append task to the sidebar list
+        taskList.appendChild(taskItem);
+
+        // Clear input field
+        taskInput.value = '';
+    });
+});
+
+
 const questions = document.querySelectorAll(".question");
 
 questions.forEach(function (question) {
@@ -7,16 +35,28 @@ questions.forEach(function (question) {
     });
 });
 
-const toggleBtn = document.querySelector(".sidebar-toggle");
-const closeBtn = document.querySelector(".close-btn");
-const sidebar = document.querySelector(".sidebar");
+const toggleBtnLeft = document.querySelector(".sidebar-toggle-left");
+const closeBtnLeft = document.querySelector(".close-btn-left");
+const sidebarLeft = document.querySelector(".sidebar-left");
 
-toggleBtn.addEventListener("click", function () {
-    sidebar.classList.remove("show-sidebar");
+toggleBtnLeft.addEventListener("click", function () {
+    sidebarLeft.classList.remove("show-sidebar-left");
 });
 
-closeBtn.addEventListener("click", function () {
-    sidebar.classList.toggle("show-sidebar");
+closeBtnLeft.addEventListener("click", function () {
+    sidebarLeft.classList.toggle("show-sidebar-left");
+});
+
+const toggleBtnRight = document.querySelector(".sidebar-toggle-right");
+const closeBtnRight = document.querySelector(".close-btn-right");
+const sidebarRight = document.querySelector(".sidebar-right");
+
+toggleBtnRight.addEventListener("click", function () {
+    sidebarRight.classList.remove("show-sidebar-right");
+});
+
+closeBtnRight.addEventListener("click", function () {
+    sidebarRight.classList.toggle("show-sidebar-right");
 });
 
 // set initial count
