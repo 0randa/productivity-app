@@ -59,29 +59,44 @@ def render_homepage():
 @app.route("/signup", methods=["POST"])
 @save_data
 def signup():
+    # Retrieve the required fields from the JSON request
     email = request.json.get("email")
     password = request.json.get("password")
     username = request.json.get("username")
+
+    # Check if any of the required fields are missing
+    if not email or not password or not username:
+        error_message = "Missing required fields: email, password, and username are all required."
+        logging.error(f"Signup error: {error_message}")
+        return jsonify({"error": error_message}), 400
 
     try:
         token = data.add_user(username, email, password)
     except ValueError as error:
         logging.error(f"Signup error: {error}")
-        return jsonify({"Signup error": str(error)}), 400
+        return jsonify({"error": str(error)}), 400
 
     return jsonify({"token": encode_token(token)}), 200
+
 
 @app.route("/login", methods=["POST"])
 @save_data
 def login():
+    # Retrieve email and password from the JSON request
     email = request.json.get("email")
     password = request.json.get("password")
+
+    # Check if the required fields are present
+    if not email or not password:
+        error_message = "Missing required fields: both email and password are required."
+        logging.error(f"Login error: {error_message}")
+        return jsonify({"error": error_message}), 400
 
     try:
         token = data.login(email, password)
     except ValueError as error:
         logging.error(f"Login error: {error}")
-        return jsonify({"Login error": str(error)}), 400
+        return jsonify({"error": str(error)}), 400
 
     return jsonify({"token": encode_token(token)}), 200
 

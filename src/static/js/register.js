@@ -29,26 +29,39 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Store user data (for testing purposes only)
-        const users = JSON.parse(localStorage.getItem("users")) || [];
-        const userExists = users.some(user => user.email === email);
-
-        if (userExists) {
-            errorMessage.textContent = "User with this email already exists.";
+        // Send HTTP POST request to the Flask /signup endpoint
+        fetch('http://127.0.0.1:5000/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: firstName, // using firstName as username
+                email: email,
+                password: password
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            return response.json().then(err => { throw new Error(err["Signup error"] || "Signup failed"); });
+        })
+        .then(data => {
+            console.log("Signup successful:", data);
+            errorMessage.textContent = "Registration successful!";
+            errorMessage.style.color = "green";
+            // Optionally, you can store the token if needed
+            localStorage.setItem("token", data.token);
+            // Redirect to login page or dashboard
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1000);
+        })
+        .catch(error => {
+            console.error("Error during signup:", error);
+            errorMessage.textContent = error.message;
             errorMessage.style.color = "red";
-            return;
-        }
-
-        users.push({ firstName, email, password });
-        localStorage.setItem("users", JSON.stringify(users));
-
-        // Simulate successful registration
-        errorMessage.textContent = "Registration successful!";
-        errorMessage.style.color = "green";
-
-        // Redirect or perform other actions
-        setTimeout(() => {
-            window.location.href = "login.html"; // Redirect to login page
-        }, 1000);
+        });
     });
 });
