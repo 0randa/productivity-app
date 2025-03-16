@@ -7,16 +7,28 @@ questions.forEach(function (question) {
     });
 });
 
-const toggleBtn = document.querySelector(".sidebar-toggle");
-const closeBtn = document.querySelector(".close-btn");
-const sidebar = document.querySelector(".sidebar");
+const toggleBtnLeft = document.querySelector(".sidebar-toggle-left");
+const closeBtnLeft = document.querySelector(".close-btn-left");
+const sidebarLeft = document.querySelector(".sidebar-left");
 
-toggleBtn.addEventListener("click", function () {
-    sidebar.classList.remove("show-sidebar");
+toggleBtnLeft.addEventListener("click", function () {
+    sidebarLeft.classList.toggle("show-sidebar-left");
 });
 
-closeBtn.addEventListener("click", function () {
-    sidebar.classList.toggle("show-sidebar");
+closeBtnLeft.addEventListener("click", function () {
+    sidebarLeft.classList.remove("show-sidebar-left");
+});
+
+const toggleBtnRight = document.querySelector(".sidebar-toggle-right");
+const closeBtnRight = document.querySelector(".close-btn-right");
+const sidebarRight = document.querySelector(".sidebar-right");
+
+toggleBtnRight.addEventListener("click", function () {
+    sidebarRight.classList.remove("show-sidebar-right");
+});
+
+closeBtnRight.addEventListener("click", function () {
+    sidebarRight.classList.toggle("show-sidebar-right");
 });
 
 // set initial count
@@ -30,12 +42,21 @@ let timerOn = 0;
 let timerReset = 0;
 let interval;
 
+let starts = 0;
+let finishes = 0;
+let pauses = 0;
+let resets = 0;
+
 // select value and buttons
 const timerHours = document.querySelector('#timer-hours');
 const timerColonLeft = document.querySelector('#timer-colon-left');
 const timerMinutes = document.querySelector('#timer-minutes');
 const timerColonRight = document.querySelector('#timer-colon-right');
 const timerSeconds = document.querySelector('#timer-seconds');
+const timersStarted = document.querySelector('#timers-started');
+const timersFinished = document.querySelector('#timers-finished');
+const timersPaused = document.querySelector('#timers-paused');
+const timersReset = document.querySelector('#timers-reset');
 const btns = document.querySelectorAll(".btn");
 const audio = document.getElementById("play-audio");
 
@@ -48,19 +69,37 @@ btns.forEach(function (btn) {
             defaultMinutes = minutesLeft;
             defaultSeconds = secondsLeft;
         }  else if (styles.contains('start')) {
+            starts++;
+            timersStarted.textContent = starts;
             if (!interval) {
                 interval = setInterval(timer, 1000);
             }
             timerOn = 1;
         } else if (styles.contains('pause')) {
-            if (timerOn ? timerOn = 0 : timerOn = 1);
+            if (timerOn) {
+                timerOn = 0;
+                pauses++;
+                timersPaused.textContent = pauses;
+            } else {
+                timerOn = 1;
+            }
         } else if (styles.contains('reset')) {
+            if (hoursLeft != defaultHours || minutesLeft != defaultMinutes ||
+                secondsLeft != defaultSeconds) {
+                resets++;
+                timersReset.textContent = resets;
+            }
             hoursLeft = defaultHours;
             minutesLeft = defaultMinutes;
             secondsLeft = defaultSeconds;
             timerOn = 0;
             updateDisplay();
         } else if (styles.contains('clear')) {
+            if (hoursLeft != 0 || minutesLeft != 0 ||
+                secondsLeft != 0) {
+                resets++;
+                timersReset.textContent = resets;
+            }
             hoursLeft = 0;
             minutesLeft = 0;
             secondsLeft = 0;
@@ -143,7 +182,11 @@ btns.forEach(function (btn) {
             }
             if (hoursLeft == 0 && minutesLeft == 0 &&
                 secondsLeft == 0) {
-                timerOn = 0;
+                if (timerOn) {
+                    finishes++;
+                    timersFinished.textContent = finishes;
+                    timerOn = 0;
+                }
                 return;
             } else if (minutesLeft == 0 && secondsLeft == 0) {
                 hoursLeft--;
