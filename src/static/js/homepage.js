@@ -69,14 +69,15 @@ btns.forEach(function (btn) {
             defaultMinutes = minutesLeft;
             defaultSeconds = secondsLeft;
         }  else if (styles.contains('start')) {
-            if (!timerOn) {
+            if (!timerOn && (hoursLeft != 0 || minutesLeft != 0 ||
+                secondsLeft != 0)) {
                 starts++;
                 timersStarted.textContent = starts;
+                timerOn = 1;
             }
             if (!interval) {
                 interval = setInterval(timer, 1000);
             }
-            timerOn = 1;
         } else if (styles.contains('pause')) {
             if (timerOn) {
                 timerOn = 0;
