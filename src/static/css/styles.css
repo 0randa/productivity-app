@@ -78,6 +78,7 @@ ul {
   list-style-type: none;
 }
 a {
+  font-family: 'Minecraft', sans-serif;
   text-decoration: none;
 }
 h1,
@@ -389,8 +390,8 @@ Modal
   border-radius: var(--radius);
   box-shadow: var(--light-shadow);
   text-align: center;
-  height: 80vh;
-  max-height: 80vw;
+  height: 60vw;
+  max-height: 80vh;
   width: 80vw;
   max-width: 1300px;
 }
@@ -628,54 +629,16 @@ Questions
 Login/Register
 ===============
 */
-:root{
-  --accent-color: #8672FF;
-  --base-color: white;
-  --text-color: #2E2B41;
-  --input-color: #F3F0FF;
-}
-*{
-  margin: 0;
-  padding: 0;
-}
-html{
-  font-family: Poppins, Segoe UI, sans-serif;
-  font-size: 12pt;
-  color: var(--text-color);
-  text-align: center;
-}
-body{
-  min-height: 100vh;
-  background-image: url(background.jpg);
-  background-size: cover;
-  background-position: right;
-  overflow: hidden;
-}
-.wrapper{
-  box-sizing: border-box;
-  background-color: var(--base-color);
-  height: 100vh;
-  width: max(40%, 600px);
-  padding: 10px;
-  border-radius: 0 20px 20px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-h1{
-  font-size: 3rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
 form{
-  width: min(400px, 100%);
-  margin-top: 20px;
-  margin-bottom: 50px;
+  font-family: 'Minecraft', sans-serif;
+  font-size: 2.5vw;
+  width: 100%;
+  margin-top: 5vw;
+  margin-bottom: 2.5vw;
+  margin-left: 25%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
 }
 form > div{
   width: 100%;
