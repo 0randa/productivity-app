@@ -23,131 +23,6 @@
         </div>
         <!-- statistics -->
         <section class="questions">
-            <!-- title -->
-            <div class="titleQuestions">
-                <h2>Stats</h2>
-            </div>
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total time paused</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Time paused</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total timers started</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Timers started</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total timers finished</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Timers finished</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total timers reset</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Timers reset</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total elapsed time this session</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Time elapsed this session</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>User's lifetime elapsed time</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Lifetime time elapsed</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-            </div>
         </section>
         <!-- social media -->
         <ul class="social-icons-left">
@@ -199,43 +74,8 @@
         <section class="questions">
             <!-- title -->
             <div class="titleQuestions">
-                <h2>Tasks</h2>
+                <h2>Stats</h2>
             </div>
-            <aside class="sidebar-right">
-                <div class="tasks">
-                    <h2>Tasks</h2>
-                    <ul id="task-list"></ul> <!-- Tasks will be added here -->
-                </div>
-            
-                <div class="task-form">
-                    <h3>Add a Task</h3>
-                    <form id="task-form">
-                        <label for="task">Task Question:</label>
-                        <input type="text" id="task" name="task" required>
-                        <button type="submit" class="btn">Add Task</button>
-                    </form>
-                </div>
-            </aside>            
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total time paused</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Time paused</p>
-                     </div>
-                </article>
-                <!-- end single question -->
                 <!-- single question -->
                 <article class="question">
                     <!-- question title -->
@@ -252,7 +92,7 @@
                     </div>
                     <!-- question text -->
                      <div class="question-text">
-                        <p>Timers started</p>
+                        <span id="timers-started">0</span>
                      </div>
                 </article>
                 <!-- end single question -->
@@ -272,7 +112,27 @@
                     </div>
                     <!-- question text -->
                      <div class="question-text">
-                        <p>Timers finished</p>
+                        <span id="timers-finished">0</span>
+                     </div>
+                </article>
+                <!-- end single question -->
+                 <!-- single question -->
+                <article class="question">
+                    <!-- question title -->
+                    <div class="question-title">
+                        <p>Total timers paused</p>
+                        <button type="button" class="question-btn">
+                            <span class="plus-icon">
+                                <i class="far fa-plus-square"></i>
+                            </span>
+                            <span class="minus-icon">
+                                <i class="far fa-minus-square"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <!-- question text -->
+                     <div class="question-text">
+                        <span id="timers-paused">0</span>
                      </div>
                 </article>
                 <!-- end single question -->
@@ -292,88 +152,12 @@
                     </div>
                     <!-- question text -->
                      <div class="question-text">
-                        <p>Timers reset</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>Total elapsed time this session</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Time elapsed this session</p>
-                     </div>
-                </article>
-                <!-- end single question -->
-                <!-- single question -->
-                <article class="question">
-                    <!-- question title -->
-                    <div class="question-title">
-                        <p>User's lifetime elapsed time</p>
-                        <button type="button" class="question-btn">
-                            <span class="plus-icon">
-                                <i class="far fa-plus-square"></i>
-                            </span>
-                            <span class="minus-icon">
-                                <i class="far fa-minus-square"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <!-- question text -->
-                     <div class="question-text">
-                        <p>Lifetime time elapsed</p>
+                        <span id="timers-reset">0</span>
                      </div>
                 </article>
                 <!-- end single question -->
             </div>
         </section>
-        <!-- social media -->
-        <ul class="social-icons-right">
-            <li>
-            <a href="https://www.twitter.com">
-                <i class="fab fa-facebook"></i>
-            </a>
-            </li>
-            <li>
-            <a href="https://www.twitter.com">
-                <i class="fab fa-twitter"></i>
-            </a>
-            </li>
-            <li>
-            <a href="https://www.twitter.com">
-                <i class="fab fa-behance"></i>
-            </a>
-            </li>
-            <li>
-            <a href="https://www.twitter.com">
-                <i class="fab fa-linkedin"></i>
-            </a>
-            </li>
-            <li>
-            <a href="https://www.twitter.com">
-                <i class="fab fa-sketch"></i>
-            </a>
-            </li>
-        </ul>
-        <ul class="social-icons-right">
-            <li>
-                <a class="btn audio">
-                    <audio id="play-audio" src="audio.mp3"></audio>
-                    <i class="fas fa-compact-disc"></i>
-                </a>
-            </li>
-        </ul>
     </aside>
     <nav>
         <div class="nav-center">
@@ -421,21 +205,6 @@
                 <button class="btn default">save as default</button>
                 <button class="btn reset">reset to default</button>
             </div>
-
-            <!-- FORM STARTS HERE -->
-            <form action="/submit" method="post" class="form-container">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" required></textarea>
-            
-            <button type="submit" class="btn">Submit</button>
-            </form>
-            <!-- FORM ENDS HERE -->
         </div>
     </header>
     <!-- end of hero -->

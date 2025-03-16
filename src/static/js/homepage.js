@@ -1,31 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const taskForm = document.getElementById('task-form');
-    const taskList = document.getElementById('task-list');
-
-    if (!taskForm || !taskList) return; // Ensure elements exist
-
-    taskForm.addEventListener('submit', (event) => {
-        event.preventDefault(); // Prevent page refresh
-
-        const taskInput = document.getElementById('task');
-        const taskText = taskInput.value.trim();
-
-        if (taskText === '') return; // Ignore empty input
-
-        // Create a new task item
-        const taskItem = document.createElement('li');
-        taskItem.textContent = taskText;
-        taskItem.classList.add('task-item');
-
-        // Append task to the sidebar list
-        taskList.appendChild(taskItem);
-
-        // Clear input field
-        taskInput.value = '';
-    });
-});
-
-
 const questions = document.querySelectorAll(".question");
 
 questions.forEach(function (question) {
@@ -40,11 +12,11 @@ const closeBtnLeft = document.querySelector(".close-btn-left");
 const sidebarLeft = document.querySelector(".sidebar-left");
 
 toggleBtnLeft.addEventListener("click", function () {
-    sidebarLeft.classList.remove("show-sidebar-left");
+    sidebarLeft.classList.toggle("show-sidebar-left");
 });
 
 closeBtnLeft.addEventListener("click", function () {
-    sidebarLeft.classList.toggle("show-sidebar-left");
+    sidebarLeft.classList.remove("show-sidebar-left");
 });
 
 const toggleBtnRight = document.querySelector(".sidebar-toggle-right");
@@ -70,12 +42,21 @@ let timerOn = 0;
 let timerReset = 0;
 let interval;
 
+let starts = 0;
+let finishes = 0;
+let pauses = 0;
+let resets = 0;
+
 // select value and buttons
 const timerHours = document.querySelector('#timer-hours');
 const timerColonLeft = document.querySelector('#timer-colon-left');
 const timerMinutes = document.querySelector('#timer-minutes');
 const timerColonRight = document.querySelector('#timer-colon-right');
 const timerSeconds = document.querySelector('#timer-seconds');
+const timersStarted = document.querySelector('#timers-started');
+const timersFinished = document.querySelector('#timers-finished');
+const timersPaused = document.querySelector('#timers-paused');
+const timersReset = document.querySelector('#timers-reset');
 const btns = document.querySelectorAll(".btn");
 const audio = document.getElementById("play-audio");
 
@@ -88,19 +69,37 @@ btns.forEach(function (btn) {
             defaultMinutes = minutesLeft;
             defaultSeconds = secondsLeft;
         }  else if (styles.contains('start')) {
+            starts++;
+            timersStarted.textContent = starts;
             if (!interval) {
                 interval = setInterval(timer, 1000);
             }
             timerOn = 1;
         } else if (styles.contains('pause')) {
-            if (timerOn ? timerOn = 0 : timerOn = 1);
+            if (timerOn) {
+                timerOn = 0;
+                pauses++;
+                timersPaused.textContent = pauses;
+            } else {
+                timerOn = 1;
+            }
         } else if (styles.contains('reset')) {
+            if (hoursLeft != defaultHours || minutesLeft != defaultMinutes ||
+                secondsLeft != defaultSeconds) {
+                resets++;
+                timersReset.textContent = resets;
+            }
             hoursLeft = defaultHours;
             minutesLeft = defaultMinutes;
             secondsLeft = defaultSeconds;
             timerOn = 0;
             updateDisplay();
         } else if (styles.contains('clear')) {
+            if (hoursLeft != 0 || minutesLeft != 0 ||
+                secondsLeft != 0) {
+                resets++;
+                timersReset.textContent = resets;
+            }
             hoursLeft = 0;
             minutesLeft = 0;
             secondsLeft = 0;
@@ -183,7 +182,11 @@ btns.forEach(function (btn) {
             }
             if (hoursLeft == 0 && minutesLeft == 0 &&
                 secondsLeft == 0) {
-                timerOn = 0;
+                if (timerOn) {
+                    finishes++;
+                    timersFinished.textContent = finishes;
+                    timerOn = 0;
+                }
                 return;
             } else if (minutesLeft == 0 && secondsLeft == 0) {
                 hoursLeft--;
