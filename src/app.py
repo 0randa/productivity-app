@@ -44,11 +44,17 @@ def decode_token(token_str):
 # ==== HTTP Endpoints =====================================================================
 # =========================================================================================
 
-@app.route("/members", methods=['GET'])
-def members():
-    return jsonify(
-        {"members": ["Member1", "Member2", "Member3"]}
-    )
+@app.route('/login.html')
+def login_page():
+    return render_template('login.html')
+
+@app.route('/register.html')
+def register_page():
+    return render_template('register.html')
+
+@app.route('/homepage.html')
+def render_homepage():
+    return render_template('homepage.html')
 
 @app.route("/signup", methods=["POST"])
 @save_data
@@ -149,6 +155,7 @@ def get_pet():
 @app.route('/')
 def index():
     return render_template('homepage.html')
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.ERROR)
