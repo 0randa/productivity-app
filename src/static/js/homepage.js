@@ -69,8 +69,10 @@ btns.forEach(function (btn) {
             defaultMinutes = minutesLeft;
             defaultSeconds = secondsLeft;
         }  else if (styles.contains('start')) {
-            starts++;
-            timersStarted.textContent = starts;
+            if (!timerOn) {
+                starts++;
+                timersStarted.textContent = starts;
+            }
             if (!interval) {
                 interval = setInterval(timer, 1000);
             }
