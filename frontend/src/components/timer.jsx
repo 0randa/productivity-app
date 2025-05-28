@@ -1,5 +1,7 @@
 "use client";
 import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 
 import { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
@@ -25,7 +27,7 @@ export default function TimerComp() {
 
     setTimeout(() => {
       setTime((prev) => ({ ...prev, seconds: prev.seconds - 1 }));
-    }, 500);
+    }, 100);
   }, [time]);
 
   function toggleTimer() {
@@ -36,23 +38,32 @@ export default function TimerComp() {
   }
 
   function resetTimer() {
-    setTime({ minutes: MINUTES, seconds: SECONDS })
+    setStartTimer(false);
+    setTime({ minutes: MINUTES, seconds: SECONDS });
   }
 
   return (
     <>
-      <Button onClick={toggleTimer} variant="primary">
-        {startTimer ? "Stop Timer" : "Start Timer"}
-      </Button>
-
-      <Button onClick={resetTimer} variant="secondary">
-        Reset Timer
-      </Button>
       <div className="mx-auto">
         <h1 className="text-center">
           {time.minutes}:{time.seconds < 10 ? "0" + time.seconds : time.seconds}
         </h1>
       </div>
+
+      <Container>
+        <Row className="justify-content-md-center">
+          <Col xs="auto">
+            <div>
+              <Button onClick={toggleTimer} variant="primary">
+                {startTimer ? "Pause Timer" : "Start Timer"}
+              </Button>
+              <Button onClick={resetTimer} variant="secondary">
+                Reset Timer
+              </Button>
+            </div>
+          </Col>
+        </Row>
+      </Container>
     </>
   );
 }
