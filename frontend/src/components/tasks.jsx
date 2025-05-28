@@ -18,7 +18,7 @@ export default function Tasks() {
           </ListGroup>
         </Col>
         <Col>
-          <h1>Stats</h1>
+          <h1>Player Stats</h1>
           <Accordion defaultActiveKey="0">
             <Accordion.Item eventKey="0">
               <Accordion.Header>Total Timers Started</Accordion.Header>
