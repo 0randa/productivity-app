@@ -35,10 +35,18 @@ export default function TimerComp() {
     setStartTimer(!startTimer);
   }
 
+  function resetTimer() {
+    setTime({ minutes: MINUTES, seconds: SECONDS })
+  }
+
   return (
     <>
       <Button onClick={toggleTimer} variant="primary">
-        Start Timer
+        {startTimer ? "Stop Timer" : "Start Timer"}
+      </Button>
+
+      <Button onClick={resetTimer} variant="secondary">
+        Reset Timer
       </Button>
       <div className="mx-auto">
         <h1 className="text-center">
