@@ -15,7 +15,14 @@ export default function Home() {
     <>
       <NavbarComp />
       <Container>
-        <TimerComp />
+        <Row>
+          <Col>
+            <TimerComp />
+          </Col>
+          <Col>
+            <span>Pokemon</span>
+          </Col>
+        </Row>
         <Tasks />
       </Container>
     </>
