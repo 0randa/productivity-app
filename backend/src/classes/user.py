@@ -31,7 +31,7 @@ class User:
 
         # Find number of consecutive days recorded
         streak = 0
-        if len(self.past_x) > 1:
+        if len(self.past_xp) > 1:
             for i in range(len(self.past_xp) - 1, 0, -1):
                 current_day = self.past_xp[i]
                 prev_day = self.past_xp[i - 1]
