@@ -2,10 +2,12 @@ from user import User
 from pet import Pet
 from task import Task
 from datetime import datetime, date
+from data_class import Data
 import time
 
 
-def createUser():
+def create_user():
+    """Create user test"""
     user_data = {
         "id": 1,
         "username": "Bob",
@@ -21,17 +23,25 @@ def createUser():
     print(person)
 
 
-def createPet():
+def create_pet():
+    """Create pet test"""
     pet_data = {"id": 1, "name": "Pikachu", "xp": 1200, "level": 20}
     pikachu = Pet.from_dict(pet_data)
 
     print(pikachu.to_dict())
 
-def createTask():
-    task_data = {"id": 1, "task": "Homework", 
-                 "tags": ["Work"], "date": None, 
-                 "start_time": datetime.now().timestamp(), "end_time": None,
-                 "elapsed": None}
+
+def create_task():
+    """Create task test"""
+    task_data = {
+        "id": 1,
+        "task": "Homework",
+        "tags": ["Work"],
+        "date": None,
+        "start_time": datetime.now().timestamp(),
+        "end_time": None,
+        "elapsed": None,
+    }
     user_task = Task.from_dict(task_data)
     print(user_task)
 
@@ -49,11 +59,52 @@ def createTask():
     print(type(user_task.start_time))
     time.sleep(5)
 
-
     user_task.end_task()
 
     print(user_task)
 
 
+def data_test():
+    """Test the data class"""
 
-createTask()
+    new_data = Data()
+
+    """Create task test"""
+    task_data = {
+        "id": 1,
+        "task": "Homework",
+        "tags": ["Work"],
+        "date": None,
+        "start_time": datetime.now().timestamp(),
+        "end_time": None,
+        "elapsed": None,
+    }
+
+    user_task = Task.from_dict(task_data)
+
+    user_data = {
+        "id": 1,
+        "username": "Bob",
+        "email": "email@email.com",
+        "password": "password",
+        "pets": [],
+        "tasks": [{user_task.id : user_task}],
+    }
+
+
+    print(user_task)
+
+    person = User.from_dict(user_data)
+    time.sleep(5)
+
+    user_task.end_task()
+    
+    print(person.tasks)
+
+    new_data.add_user(person)
+    new_data.add_task(user_task)
+
+    print(new_data.save_data())
+
+
+data_test()

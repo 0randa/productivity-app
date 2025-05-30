@@ -21,6 +21,7 @@ class User:
         self.pets.append({pet.id: pet})
 
     def add_task(self, task):
+        print(f"the task id is: {task.id} the task is {task}")
         self.tasks.append({task.id: task})
 
     def __str__(self):
@@ -35,12 +36,16 @@ class User:
         """Turns the user info into a dict"""
 
         pet_ids = []
+        task_ids = []
 
         # chuck the pet_ids into an array
         for pet in self.pets:
             for key in pet.keys():
                 pet_ids.append(key)
 
+        for task in self.tasks:
+            for key in task.keys():
+                task_ids.append(key)
 
         return {
             "id": self.id,
@@ -48,6 +53,7 @@ class User:
             "email": self.email,
             "password": self.password,
             "pets": pet_ids,
+            "tasks": task_ids
         }
 
     # Takes in a user dictionary and outputs a User instance

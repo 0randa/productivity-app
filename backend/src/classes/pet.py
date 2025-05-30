@@ -1,13 +1,13 @@
 from dataclasses import dataclass, field
 
-"""
-    Pet class, the pet contains a name, xp, level and happiness.
-    The pet's happiness will decrease if the player is not studying.
-"""
-
 
 @dataclass
 class Pet:
+    """
+    Pet class, the pet contains a name, xp, level and happiness.
+    The pet's happiness will decrease if the player is not studying.
+    """
+
     id: int
     name: str
     xp: int
@@ -15,6 +15,7 @@ class Pet:
 
     # for chucking data into a dict
     def to_dict(self):
+        """Transforms the class instance into a dictionary"""
         return {
             "id": self.id,
             "name": self.name,
@@ -26,4 +27,5 @@ class Pet:
     # instance out of it
     @classmethod
     def from_dict(cls, pet):
+        """Creates a class instance from an input dictionary"""
         return cls(id=pet["id"], name=pet["name"], xp=pet["xp"], level=pet["level"])
