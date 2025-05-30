@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Token:
     session_id: int
@@ -8,7 +9,4 @@ class Token:
     # Takes in a token dictionary and outputs a Token instance
     @classmethod
     def from_dict(cls, token):
-        return cls(
-            session_id=token["session_id"],
-            user_id=token["user_id"]
-        )
+        return cls(session_id=token["session_id"], user_id=token["user_id"])

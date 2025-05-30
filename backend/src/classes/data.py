@@ -1,12 +1,13 @@
 from dataclasses import dataclass, asdict, is_dataclass
 from datetime import datetime
 from classes.user import User
-from classes.token import Token
+from backend.src.classes.app_token import Token
 from classes.task import get_date
 from typing import Dict, List
 import json
 import os
 import logging
+
 
 # Constants
 DATA_DIR = "data.json"
@@ -15,8 +16,9 @@ DEFAULT_DICT = {
     "next_session_id": 0,
     "next_task_id": 0,
     "users": [],
-    "tokens": []
+    "tokens": [],
 }
+
 
 # Loads data from data.json into a Data object
 # Returns a Data object
@@ -31,11 +33,13 @@ def read_data():
         data_dict = json.load(data_file)
         return Data.from_dict(data_dict)
 
+
 # Saves the data object into data.json
 def write_data(data):
     data_dict = asdict(data)
     with open(DATA_DIR, "w") as data_file:
         json.dump(data_dict, data_file, indent=2)
+
 
 # Data.json is directly loaded into this class
 @dataclass
@@ -51,7 +55,7 @@ class Data:
         user_id = self.next_user_id
         self.next_user_id += 1
         return user_id
-    
+
     # get session id
     def get_next_session_id(self):
         session_id = self.next_session_id
@@ -63,15 +67,12 @@ class Data:
         task_id = self.next_task_id
         self.next_task_id += 1
         return task_id
-    
 
     def get_user_by_id(self, id):
         for user in self.users:
             if user.user_id == id:
                 return user
         raise ValueError("Username does not exist")
-        
-        
 
     # Checks if user is valid, if so append to users list, and also logs in a user
     def add_user(self, username, email, password):
@@ -80,7 +81,7 @@ class Data:
                 raise ValueError("Email already exists.")
             if user.username == username:
                 raise ValueError("Username already exists.")
-        
+
         user_id = self.get_next_user_id()
 
         # Make a token
@@ -95,7 +96,7 @@ class Data:
             password=password,
             pet=None,
             tracker=[],
-            past_xp=[]
+            past_xp=[],
         )
 
         self.users.append(new_user)
@@ -103,7 +104,7 @@ class Data:
         logging.info(f"Signed up with email: {email}, password: {password}.")
 
         return token
-    
+
     # Logs in a user
     def login(self, email, password):
         # check if user exists in the list
@@ -114,7 +115,7 @@ class Data:
                     self.tokens.append(token)
                     return token
                 raise ValueError("Password not valid")
-            
+
         raise ValueError("Email does not exist")
 
     # Logic for add_task route
@@ -122,7 +123,7 @@ class Data:
         user = self.get_user_by_id(user_id)
         task_id = self.get_next_task_id()
         user.add_task(task_id, task, tags)
-    
+
     # Logic for ending a task
     def end_task(self, user_id):
         user = self.get_user_by_id(user_id)
@@ -148,6 +149,5 @@ class Data:
             next_session_id=data["next_session_id"],
             next_task_id=data["next_task_id"],
             users=[User.from_dict(user) for user in data["users"]],
-            tokens=[Token.from_dict(token) for token in data["tokens"]]
+            tokens=[Token.from_dict(token) for token in data["tokens"]],
         )
-    

@@ -2,17 +2,20 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from typing import List, Optional
 
+
 # Returns a unix timestamp
 def get_timestamp():
     return int(datetime.utcnow().timestamp())
+
 
 # Returns the date
 def get_date():
     return datetime.now().date()
 
+
 @dataclass
 class Task:
-    task_id: int
+    id: int
     task: str
     tags: List[str]
     date: date = field(default_factory=list)
@@ -30,7 +33,7 @@ class Task:
             date=task["date"],
             start_time=task["start_time"],
             end_time=task["end_time"],
-            elapsed=task["elapsed"]
+            elapsed=task["elapsed"],
         )
 
     def end_task(self):
