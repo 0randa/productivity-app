@@ -53,7 +53,7 @@ class User:
             "email": self.email,
             "password": self.password,
             "pets": pet_ids,
-            "tasks": task_ids
+            "tasks": task_ids,
         }
 
     # Takes in a user dictionary and outputs a User instance

@@ -51,7 +51,7 @@ def create_task():
         "email": "email@email.com",
         "password": "password",
         "pets": [],
-        "tasks": user_task,
+        "tasks": [{user_task.id: user_task}],
     }
 
     person = User.from_dict(user_data)
@@ -61,7 +61,7 @@ def create_task():
 
     user_task.end_task()
 
-    print(user_task)
+    print(person.tasks)
 
 
 def data_test():
@@ -88,23 +88,23 @@ def data_test():
         "email": "email@email.com",
         "password": "password",
         "pets": [],
-        "tasks": [{user_task.id : user_task}],
+        "tasks": [{user_task.id: user_task}],
     }
-
-
-    print(user_task)
 
     person = User.from_dict(user_data)
     time.sleep(5)
 
     user_task.end_task()
-    
-    print(person.tasks)
 
     new_data.add_user(person)
     new_data.add_task(user_task)
 
-    print(new_data.save_data())
+    new_data.save_data()
+    new_data.clean_data()
+    new_data.load_data()
+
+    print(new_data)
 
 
 data_test()
+# create_task()
