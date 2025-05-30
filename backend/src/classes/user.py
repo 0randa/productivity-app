@@ -28,6 +28,7 @@ class User:
         return (
             f"{self.username} has user id of {self.id} and registered "
             f"with email: {self.email} and password: {self.password}"
+            f" has tasks: {self.tasks} and their pet is {self.pets}"
         )
 
     def to_dict(self):
@@ -39,6 +40,7 @@ class User:
         for pet in self.pets:
             for key in pet.keys():
                 pet_ids.append(key)
+
 
         return {
             "id": self.id,
@@ -56,8 +58,8 @@ class User:
             username=user["username"],
             email=user["email"],
             password=user["password"],
-            pets=[],
-            tasks=[],
+            pets=user["pets"],
+            tasks=user["tasks"],
         )
 
 
