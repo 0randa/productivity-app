@@ -1,11 +1,13 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from classes.data import Data, read_data, write_data
+from classes.data_class import Data
+# from classes.user import User
 import logging
 import functools
 import urllib.parse
 from dataclasses import asdict, is_dataclass
 import json
+from uuid import uuid4
 
 # =========================================================================================
 # ==== Global Variables ===================================================================
@@ -14,174 +16,100 @@ import json
 app = Flask(__name__)
 cors = CORS(app)
 
-data = read_data()
+data = Data()
 
 # =========================================================================================
 # ==== Helper Functions and Decorators ====================================================
 # =========================================================================================
 
 
-# Runs write_data() after the provided function is called
-def save_data(function):
-    @functools.wraps(function)  # Preserve function name
-    def wrapper():
-        response = function()
-        write_data(data)
-        return response
-
-    return wrapper
-
-
-# Encodes a token
-def encode_token(token):
-    if is_dataclass(token):
-        token = asdict(token)
-    return urllib.parse.quote(json.dumps(token))
-
-
-# Decodes a token
-def decode_token(token_str):
-    return json.loads(urllib.parse.unquote(token_str))
-
-
 # =========================================================================================
 # ==== HTTP Endpoints =====================================================================
 # =========================================================================================
 
+# @app.route("/register", methods=["POST"])
+# def register():
+#     # load the json file data
+#     data.load_data()
 
-@app.route("/login.html")
-def login_page():
-    return render_template("login.html")
+#     register_data = request.get_json()
 
+#     if not register_data:
+#         return jsonify({"msg": "No JSON data received or malformed JSON."}), 400
 
-@app.route("/register.html")
-def register_page():
-    return render_template("register.html")
+#     required_fields = ['username', 'email', 'password']
+#     for field in required_fields:
+#         if field not in register_data:
+#             app.logger.error(f"Missing field in registration data: {field}")
+#             return jsonify({"msg": f"Missing required field: {field}"}), 400
 
+#     user_id = str(uuid4())
+#     username = register_data['username']
+#     email = register_data['email']
+#     password = register_data['password']
+#     pets = []
+#     tasks = []
 
-@app.route("/homepage.html")
-def render_homepage():
-    return render_template("homepage.html")
+#     user_data = {
+#         "id": user_id,
+#         "username": username,
+#         "email": email,
+#         "password": password,
+#         "pets": pets,
+#         "tasks": tasks,
+#     }
 
+#     user = User.from_dict(user_data)
+#     add_user = data.add_user(user)
 
-@app.route("/signup", methods=["POST"])
-@save_data
-def signup():
-    # Retrieve the required fields from the JSON request
-    email = request.json.get("email")
-    password = request.json.get("password")
-    username = request.json.get("username")
+#     # check that user does not already have a username registered
+#     status, message = add_user
+#     if not status:
+#         return jsonify({"msg": message}), 400
 
-    # Check if any of the required fields are missing
-    if not email or not password or not username:
-        error_message = (
-            "Missing required fields: email, password, and username are all required."
-        )
-        logging.error(f"Signup error: {error_message}")
-        return jsonify({"error": error_message}), 400
+#     # Success message and save data.
+#     message = "User successfully registered"
+#     data.save_data()
+#     return jsonify({"msg": message}), 200
 
+@app.route("/register", methods=["POST"])
+def register():
+    app.logger.info("Register route was hit!")
     try:
-        token = data.add_user(username, email, password)
-    except ValueError as error:
-        logging.error(f"Signup error: {error}")
-        return jsonify({"error": str(error)}), 400
+        register_data = request.get_json()
+        app.logger.info(f"Received data: {register_data}")
 
-    return jsonify({"token": encode_token(token)}), 200
+        # Temporarily bypass problematic code
+        # data.load_data()
+        # ... (rest of your logic) ...
+        # data.save_data()
+
+        # Just return success for now
+        return jsonify({"msg": "Test: Registration endpoint reached successfully"}), 200
+    except Exception as e:
+        app.logger.error(f"Error in /register: {e}", exc_info=True) # Log the full traceback
+        return jsonify({"msg": "Internal server error"}), 500
 
 
 @app.route("/login", methods=["POST"])
-@save_data
 def login():
-    # Retrieve email and password from the JSON request
-    email = request.json.get("email")
-    password = request.json.get("password")
-
-    # Check if the required fields are present
-    if not email or not password:
-        error_message = "Missing required fields: both email and password are required."
-        logging.error(f"Login error: {error_message}")
-        return jsonify({"error": error_message}), 400
-
-    try:
-        token = data.login(email, password)
-    except ValueError as error:
-        logging.error(f"Login error: {error}")
-        return jsonify({"error": str(error)}), 400
-
-    return jsonify({"token": encode_token(token)}), 200
-
-
-@app.route("/getSummary", methods=["GET"])
-def get_summary():
-    token_str = request.headers.get("token")
-    date = request.json.get("date")
-
-    summary = data.get_summary(decode_token(token_str)["user_id"], date)
-
-    return jsonify(summary), 200
+    pass
 
 
 @app.route("/addTask", methods=["POST"])
-@save_data
 def add_task():
-    token_str = request.headers.get("token")
-    task = request.json.get("task")
-    tags = request.json.get("tags")
-    try:
-        data.add_task(decode_token(token_str)["user_id"], task, tags)
-    except ValueError as error:
-        logging.error(f"Error when adding task: {error}")
-        return jsonify({"Error when adding task": str(error)}), 400
-
-    return jsonify({}), 200
+    pass
 
 
 @app.route("/endTask", methods=["PUT"])
-@save_data
 def end_task():
-    token_str = request.headers.get("token")
-
-    try:
-        data.end_task(decode_token(token_str)["user_id"])
-    except ValueError as error:
-        logging.error(f"Error in end task")
-        return jsonify({"Error in end task": str(error)}), 400
-
-    return jsonify({}), 200
+    pass
 
 
 @app.route("/createPet", methods=["POST"])
-@save_data
 def create_pet():
-    token_str = request.headers.get("token")
-    name = request.json.get("pet_name")
+    pass
 
-    try:
-        data.create_pet(decode_token(token_str)["user_id"], name)
-    except ValueError as error:
-        logging.error(f"Create pet error: {error}")
-        return jsonify({"Error": str(error)}), 400
-
-    return jsonify({}), 200
-
-
-"""Route for the pet page"""
-
-
-@app.route("/pet", methods=["GET"])
-@save_data
-def get_pet():
-    token_str = request.headers.get("token")
-    user = data.get_user_by_id(decode_token(token_str)["user_id"])
-
-    pet_data = {
-        "name": user.pet.name,
-        "xp": user.pet.xp,
-        "level": user.pet.level,
-        "happiness": user.pet.happiness,
-    }
-
-    return jsonify({"pet": pet_data}), 200
 
 
 @app.route("/")
@@ -191,4 +119,4 @@ def index():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.ERROR)
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8000)

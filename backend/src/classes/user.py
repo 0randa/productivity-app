@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Dict, List
-from pet import Pet
+from .pet import Pet
+from .task import Task
 
 
 @dataclass
@@ -15,7 +16,7 @@ class User:
     password: str
     # probably have it map to the ID and
     pets: List[Dict[int, Pet]]
-    tasks: List[Dict[int, str]]
+    tasks: List[Dict[int, Task]]
 
     def add_pet(self, pet):
         self.pets.append({pet.id: pet})

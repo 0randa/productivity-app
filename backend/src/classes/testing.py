@@ -25,8 +25,8 @@ def create_user():
 
 def create_pet():
     """Create pet test"""
-    pet_data = {"id": 1, "name": "Pikachu", "xp": 1200, "level": 20}
-    pikachu = Pet.from_dict(pet_data)
+    pikachu_data = {"id": 1, "name": "Pikachu", "xp": 1200, "level": 20}
+    pikachu = Pet.from_dict(pikachu_data)
 
     print(pikachu.to_dict())
 
@@ -81,8 +81,8 @@ def data_test():
 
     user_task = Task.from_dict(task_data)
 
-    pet_data = {"id": 1, "name": "Pikachu", "xp": 1200, "level": 20}
-    pikachu = Pet.from_dict(pet_data)
+    pikachu_data = {"id": 1, "name": "Pikachu", "xp": 1200, "level": 20}
+    pikachu = Pet.from_dict(pikachu_data)
 
     user_data = {
         "id": 1,
@@ -93,7 +93,12 @@ def data_test():
         "tasks": [{user_task.id: user_task}],
     }
 
+    charizard_data = {"id": 2, "name": "Charizard", "xp": 5000, "level": 36}
+    charizard = Pet.from_dict(charizard_data)
+
     person = User.from_dict(user_data)
+
+    person.add_pet(charizard)
     time.sleep(2)
 
     user_task.end_task()
@@ -101,6 +106,7 @@ def data_test():
     new_data.add_user(person)
     new_data.add_task(user_task)
     new_data.add_pet(pikachu)
+    new_data.add_pet(charizard)
 
     print(new_data)
     print()
@@ -112,5 +118,35 @@ def data_test():
     print(new_data)
 
 
-data_test()
+def invalid_user_add():
+    data = Data()
+    user_data = {
+        "id": 1,
+        "username": "Bob",
+        "email": "email@email.com",
+        "password": "password",
+        "pets": [],
+        "tasks": [],
+    }
+
+    person = User.from_dict(user_data)
+    data.add_user(person)
+
+    user_data = {
+        "id": 1,
+        "username": "Bob",
+        "email": "email@email.com",
+        "password": "password",
+        "pets": [],
+        "tasks": [],
+    }
+
+    person = User.from_dict(user_data)
+    res = data.add_user(person)
+
+    print(res)
+
+
+
+invalid_user_add()
 # create_task()
