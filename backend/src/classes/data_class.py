@@ -15,17 +15,17 @@ DATA_DIR = "data.json"
 
 
 class Data:
+    """Data class for storing data"""
+
     def __init__(self):
         self.users = []
         self.pets = []
         self.tasks = []
 
-    # users: List[User]
-    # pets: List[Pet]
-    # tasks: List[Task]
-
     def __str__(self):
-        return f"users = {self.users} " f"pets = {self.pets} " f"tasks = {self.tasks} "
+        return (
+            f"users = {self.users}\n" f"pets = {self.pets}\n" f"tasks = {self.tasks}\n"
+        )
 
     def save_data(self):
         """Save data to json"""
@@ -55,15 +55,19 @@ class Data:
     def load_users(self, user_object):
         """Load the users from the JSON user object"""
         for user in user_object:
-            user_id, name, email, password, pets, tasks = user
+            # Get the values from the dictionary
+            user_id, name, email, password, pets, tasks = user.values()
             user_tasks = []
             user_pets = []
 
+            # Iterate through the tasks and append to users array if it
+            # there is a match
             for task_id in tasks:
                 for task in self.tasks:
                     if task_id == task["id"]:
                         user_tasks.append(task)
 
+            # Same as above logic but for pets
             for pet_id in pets:
                 for pet in self.pets:
                     if pet_id == pet["id"]:
@@ -78,6 +82,7 @@ class Data:
                 "tasks": user_tasks,
             }
 
+            # Create a user instance and then chuck it into the array
             person = User.from_dict(user_data)
             self.users.append(person)
 
@@ -86,10 +91,13 @@ class Data:
         with open(DATA_DIR, "r") as f:
             json_object = json.load(f)
 
-
+        pet_object = json_object["pets"]
         task_object = json_object["tasks"]
         user_object = json_object["users"]
 
+        print(f"User object: {user_object}")
+
+        self.load_pets(pet_object)
         self.load_tasks(task_object)
         self.load_users(user_object)
 

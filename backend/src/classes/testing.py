@@ -1,9 +1,9 @@
+import time
 from user import User
 from pet import Pet
 from task import Task
 from datetime import datetime, date
 from data_class import Data
-import time
 
 
 def create_user():
@@ -69,7 +69,6 @@ def data_test():
 
     new_data = Data()
 
-    """Create task test"""
     task_data = {
         "id": 1,
         "task": "Homework",
@@ -82,22 +81,29 @@ def data_test():
 
     user_task = Task.from_dict(task_data)
 
+    pet_data = {"id": 1, "name": "Pikachu", "xp": 1200, "level": 20}
+    pikachu = Pet.from_dict(pet_data)
+
     user_data = {
         "id": 1,
         "username": "Bob",
         "email": "email@email.com",
         "password": "password",
-        "pets": [],
+        "pets": [{pikachu.id: pikachu}],
         "tasks": [{user_task.id: user_task}],
     }
 
     person = User.from_dict(user_data)
-    time.sleep(5)
+    time.sleep(2)
 
     user_task.end_task()
 
     new_data.add_user(person)
     new_data.add_task(user_task)
+    new_data.add_pet(pikachu)
+
+    print(new_data)
+    print()
 
     new_data.save_data()
     new_data.clean_data()
