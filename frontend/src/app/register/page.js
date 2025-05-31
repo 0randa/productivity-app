@@ -32,6 +32,9 @@ export default function RegisterForm() {
       console.log("Registration successful", response.data);
     } catch (error) {
       console.error("Registration failed", error);
+      console.log(
+        `Error message: ${error.response.data.msg}, status code ${error.response.status}`
+      );
     }
   };
 
