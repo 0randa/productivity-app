@@ -3,6 +3,7 @@
 import {
   Badge,
   Box,
+  Button,
   Flex,
   Heading,
   HStack,
@@ -15,21 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
-const taskItems = [
-  { name: "Finish lecture notes", status: "In Progress", points: 30 },
-  { name: "Preview tutorial exercises", status: "Queued", points: 15 },
-  { name: "Complete coding lab", status: "Queued", points: 40 },
-  { name: "Ship assignment draft", status: "In Progress", points: 60 },
-];
-
-const stats = [
-  { label: "Sessions Started", value: 12 },
-  { label: "Sessions Completed", value: 9 },
-  { label: "Tasks Finished", value: 7 },
-  { label: "Resets", value: 3 },
-];
-
-export default function Tasks() {
+export default function Tasks({ tasks, onCompleteTask, canCompleteTask, stats }) {
   return (
     <Flex direction={{ base: "column", lg: "row" }} gap={6}>
       <Box
@@ -40,34 +27,50 @@ export default function Tasks() {
         border="1px solid"
         borderColor="whiteAlpha.200"
       >
-        <Heading size="md" mb={4}>
+        <Heading size="md" mb={2}>
           Active Tasks
         </Heading>
+        <Text fontSize="sm" color="whiteAlpha.700" mb={4}>
+          Finish one pomodoro, then complete one task to claim XP.
+        </Text>
+
         <List spacing={3}>
-          {taskItems.map((task) => (
+          {tasks.map((task) => (
             <ListItem
-              key={task.name}
+              key={task.id}
               p={3}
               borderRadius="lg"
               bg="rgba(15, 23, 42, 0.7)"
               border="1px solid"
               borderColor="whiteAlpha.200"
             >
-              <HStack justify="space-between" align="start">
+              <HStack justify="space-between" align="center" spacing={4}>
                 <VStack spacing={1} align="start">
                   <Text fontWeight="semibold">{task.name}</Text>
                   <Text fontSize="sm" color="whiteAlpha.700">
                     +{task.points} XP when complete
                   </Text>
                 </VStack>
-                <Badge
-                  colorScheme={task.status === "In Progress" ? "orange" : "blue"}
-                  borderRadius="full"
-                  px={2.5}
-                  py={1}
-                >
-                  {task.status}
-                </Badge>
+
+                <HStack spacing={2}>
+                  <Badge
+                    colorScheme={task.done ? "green" : "blue"}
+                    borderRadius="full"
+                    px={2.5}
+                    py={1}
+                  >
+                    {task.done ? "Completed" : "Queued"}
+                  </Badge>
+                  <Button
+                    size="sm"
+                    colorScheme="orange"
+                    variant={task.done ? "outline" : "solid"}
+                    onClick={() => onCompleteTask(task.id)}
+                    isDisabled={task.done || !canCompleteTask}
+                  >
+                    {task.done ? "Done" : "Complete"}
+                  </Button>
+                </HStack>
               </HStack>
             </ListItem>
           ))}
@@ -83,22 +86,25 @@ export default function Tasks() {
         borderColor="whiteAlpha.200"
       >
         <Heading size="md" mb={4}>
-          Player Stats
+          Session Stats
         </Heading>
         <VStack align="stretch" spacing={3}>
-          {stats.map((item) => (
-            <Stat
-              key={item.label}
-              p={3}
-              borderRadius="lg"
-              bg="rgba(15, 23, 42, 0.7)"
-              border="1px solid"
-              borderColor="whiteAlpha.200"
-            >
-              <StatLabel color="whiteAlpha.700">{item.label}</StatLabel>
-              <StatNumber>{item.value}</StatNumber>
-            </Stat>
-          ))}
+          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
+            <StatLabel color="whiteAlpha.700">Pomodoros Started</StatLabel>
+            <StatNumber>{stats.sessionsStarted}</StatNumber>
+          </Stat>
+          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
+            <StatLabel color="whiteAlpha.700">Pomodoros Completed</StatLabel>
+            <StatNumber>{stats.sessionsCompleted}</StatNumber>
+          </Stat>
+          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
+            <StatLabel color="whiteAlpha.700">Tasks Completed</StatLabel>
+            <StatNumber>{stats.tasksCompleted}</StatNumber>
+          </Stat>
+          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
+            <StatLabel color="whiteAlpha.700">Current Level</StatLabel>
+            <StatNumber>{stats.currentLevel}</StatNumber>
+          </Stat>
         </VStack>
       </Box>
     </Flex>

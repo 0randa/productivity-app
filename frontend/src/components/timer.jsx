@@ -6,7 +6,7 @@ import { Box, Button, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 const START_MINUTES = 25;
 const START_SECONDS_TOTAL = START_MINUTES * 60;
 
-export default function TimerComp() {
+export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
   const [secondsLeft, setSecondsLeft] = useState(START_SECONDS_TOTAL);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -19,6 +19,9 @@ export default function TimerComp() {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
           setIsRunning(false);
+          if (onPomodoroComplete) {
+            onPomodoroComplete();
+          }
           return 0;
         }
         return prev - 1;
@@ -26,7 +29,7 @@ export default function TimerComp() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, onPomodoroComplete]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
@@ -35,6 +38,30 @@ export default function TimerComp() {
     const elapsed = START_SECONDS_TOTAL - secondsLeft;
     return (elapsed / START_SECONDS_TOTAL) * 100;
   }, [secondsLeft]);
+
+  const toggleTimer = () => {
+    if (isRunning) {
+      setIsRunning(false);
+      return;
+    }
+
+    if (secondsLeft === 0) {
+      setSecondsLeft(START_SECONDS_TOTAL);
+    }
+
+    if (secondsLeft === START_SECONDS_TOTAL || secondsLeft === 0) {
+      if (onPomodoroStart) {
+        onPomodoroStart();
+      }
+    }
+
+    setIsRunning(true);
+  };
+
+  const resetTimer = () => {
+    setIsRunning(false);
+    setSecondsLeft(START_SECONDS_TOTAL);
+  };
 
   return (
     <VStack spacing={6} align="stretch">
@@ -66,22 +93,15 @@ export default function TimerComp() {
           }}
         />
         <HStack spacing={3} mt={6}>
-          <Button
-            colorScheme="orange"
-            onClick={() => setIsRunning((prev) => !prev)}
-            minW="140px"
-          >
-            {isRunning ? "Pause" : "Start"}
+          <Button colorScheme="orange" onClick={toggleTimer} minW="160px">
+            {isRunning ? "Pause" : secondsLeft === 0 ? "Start New Session" : "Start"}
           </Button>
           <Button
             variant="outline"
             color="whiteAlpha.900"
             borderColor="whiteAlpha.400"
             _hover={{ bg: "whiteAlpha.200" }}
-            onClick={() => {
-              setIsRunning(false);
-              setSecondsLeft(START_SECONDS_TOTAL);
-            }}
+            onClick={resetTimer}
           >
             Reset
           </Button>

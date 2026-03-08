@@ -46,11 +46,10 @@ docker compose up --build
 {
   "username": "ash",
   "email": "ash@example.com",
-  "password": "secret",
-  "starter": "bulbasaur"
+  "password": "secret"
 }
 ```
-`starter` must be one of: `bulbasaur`, `charmander`, `squirtle`.
+Starter selection now happens in the dashboard session flow on first visit.
 
 ## Notes
 - Frontend auth pages call Flask at `http://localhost:8000`.
