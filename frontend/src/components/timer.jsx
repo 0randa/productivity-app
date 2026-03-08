@@ -1,69 +1,92 @@
 "use client";
-import Button from "react-bootstrap/Button";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
 
-import { useState, useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { useEffect, useMemo, useState } from "react";
+import { Box, Button, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 
-const SECONDS = 0;
-const MINUTES = 2;
+const START_MINUTES = 25;
+const START_SECONDS_TOTAL = START_MINUTES * 60;
 
 export default function TimerComp() {
-  const [time, setTime] = useState({ minutes: MINUTES, seconds: SECONDS });
-  const [startTimer, setStartTimer] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(START_SECONDS_TOTAL);
+  const [isRunning, setIsRunning] = useState(false);
 
-  // timer effect hook
   useEffect(() => {
-    if ((time.minutes <= 0 && time.seconds <= 0) || !startTimer) return;
-
-    if (time.seconds == 0) {
-      setTime((prev) => ({
-        minutes: prev.minutes - 1,
-        seconds: 59,
-      }));
-      return;
+    if (!isRunning) {
+      return undefined;
     }
 
-    setTimeout(() => {
-      setTime((prev) => ({ ...prev, seconds: prev.seconds - 1 }));
-    }, 100);
-  }, [time]);
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  function toggleTimer() {
-    if (!startTimer) {
-      setTime((prev) => ({ ...prev, seconds: prev.seconds - 1 + 1 }));
-    }
-    setStartTimer(!startTimer);
-  }
+    return () => clearInterval(interval);
+  }, [isRunning]);
 
-  function resetTimer() {
-    setStartTimer(false);
-    setTime({ minutes: MINUTES, seconds: SECONDS });
-  }
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+
+  const progress = useMemo(() => {
+    const elapsed = START_SECONDS_TOTAL - secondsLeft;
+    return (elapsed / START_SECONDS_TOTAL) * 100;
+  }, [secondsLeft]);
 
   return (
-    <>
-      <div className="mx-auto">
-        <h1 className="text-center">
-          {time.minutes}:{time.seconds < 10 ? "0" + time.seconds : time.seconds}
-        </h1>
-      </div>
-
-      <Container>
-        <Row className="justify-content-md-center">
-          <Col xs="auto">
-            <div>
-              <Button onClick={toggleTimer} variant="primary">
-                {startTimer ? "Pause Timer" : "Start Timer"}
-              </Button>
-              <Button onClick={resetTimer} variant="secondary">
-                Reset Timer
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      </Container>
-    </>
+    <VStack spacing={6} align="stretch">
+      <Box
+        px={6}
+        py={8}
+        borderRadius="2xl"
+        bg="rgba(15, 23, 42, 0.65)"
+        border="1px solid"
+        borderColor="whiteAlpha.200"
+        boxShadow="0 12px 34px rgba(15, 23, 42, 0.45)"
+      >
+        <Text fontSize="sm" textTransform="uppercase" letterSpacing="wide" color="whiteAlpha.700">
+          Focus Session
+        </Text>
+        <Text fontSize={{ base: "5xl", md: "6xl" }} fontWeight="bold" lineHeight="1" mt={2}>
+          {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+        </Text>
+        <Progress
+          value={progress}
+          mt={5}
+          colorScheme="orange"
+          borderRadius="full"
+          bg="whiteAlpha.200"
+          sx={{
+            ".chakra-progress__filled-track": {
+              transition: "width 0.6s ease",
+            },
+          }}
+        />
+        <HStack spacing={3} mt={6}>
+          <Button
+            colorScheme="orange"
+            onClick={() => setIsRunning((prev) => !prev)}
+            minW="140px"
+          >
+            {isRunning ? "Pause" : "Start"}
+          </Button>
+          <Button
+            variant="outline"
+            color="whiteAlpha.900"
+            borderColor="whiteAlpha.400"
+            _hover={{ bg: "whiteAlpha.200" }}
+            onClick={() => {
+              setIsRunning(false);
+              setSecondsLeft(START_SECONDS_TOTAL);
+            }}
+          >
+            Reset
+          </Button>
+        </HStack>
+      </Box>
+    </VStack>
   );
 }

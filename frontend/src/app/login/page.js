@@ -1,39 +1,87 @@
 "use client";
 
-import { Container } from "react-bootstrap";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import { NavbarComp } from "../../components/navbar";
+import { useState } from "react";
+import axios from "axios";
+import {
+  Alert,
+  AlertIcon,
+  Box,
+  Button,
+  Container,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { NavbarComp } from "@/components/navbar";
 
-function LoginForm() {
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:8000/login", {
+        email,
+        password,
+      });
+
+      setIsError(false);
+      setMessage(response.data.msg ?? "Logged in successfully.");
+      setEmail("");
+      setPassword("");
+    } catch (error) {
+      setIsError(true);
+      setMessage(error?.response?.data?.msg ?? "Login failed.");
+    }
+  };
+
   return (
-    <Form>
-      <Form.Group className="mb-3" controlId="formBasicEmail">
-        <Form.Label>Email address</Form.Label>
-        <Form.Control type="email" placeholder="Enter email" />
-        <Form.Text className="text-muted"></Form.Text>
-      </Form.Group>
-
-      <Form.Group className="mb-3" controlId="formBasicPassword">
-        <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" />
-      </Form.Group>
-
-      <Button variant="primary" type="submit">
-        Submit
-      </Button>
-    </Form>
-  );
-}
-
-export default function RegisterPage() {
-  return (
-    <>
+    <Box minH="100vh" bgGradient="linear(to-b, #0f172a, #172554 35%, #111827)">
       <NavbarComp />
-      <Container>
-        {/* then send to the backend */}
-        <LoginForm />
+      <Container maxW="md" py={10}>
+        <Box
+          p={8}
+          borderRadius="2xl"
+          bg="rgba(15, 23, 42, 0.72)"
+          border="1px solid"
+          borderColor="whiteAlpha.200"
+        >
+          <Heading size="lg">Welcome back</Heading>
+          <Text color="whiteAlpha.700" mt={2} mb={6}>
+            Continue your focus streak.
+          </Text>
+
+          <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
+            <FormControl isRequired>
+              <FormLabel>Email</FormLabel>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel>Password</FormLabel>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </FormControl>
+
+            <Button type="submit" colorScheme="orange" size="lg" mt={2}>
+              Login
+            </Button>
+
+            {message ? (
+              <Alert status={isError ? "error" : "success"} borderRadius="lg">
+                <AlertIcon />
+                {message}
+              </Alert>
+            ) : null}
+          </VStack>
+        </Box>
       </Container>
-    </>
+    </Box>
   );
 }

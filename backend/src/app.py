@@ -77,7 +77,38 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
-    pass
+    data.load_data()
+
+    login_data = request.get_json()
+
+    if not login_data:
+        return jsonify({"msg": "No JSON data received or malformed JSON."}), 400
+
+    required_fields = ['email', 'password']  
+    for field in required_fields:
+        if field not in login_data:
+            app.logger.error(f"Missing field in registration data: {field}")
+            return jsonify({"msg": f"Missing required field: {field}"}), 400
+
+    email = login_data['email']
+    password = login_data['password']
+
+    # check if the user exists
+
+    user_exists = [u for u in data.users if u.email == email]
+
+    if not user_exists:
+        return jsonify({"msg": "User does not exist"}), 400
+    
+    if user_exists[0]['password'] != password:
+        return jsonify({"msg": "Wrong password"}), 400
+
+    message = "Logged in successfully"
+    return jsonify({"msg": message}), 200
+
+
+
+
 
 
 @app.route("/addTask", methods=["POST"])
