@@ -16,7 +16,7 @@ import TimerComp from "@/components/timer";
 import Tasks from "@/components/tasks";
 import { NavbarComp } from "@/components/navbar";
 
-export default function Home() {
+export default function App() {
   const [image, setImage] = useState(null);
   const pokemon = "pikachu";
   const level = 14;
@@ -75,9 +75,7 @@ export default function Home() {
                 borderColor="whiteAlpha.300"
                 p={2}
               >
-                {image ? (
-                  <Image src={image} alt="Companion" w="full" h="full" objectFit="contain" />
-                ) : null}
+                {image ? <Image src={image} alt="Companion" w="full" h="full" objectFit="contain" /> : null}
               </Box>
               <Box>
                 <Heading size="lg" textTransform="capitalize">
