@@ -1,47 +1,33 @@
-# PomoPet (Next.js + Flask)
+# PomoPet (Next.js Full Stack)
 
-Gamified pomodoro productivity app with:
-- `frontend/`: Next.js app with Chakra UI
-- `backend/`: Flask API for auth and task data
+Gamified pomodoro productivity app built as a single Next.js project.
 
 ## Stack
-- Frontend: Next.js 15, React 19, Chakra UI, Axios
-- Backend: Flask, Flask-CORS
-- Data store: JSON file (`backend/src/data.json`)
-- Optional local orchestration: Docker Compose
+- Frontend: Next.js 15, React 19, Chakra UI
+- Backend (in-app): Next.js Route Handlers (`/api/*`)
+- Runtime data: in-memory only (no persistence on restart/refresh)
+- Optional orchestration: Docker Compose
 
 ## Quick Start (Local Dev)
-
-### 1) Backend (Flask)
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cd src
-python3 app.py
-```
-Backend runs on `http://localhost:8000`.
-
-### 2) Frontend (Next.js)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Frontend runs on `http://localhost:3000`.
 
-## Docker (Alternative)
+App runs on `http://localhost:3000`.
+
+## Docker
 From project root:
 ```bash
 docker compose up --build
 ```
 
 ## API Endpoints (Current)
-- `POST /register`
-- `POST /login`
+- `POST /api/register`
+- `POST /api/login`
 
-`POST /register` expects:
+`POST /api/register` expects:
 ```json
 {
   "username": "ash",
@@ -49,15 +35,7 @@ docker compose up --build
   "password": "secret"
 }
 ```
-Starter selection now happens in the dashboard session flow on first visit.
 
 ## Notes
-- Frontend auth pages call Flask at `http://localhost:8000`.
-- If you reset app data, initialize `backend/src/data.json` with:
-```json
-{
-  "users": [],
-  "pets": [],
-  "tasks": []
-}
-```
+- Starter selection now happens on first dashboard visit.
+- Session progress and users are intentionally non-persistent for now.
