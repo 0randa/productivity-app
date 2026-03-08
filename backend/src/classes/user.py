@@ -17,6 +17,7 @@ class User:
     # probably have it map to the ID and
     pets: List[Dict[int, Pet]]
     tasks: List[Dict[int, Task]]
+    starter: str = ""
 
     def add_pet(self, pet):
         self.pets.append({pet.id: pet})
@@ -53,6 +54,7 @@ class User:
             "name": self.username,
             "email": self.email,
             "password": self.password,
+            "starter": self.starter,
             "pets": pet_ids,
             "tasks": task_ids,
         }
@@ -65,6 +67,7 @@ class User:
             username=user["username"],
             email=user["email"],
             password=user["password"],
+            starter=user.get("starter", ""),
             pets=user["pets"],
             tasks=user["tasks"],
         )

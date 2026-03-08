@@ -65,8 +65,13 @@ class Data:
         def load_users(users):
             """Load the users from the JSON user object"""
             for user in users:
-                # Get the values from the dictionary
-                user_id, name, email, password, pets, tasks = user.values()
+                user_id = user["id"]
+                name = user["name"]
+                email = user["email"]
+                password = user["password"]
+                starter = user.get("starter", "")
+                pets = user["pets"]
+                tasks = user["tasks"]
                 user_tasks = []
                 user_pets = []
 
@@ -88,6 +93,7 @@ class Data:
                     "username": name,
                     "email": email,
                     "password": password,
+                    "starter": starter,
                     "pets": user_pets,
                     "tasks": user_tasks,
                 }

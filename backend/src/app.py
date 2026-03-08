@@ -38,7 +38,7 @@ def register():
     if not register_data:
         return jsonify({"msg": "No JSON data received or malformed JSON."}), 400
 
-    required_fields = ['username', 'email', 'password']
+    required_fields = ['username', 'email', 'password', 'starter']
     for field in required_fields:
         if field not in register_data:
             app.logger.error(f"Missing field in registration data: {field}")
@@ -48,6 +48,11 @@ def register():
     username = register_data['username']
     email = register_data['email']
     password = register_data['password']
+    starter = register_data['starter']
+    allowed_starters = {"bulbasaur", "charmander", "squirtle"}
+
+    if starter not in allowed_starters:
+        return jsonify({"msg": "Starter must be bulbasaur, charmander, or squirtle"}), 400
     pets = []
     tasks = []
 
@@ -56,6 +61,7 @@ def register():
         "username": username,
         "email": email,
         "password": password,
+        "starter": starter,
         "pets": pets,
         "tasks": tasks,
     }
@@ -100,7 +106,7 @@ def login():
     if not user_exists:
         return jsonify({"msg": "User does not exist"}), 400
     
-    if user_exists[0]['password'] != password:
+    if user_exists[0].password != password:
         return jsonify({"msg": "Wrong password"}), 400
 
     message = "Logged in successfully"

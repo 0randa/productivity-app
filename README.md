@@ -41,6 +41,17 @@ docker compose up --build
 - `POST /register`
 - `POST /login`
 
+`POST /register` expects:
+```json
+{
+  "username": "ash",
+  "email": "ash@example.com",
+  "password": "secret",
+  "starter": "bulbasaur"
+}
+```
+`starter` must be one of: `bulbasaur`, `charmander`, `squirtle`.
+
 ## Notes
 - Frontend auth pages call Flask at `http://localhost:8000`.
 - If you reset app data, initialize `backend/src/data.json` with:
