@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box, Button, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 
-const START_MINUTES = 25;
+const START_MINUTES = 1;
 const START_SECONDS_TOTAL = START_MINUTES * 60;
 
 export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
@@ -74,10 +74,20 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
         borderColor="whiteAlpha.200"
         boxShadow="0 12px 34px rgba(15, 23, 42, 0.45)"
       >
-        <Text fontSize="sm" textTransform="uppercase" letterSpacing="wide" color="whiteAlpha.700">
+        <Text
+          fontSize="sm"
+          textTransform="uppercase"
+          letterSpacing="wide"
+          color="whiteAlpha.700"
+        >
           Focus Session
         </Text>
-        <Text fontSize={{ base: "5xl", md: "6xl" }} fontWeight="bold" lineHeight="1" mt={2}>
+        <Text
+          fontSize={{ base: "5xl", md: "6xl" }}
+          fontWeight="bold"
+          lineHeight="1"
+          mt={2}
+        >
           {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
         </Text>
         <Progress
@@ -94,7 +104,11 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
         />
         <HStack spacing={3} mt={6}>
           <Button colorScheme="orange" onClick={toggleTimer} minW="160px">
-            {isRunning ? "Pause" : secondsLeft === 0 ? "Start New Session" : "Start"}
+            {isRunning
+              ? "Pause"
+              : secondsLeft === 0
+                ? "Start New Session"
+                : "Start"}
           </Button>
           <Button
             variant="outline"

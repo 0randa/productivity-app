@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Badge,
   Box,
@@ -7,6 +8,7 @@ import {
   Flex,
   Heading,
   HStack,
+  Input,
   List,
   ListItem,
   Stat,
@@ -16,7 +18,17 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
-export default function Tasks({ tasks, onCompleteTask, canCompleteTask, stats }) {
+export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTask, stats }) {
+  const [taskDraft, setTaskDraft] = useState("");
+
+  const handleAddTask = (event) => {
+    event.preventDefault();
+    const wasCreated = onAddTask?.(taskDraft);
+    if (wasCreated) {
+      setTaskDraft("");
+    }
+  };
+
   return (
     <Flex direction={{ base: "column", lg: "row" }} gap={6}>
       <Box
@@ -33,6 +45,37 @@ export default function Tasks({ tasks, onCompleteTask, canCompleteTask, stats })
         <Text fontSize="sm" color="whiteAlpha.700" mb={4}>
           Finish one pomodoro, then complete one task to claim XP.
         </Text>
+
+        <Box as="form" onSubmit={handleAddTask} mb={4}>
+          <HStack spacing={3}>
+            <Input
+              value={taskDraft}
+              onChange={(event) => setTaskDraft(event.target.value)}
+              placeholder="Add a new task"
+              bg="rgba(15, 23, 42, 0.75)"
+              borderColor="whiteAlpha.300"
+              _placeholder={{ color: "whiteAlpha.500" }}
+            />
+            <Button type="submit" colorScheme="orange">
+              Add Task
+            </Button>
+          </HStack>
+        </Box>
+
+        {tasks.length === 0 ? (
+          <Box
+            p={5}
+            borderRadius="lg"
+            bg="rgba(15, 23, 42, 0.7)"
+            border="1px solid"
+            borderColor="whiteAlpha.200"
+          >
+            <Text fontWeight="semibold">No active tasks yet.</Text>
+            <Text fontSize="sm" color="whiteAlpha.700" mt={1}>
+              Add your first task above, then complete a pomodoro to unlock task completion.
+            </Text>
+          </Box>
+        ) : null}
 
         <List spacing={3}>
           {tasks.map((task) => (

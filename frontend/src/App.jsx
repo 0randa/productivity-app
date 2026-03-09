@@ -42,16 +42,15 @@ const STARTERS = [
   },
 ];
 
-const INITIAL_TASKS = [
-  { id: "task-1", name: "Finish lecture notes", points: 40, done: false },
-  { id: "task-2", name: "Preview tutorial exercises", points: 40, done: false },
-  { id: "task-3", name: "Complete coding lab", points: 40, done: false },
-  { id: "task-4", name: "Ship assignment draft", points: 40, done: false },
-];
+const INITIAL_TASKS = [];
 
 const START_LEVEL = 5;
 const XP_PER_LEVEL = 100;
 const XP_PER_TASK = 40;
+const createTaskId = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `task-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
 export default function App() {
   const [selectedStarter, setSelectedStarter] = useState(null);
@@ -129,6 +128,32 @@ export default function App() {
     setPomodorosCompleted((prev) => prev + 1);
     setAvailableTaskClaims((prev) => prev + 1);
     setStatusMessage("Pomodoro complete. Mark one task done to claim XP.");
+  };
+
+  const handleTaskCreate = (taskName) => {
+    const normalizedTaskName = taskName.trim();
+    if (!normalizedTaskName) {
+      setStatusMessage("Add a task name before creating it.");
+      return false;
+    }
+
+    setTasks((prev) => [
+      ...prev,
+      {
+        id: createTaskId(),
+        name: normalizedTaskName,
+        points: XP_PER_TASK,
+        done: false,
+      },
+    ]);
+
+    if (availableTaskClaims > 0) {
+      setStatusMessage(`Task added: ${normalizedTaskName}. You can complete it now to claim XP.`);
+    } else {
+      setStatusMessage(`Task added: ${normalizedTaskName}. Complete a pomodoro to unlock completion.`);
+    }
+
+    return true;
   };
 
   const handleTaskComplete = (taskId) => {
@@ -309,6 +334,7 @@ export default function App() {
 
         <Tasks
           tasks={tasks}
+          onAddTask={handleTaskCreate}
           onCompleteTask={handleTaskComplete}
           canCompleteTask={availableTaskClaims > 0}
           stats={{
