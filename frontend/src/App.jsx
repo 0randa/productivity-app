@@ -21,6 +21,7 @@ import { NavbarComp } from "@/components/navbar";
 const STARTERS = [
   {
     key: "bulbasaur",
+    speciesName: "bulbasaur",
     pokemonId: 1,
     label: "Bulbasaur",
     sprite:
@@ -29,6 +30,7 @@ const STARTERS = [
   },
   {
     key: "charmander",
+    speciesName: "charmander",
     pokemonId: 4,
     label: "Charmander",
     sprite:
@@ -37,6 +39,7 @@ const STARTERS = [
   },
   {
     key: "squirtle",
+    speciesName: "squirtle",
     pokemonId: 7,
     label: "Squirtle",
     sprite:
@@ -55,6 +58,19 @@ const createTaskId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : `task-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+const getPokemonAssets = (pokemonId) => ({
+  sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`,
+  cry: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemonId}.ogg`,
+});
+const getPokemonIdFromResourceUrl = (resourceUrl) => {
+  const idMatch = resourceUrl?.match(/\/(\d+)\/?$/);
+  return idMatch ? Number(idMatch[1]) : null;
+};
+const formatPokemonName = (speciesName) =>
+  speciesName
+    .split("-")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
 const getExperienceForLevel = (levels, targetLevel) =>
   levels.find((entry) => entry.level === targetLevel)?.experience ?? 0;
 const calculateLevelFromExperience = (levels, totalExperience) => {
@@ -67,9 +83,48 @@ const calculateLevelFromExperience = (levels, totalExperience) => {
   }
   return resolvedLevel;
 };
+const getNextEvolutionEntry = (chainNode, currentSpeciesName) => {
+  if (!chainNode) {
+    return null;
+  }
+
+  if (chainNode.species?.name === currentSpeciesName) {
+    if (!chainNode.evolves_to?.length) {
+      return null;
+    }
+
+    const sortedCandidates = chainNode.evolves_to
+      .map((candidate) => {
+        const minLevel = candidate.evolution_details?.find(
+          (detail) => typeof detail.min_level === "number",
+        )?.min_level;
+
+        return {
+          candidate,
+          minLevel: typeof minLevel === "number" ? minLevel : null,
+        };
+      })
+      .sort(
+        (left, right) =>
+          (left.minLevel ?? Number.MAX_SAFE_INTEGER) -
+          (right.minLevel ?? Number.MAX_SAFE_INTEGER),
+      );
+
+    return sortedCandidates[0] ?? null;
+  }
+
+  for (const childNode of chainNode.evolves_to ?? []) {
+    const result = getNextEvolutionEntry(childNode, currentSpeciesName);
+    if (result) {
+      return result;
+    }
+  }
+
+  return null;
+};
 
 export default function App() {
-  const [selectedStarter, setSelectedStarter] = useState(null);
+  const [activePokemon, setActivePokemon] = useState(null);
   const [previewStarter, setPreviewStarter] = useState(STARTERS[0].key);
   const [playingStarter, setPlayingStarter] = useState("");
   const [tasks, setTasks] = useState(INITIAL_TASKS);
@@ -82,6 +137,7 @@ export default function App() {
   const [growthLevels, setGrowthLevels] = useState([]);
   const [isGrowthDataLoading, setIsGrowthDataLoading] = useState(false);
   const [growthDataError, setGrowthDataError] = useState("");
+  const [nextEvolution, setNextEvolution] = useState(null);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -93,26 +149,18 @@ export default function App() {
     };
   }, []);
 
-  const currentStarter = useMemo(
-    () => STARTERS.find((starter) => starter.key === selectedStarter) ?? null,
-    [selectedStarter]
-  );
-
   const previewStarterData = useMemo(
-    () => STARTERS.find((starter) => starter.key === previewStarter) ?? STARTERS[0],
-    [previewStarter]
+    () =>
+      STARTERS.find((starter) => starter.key === previewStarter) ?? STARTERS[0],
+    [previewStarter],
   );
 
   useEffect(() => {
-    if (!selectedStarter) {
+    if (!activePokemon) {
       setGrowthLevels([]);
       setGrowthDataError("");
       setIsGrowthDataLoading(false);
-      return;
-    }
-
-    const starterChoice = STARTERS.find((starter) => starter.key === selectedStarter);
-    if (!starterChoice) {
+      setNextEvolution(null);
       return;
     }
 
@@ -121,11 +169,12 @@ export default function App() {
     const loadGrowthData = async () => {
       setIsGrowthDataLoading(true);
       setGrowthDataError("");
+      setNextEvolution(null);
 
       try {
         const speciesResponse = await fetch(
-          `https://pokeapi.co/api/v2/pokemon-species/${starterChoice.pokemonId}`,
-          { signal: abortController.signal }
+          `https://pokeapi.co/api/v2/pokemon-species/${activePokemon.pokemonId}`,
+          { signal: abortController.signal },
         );
         if (!speciesResponse.ok) {
           throw new Error(`Species request failed: ${speciesResponse.status}`);
@@ -136,15 +185,38 @@ export default function App() {
         if (!growthRateUrl) {
           throw new Error("Growth rate URL is missing from species response.");
         }
-
-        const growthRateResponse = await fetch(growthRateUrl, {
-          signal: abortController.signal,
-        });
-        if (!growthRateResponse.ok) {
-          throw new Error(`Growth rate request failed: ${growthRateResponse.status}`);
+        const evolutionChainUrl = speciesData.evolution_chain?.url;
+        if (!evolutionChainUrl) {
+          throw new Error(
+            "Evolution chain URL is missing from species response.",
+          );
         }
 
-        const growthRateData = await growthRateResponse.json();
+        const [growthRateResponse, evolutionChainResponse] = await Promise.all([
+          fetch(growthRateUrl, {
+            signal: abortController.signal,
+          }),
+          fetch(evolutionChainUrl, {
+            signal: abortController.signal,
+          }),
+        ]);
+
+        if (!growthRateResponse.ok) {
+          throw new Error(
+            `Growth rate request failed: ${growthRateResponse.status}`,
+          );
+        }
+        if (!evolutionChainResponse.ok) {
+          throw new Error(
+            `Evolution chain request failed: ${evolutionChainResponse.status}`,
+          );
+        }
+
+        const [growthRateData, evolutionChainData] = await Promise.all([
+          growthRateResponse.json(),
+          evolutionChainResponse.json(),
+        ]);
+
         const normalizedLevels = (growthRateData.levels ?? [])
           .map((levelEntry) => ({
             level: levelEntry.level,
@@ -158,6 +230,30 @@ export default function App() {
 
         if (isActive) {
           setGrowthLevels(normalizedLevels);
+
+          const nextEvolutionEntry = getNextEvolutionEntry(
+            evolutionChainData.chain,
+            speciesData.name,
+          );
+          if (!nextEvolutionEntry) {
+            setNextEvolution(null);
+            return;
+          }
+
+          const pokemonId = getPokemonIdFromResourceUrl(
+            nextEvolutionEntry.candidate.species?.url,
+          );
+          if (!pokemonId) {
+            setNextEvolution(null);
+            return;
+          }
+
+          setNextEvolution({
+            pokemonId,
+            speciesName: nextEvolutionEntry.candidate.species.name,
+            label: formatPokemonName(nextEvolutionEntry.candidate.species.name),
+            minLevel: nextEvolutionEntry.minLevel,
+          });
         }
       } catch (error) {
         if (!isActive || error.name === "AbortError") {
@@ -166,7 +262,10 @@ export default function App() {
 
         console.error("Could not load growth data from PokeAPI:", error);
         setGrowthLevels([]);
-        setGrowthDataError("Could not load PokeAPI growth data. Using fallback leveling.");
+        setNextEvolution(null);
+        setGrowthDataError(
+          "Could not load PokeAPI growth data. Using fallback leveling.",
+        );
       } finally {
         if (isActive) {
           setIsGrowthDataLoading(false);
@@ -180,7 +279,7 @@ export default function App() {
       isActive = false;
       abortController.abort();
     };
-  }, [selectedStarter]);
+  }, [activePokemon]);
 
   const baseExperienceAtStartLevel = useMemo(() => {
     if (!growthLevels.length) {
@@ -193,45 +292,55 @@ export default function App() {
 
   const level = useMemo(() => {
     if (!growthLevels.length) {
-      return Math.min(MAX_LEVEL, START_LEVEL + Math.floor(totalXp / FALLBACK_XP_PER_LEVEL));
+      return Math.min(
+        MAX_LEVEL,
+        START_LEVEL + Math.floor(totalXp / FALLBACK_XP_PER_LEVEL),
+      );
     }
 
     return calculateLevelFromExperience(growthLevels, totalExperience);
   }, [growthLevels, totalExperience, totalXp]);
 
-  const { xpInCurrentLevel, xpNeededForNextLevel, xpProgress, nextLevel } = useMemo(() => {
-    if (!growthLevels.length) {
-      const fallbackXpInCurrentLevel = totalXp % FALLBACK_XP_PER_LEVEL;
+  const { xpInCurrentLevel, xpNeededForNextLevel, xpProgress, nextLevel } =
+    useMemo(() => {
+      if (!growthLevels.length) {
+        const fallbackXpInCurrentLevel = totalXp % FALLBACK_XP_PER_LEVEL;
+        return {
+          xpInCurrentLevel: fallbackXpInCurrentLevel,
+          xpNeededForNextLevel: FALLBACK_XP_PER_LEVEL,
+          xpProgress: (fallbackXpInCurrentLevel / FALLBACK_XP_PER_LEVEL) * 100,
+          nextLevel: Math.min(level + 1, MAX_LEVEL),
+        };
+      }
+
+      const currentLevelExperience = getExperienceForLevel(growthLevels, level);
+      if (level >= MAX_LEVEL) {
+        return {
+          xpInCurrentLevel: totalExperience - currentLevelExperience,
+          xpNeededForNextLevel: 0,
+          xpProgress: 100,
+          nextLevel: MAX_LEVEL,
+        };
+      }
+
+      const targetNextLevel = level + 1;
+      const nextLevelExperience = getExperienceForLevel(
+        growthLevels,
+        targetNextLevel,
+      );
+      const xpNeeded = Math.max(
+        nextLevelExperience - currentLevelExperience,
+        1,
+      );
+      const xpInLevel = Math.max(totalExperience - currentLevelExperience, 0);
+
       return {
-        xpInCurrentLevel: fallbackXpInCurrentLevel,
-        xpNeededForNextLevel: FALLBACK_XP_PER_LEVEL,
-        xpProgress: (fallbackXpInCurrentLevel / FALLBACK_XP_PER_LEVEL) * 100,
-        nextLevel: Math.min(level + 1, MAX_LEVEL),
+        xpInCurrentLevel: xpInLevel,
+        xpNeededForNextLevel: xpNeeded,
+        xpProgress: Math.min((xpInLevel / xpNeeded) * 100, 100),
+        nextLevel: targetNextLevel,
       };
-    }
-
-    const currentLevelExperience = getExperienceForLevel(growthLevels, level);
-    if (level >= MAX_LEVEL) {
-      return {
-        xpInCurrentLevel: totalExperience - currentLevelExperience,
-        xpNeededForNextLevel: 0,
-        xpProgress: 100,
-        nextLevel: MAX_LEVEL,
-      };
-    }
-
-    const targetNextLevel = level + 1;
-    const nextLevelExperience = getExperienceForLevel(growthLevels, targetNextLevel);
-    const xpNeeded = Math.max(nextLevelExperience - currentLevelExperience, 1);
-    const xpInLevel = Math.max(totalExperience - currentLevelExperience, 0);
-
-    return {
-      xpInCurrentLevel: xpInLevel,
-      xpNeededForNextLevel: xpNeeded,
-      xpProgress: Math.min((xpInLevel / xpNeeded) * 100, 100),
-      nextLevel: targetNextLevel,
-    };
-  }, [growthLevels, level, totalExperience, totalXp]);
+    }, [growthLevels, level, totalExperience, totalXp]);
 
   const playStarterCry = async (starterChoice) => {
     setPreviewStarter(starterChoice.key);
@@ -246,7 +355,9 @@ export default function App() {
     audioRef.current = cryAudio;
 
     cryAudio.onended = () => {
-      setPlayingStarter((current) => (current === starterChoice.key ? "" : current));
+      setPlayingStarter((current) =>
+        current === starterChoice.key ? "" : current,
+      );
     };
 
     try {
@@ -259,9 +370,9 @@ export default function App() {
   };
 
   const beginSession = () => {
-    setSelectedStarter(previewStarter);
+    setActivePokemon(previewStarterData);
     setStatusMessage(
-      `Welcome in. You chose ${previewStarterData.label} at level ${START_LEVEL}. Complete pomodoros and tasks to gain XP.`
+      `Welcome in. You chose ${previewStarterData.label} at level ${START_LEVEL}. Complete pomodoros and tasks to gain XP.`,
     );
   };
 
@@ -293,22 +404,30 @@ export default function App() {
     ]);
 
     if (availableTaskClaims > 0) {
-      setStatusMessage(`Task added: ${normalizedTaskName}. You can complete it now to claim XP.`);
+      setStatusMessage(
+        `Task added: ${normalizedTaskName}. You can complete it now to claim XP.`,
+      );
     } else {
-      setStatusMessage(`Task added: ${normalizedTaskName}. Complete a pomodoro to unlock completion.`);
+      setStatusMessage(
+        `Task added: ${normalizedTaskName}. Complete a pomodoro to unlock completion.`,
+      );
     }
 
     return true;
   };
 
   const handleTaskComplete = (taskId) => {
-    const taskToComplete = tasks.find((task) => task.id === taskId && !task.done);
+    const taskToComplete = tasks.find(
+      (task) => task.id === taskId && !task.done,
+    );
     if (!taskToComplete) {
       return;
     }
 
     if (availableTaskClaims <= 0) {
-      setStatusMessage("Complete a pomodoro first, then claim XP by finishing a task.");
+      setStatusMessage(
+        "Complete a pomodoro first, then claim XP by finishing a task.",
+      );
       return;
     }
 
@@ -319,14 +438,20 @@ export default function App() {
               ...task,
               done: true,
             }
-          : task
-      )
+          : task,
+      ),
     );
 
     const nextTotalXp = totalXp + XP_PER_TASK;
     const nextLevel = growthLevels.length
-      ? calculateLevelFromExperience(growthLevels, baseExperienceAtStartLevel + nextTotalXp)
-      : Math.min(MAX_LEVEL, START_LEVEL + Math.floor(nextTotalXp / FALLBACK_XP_PER_LEVEL));
+      ? calculateLevelFromExperience(
+          growthLevels,
+          baseExperienceAtStartLevel + nextTotalXp,
+        )
+      : Math.min(
+          MAX_LEVEL,
+          START_LEVEL + Math.floor(nextTotalXp / FALLBACK_XP_PER_LEVEL),
+        );
     const didLevelUp = nextLevel > level;
 
     setAvailableTaskClaims((prev) => prev - 1);
@@ -334,14 +459,55 @@ export default function App() {
     setTotalXp((prev) => prev + XP_PER_TASK);
     setStatusMessage(
       didLevelUp
-        ? `${taskToComplete.name} complete. ${currentStarter?.label ?? "Starter"} gained ${XP_PER_TASK} XP and reached level ${nextLevel}.`
-        : `${taskToComplete.name} complete. ${currentStarter?.label ?? "Starter"} gained ${XP_PER_TASK} XP.`
+        ? `${taskToComplete.name} complete. ${activePokemon?.label ?? "Starter"} gained ${XP_PER_TASK} XP and reached level ${nextLevel}.`
+        : `${taskToComplete.name} complete. ${activePokemon?.label ?? "Starter"} gained ${XP_PER_TASK} XP.`,
     );
   };
 
-  if (!selectedStarter) {
+  const canEvolveByLevel =
+    Boolean(nextEvolution) &&
+    typeof nextEvolution.minLevel === "number" &&
+    level >= nextEvolution.minLevel;
+
+  const handleEvolve = () => {
+    if (!nextEvolution) {
+      return;
+    }
+
+    if (typeof nextEvolution.minLevel !== "number") {
+      setStatusMessage(
+        `${activePokemon?.label ?? "Your Pokemon"} cannot evolve by level in this line.`,
+      );
+      return;
+    }
+
+    if (level < nextEvolution.minLevel) {
+      setStatusMessage(
+        `${activePokemon?.label ?? "Your Pokemon"} evolves at level ${nextEvolution.minLevel}.`,
+      );
+      return;
+    }
+
+    const evolvedPokemon = {
+      key: nextEvolution.speciesName,
+      speciesName: nextEvolution.speciesName,
+      pokemonId: nextEvolution.pokemonId,
+      label: nextEvolution.label,
+      ...getPokemonAssets(nextEvolution.pokemonId),
+    };
+
+    setActivePokemon(evolvedPokemon);
+    setStatusMessage(
+      `${activePokemon?.label ?? "Your Pokemon"} evolved into ${nextEvolution.label}!`,
+    );
+  };
+
+  if (!activePokemon) {
     return (
-      <Box minH="100vh" bgGradient="linear(to-b, #0f172a, #172554 35%, #111827)">
+      <Box
+        minH="100vh"
+        bgGradient="linear(to-b, #0f172a, #172554 35%, #111827)"
+      >
         <NavbarComp />
         <Container maxW="6xl" py={{ base: 8, md: 12 }}>
           <Box
@@ -358,7 +524,8 @@ export default function App() {
               Choose your starter Pokémon
             </Heading>
             <Text color="whiteAlpha.800" mt={2} mb={6}>
-              This choice is session-only for now. Refreshing the page will reset progress.
+              This choice is session-only for now. Refreshing the page will
+              reset progress.
             </Text>
 
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
@@ -381,7 +548,11 @@ export default function App() {
                     color={isSelected ? "gray.900" : "white"}
                     transition="all 0.2s ease"
                     transform={isSelected ? "translateY(-3px)" : "none"}
-                    boxShadow={isSelected ? "0 12px 28px rgba(251, 146, 60, 0.35)" : "none"}
+                    boxShadow={
+                      isSelected
+                        ? "0 12px 28px rgba(251, 146, 60, 0.35)"
+                        : "none"
+                    }
                     _hover={{ transform: "translateY(-3px)" }}
                   >
                     <VStack align="start" spacing={2}>
@@ -394,7 +565,12 @@ export default function App() {
                         alignItems="center"
                         justifyContent="center"
                       >
-                        <Image src={starter.sprite} alt={starter.label} maxH="92px" objectFit="contain" />
+                        <Image
+                          src={starter.sprite}
+                          alt={starter.label}
+                          maxH="92px"
+                          objectFit="contain"
+                        />
                       </Box>
                       <Text fontWeight="bold">{starter.label}</Text>
                       <Text fontSize="xs" opacity={0.85}>
@@ -406,7 +582,12 @@ export default function App() {
               })}
             </SimpleGrid>
 
-            <Button mt={6} colorScheme="orange" size="lg" onClick={beginSession}>
+            <Button
+              mt={6}
+              colorScheme="orange"
+              size="lg"
+              onClick={beginSession}
+            >
               Start with {previewStarterData.label}
             </Button>
           </Box>
@@ -434,10 +615,14 @@ export default function App() {
               Build momentum one focused sprint at a time.
             </Heading>
             <Text mt={4} color="whiteAlpha.800" maxW="lg">
-              Complete a pomodoro, then complete a task to claim XP for your starter.
+              Complete a pomodoro, then complete a task to claim XP for your
+              companion.
             </Text>
             <Box mt={8}>
-              <TimerComp onPomodoroStart={handlePomodoroStart} onPomodoroComplete={handlePomodoroComplete} />
+              <TimerComp
+                onPomodoroStart={handlePomodoroStart}
+                onPomodoroComplete={handlePomodoroComplete}
+              />
             </Box>
             {statusMessage ? (
               <Text mt={4} fontSize="sm" color="orange.200">
@@ -463,11 +648,19 @@ export default function App() {
                 borderColor="whiteAlpha.300"
                 p={2}
               >
-                <Image src={currentStarter.sprite} alt={currentStarter.label} w="full" h="full" objectFit="contain" />
+                <Image
+                  src={activePokemon.sprite}
+                  alt={activePokemon.label}
+                  w="full"
+                  h="full"
+                  objectFit="contain"
+                />
               </Box>
               <Box>
-                <Heading size="lg">{currentStarter.label}</Heading>
-                <Text color="whiteAlpha.800">Level {level} Focus Companion</Text>
+                <Heading size="lg">{activePokemon.label}</Heading>
+                <Text color="whiteAlpha.800">
+                  Level {level} Focus Companion
+                </Text>
               </Box>
             </Flex>
 
@@ -478,7 +671,12 @@ export default function App() {
                   ? "Max level reached"
                   : `${xpInCurrentLevel} / ${xpNeededForNextLevel} XP toward level ${nextLevel}`}
               </Text>
-              <Progress value={xpProgress} colorScheme="green" borderRadius="full" bg="whiteAlpha.300" />
+              <Progress
+                value={xpProgress}
+                colorScheme="green"
+                borderRadius="full"
+                bg="whiteAlpha.300"
+              />
               {isGrowthDataLoading ? (
                 <Text mt={2} fontSize="xs" color="whiteAlpha.700">
                   Loading growth data from PokeAPI...
@@ -490,6 +688,26 @@ export default function App() {
                 </Text>
               ) : null}
             </Box>
+
+            {nextEvolution ? (
+              <Box mt={5}>
+                <Text fontSize="sm" color="whiteAlpha.800">
+                  Next evolution: {nextEvolution.label}
+                  {typeof nextEvolution.minLevel === "number"
+                    ? ` at level ${nextEvolution.minLevel}`
+                    : " (special condition)"}
+                </Text>
+                <Button
+                  mt={3}
+                  size="sm"
+                  colorScheme="orange"
+                  onClick={handleEvolve}
+                  isDisabled={!canEvolveByLevel}
+                >
+                  Evolve
+                </Button>
+              </Box>
+            ) : null}
 
             <SimpleGrid columns={3} spacing={3} mt={8}>
               <StatCard label="XP / Task" value={XP_PER_TASK} />
@@ -525,7 +743,12 @@ function StatCard({ label, value }) {
       border="1px solid"
       borderColor="whiteAlpha.200"
     >
-      <Text fontSize="xs" textTransform="uppercase" letterSpacing="wide" color="whiteAlpha.700">
+      <Text
+        fontSize="xs"
+        textTransform="uppercase"
+        letterSpacing="wide"
+        color="whiteAlpha.700"
+      >
         {label}
       </Text>
       <Text mt={1} fontWeight="bold" fontSize="lg">
