@@ -1,37 +1,44 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Container, SimpleGrid } from "@chakra-ui/react";
-import CompanionPanel from "@/components/companion-panel";
-import FocusPanel from "@/components/focus-panel";
-import { NavbarComp } from "@/components/navbar";
+import { useMemo, useState } from "react";
 import StarterSelection from "@/components/starter-selection";
-import StudyMoodBanner from "@/components/study-mood-banner";
-import Tasks from "@/components/tasks";
+import StudyDashboard from "@/components/study-dashboard";
+import StudyShell from "@/components/study-shell";
 import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
+import { useSessionState } from "@/hooks/use-session-state";
+import { useStarterSelection } from "@/hooks/use-starter-selection";
 import {
   MAX_LEVEL,
   STARTERS,
   START_LEVEL,
   XP_PER_TASK,
-  createTaskId,
   getPokemonAssets,
 } from "@/lib/pokemon";
 
-const INITIAL_TASKS = [];
-
 export default function App() {
   const [activePokemon, setActivePokemon] = useState(null);
-  const [previewStarter, setPreviewStarter] = useState(STARTERS[0].key);
-  const [playingStarter, setPlayingStarter] = useState("");
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
-  const [pomodorosStarted, setPomodorosStarted] = useState(0);
-  const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
-  const [tasksCompleted, setTasksCompleted] = useState(0);
-  const [availableTaskClaims, setAvailableTaskClaims] = useState(0);
-  const [totalXp, setTotalXp] = useState(0);
-  const [statusMessage, setStatusMessage] = useState("");
-  const audioRef = useRef(null);
+  const {
+    previewStarter,
+    previewStarterData,
+    playingStarter,
+    playStarterCry,
+  } = useStarterSelection(STARTERS);
+
+  const {
+    tasks,
+    pomodorosStarted,
+    pomodorosCompleted,
+    tasksCompleted,
+    availableTaskClaims,
+    totalXp,
+    statusMessage,
+    setWelcomeMessage,
+    updateStatusMessage,
+    handlePomodoroStart,
+    handlePomodoroComplete,
+    handleTaskCreate,
+    handleTaskComplete,
+  } = useSessionState();
 
   const {
     level,
@@ -45,11 +52,6 @@ export default function App() {
     getLevelForEarnedXp,
   } = usePokemonProgress({ activePokemon, totalXp });
 
-  const previewStarterData = useMemo(
-    () =>
-      STARTERS.find((starter) => starter.key === previewStarter) ?? STARTERS[0],
-    [previewStarter],
-  );
   const greetingLabel = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) {
@@ -61,127 +63,21 @@ export default function App() {
     return "Evening Deep Focus";
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const playStarterCry = async (starterChoice) => {
-    setPreviewStarter(starterChoice.key);
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-
-    const cryAudio = new Audio(starterChoice.cry);
-    cryAudio.volume = 0.75;
-    audioRef.current = cryAudio;
-
-    cryAudio.onended = () => {
-      setPlayingStarter((current) =>
-        current === starterChoice.key ? "" : current,
-      );
-    };
-
-    try {
-      await cryAudio.play();
-      setPlayingStarter(starterChoice.key);
-    } catch (error) {
-      setPlayingStarter("");
-      console.error("Could not play starter cry:", error);
-    }
-  };
-
   const beginSession = () => {
     setActivePokemon(previewStarterData);
-    setStatusMessage(
-      `Welcome in. You chose ${previewStarterData.label} at level ${START_LEVEL}. Complete pomodoros and tasks to gain XP.`,
-    );
+    setWelcomeMessage({
+      starterLabel: previewStarterData.label,
+      startLevel: START_LEVEL,
+    });
   };
 
-  const handlePomodoroStart = () => {
-    setPomodorosStarted((prev) => prev + 1);
-  };
-
-  const handlePomodoroComplete = () => {
-    setPomodorosCompleted((prev) => prev + 1);
-    setAvailableTaskClaims((prev) => prev + 1);
-    setStatusMessage("Pomodoro complete. Mark one task done to claim XP.");
-  };
-
-  const handleTaskCreate = (taskName) => {
-    const normalizedTaskName = taskName.trim();
-    if (!normalizedTaskName) {
-      setStatusMessage("Add a task name before creating it.");
-      return false;
-    }
-
-    setTasks((prev) => [
-      ...prev,
-      {
-        id: createTaskId(),
-        name: normalizedTaskName,
-        points: XP_PER_TASK,
-        done: false,
-      },
-    ]);
-
-    if (availableTaskClaims > 0) {
-      setStatusMessage(
-        `Task added: ${normalizedTaskName}. You can complete it now to claim XP.`,
-      );
-    } else {
-      setStatusMessage(
-        `Task added: ${normalizedTaskName}. Complete a pomodoro to unlock completion.`,
-      );
-    }
-
-    return true;
-  };
-
-  const handleTaskComplete = (taskId) => {
-    const taskToComplete = tasks.find(
-      (task) => task.id === taskId && !task.done,
-    );
-    if (!taskToComplete) {
-      return;
-    }
-
-    if (availableTaskClaims <= 0) {
-      setStatusMessage(
-        "Complete a pomodoro first, then claim XP by finishing a task.",
-      );
-      return;
-    }
-
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              done: true,
-            }
-          : task,
-      ),
-    );
-
-    const nextTotalXp = totalXp + XP_PER_TASK;
-    const nextLevelAfterGain = getLevelForEarnedXp(nextTotalXp);
-    const didLevelUp = nextLevelAfterGain > level;
-
-    setAvailableTaskClaims((prev) => prev - 1);
-    setTasksCompleted((prev) => prev + 1);
-    setTotalXp((prev) => prev + XP_PER_TASK);
-    setStatusMessage(
-      didLevelUp
-        ? `${taskToComplete.name} complete. ${activePokemon?.label ?? "Starter"} gained ${XP_PER_TASK} XP and reached level ${nextLevelAfterGain}.`
-        : `${taskToComplete.name} complete. ${activePokemon?.label ?? "Starter"} gained ${XP_PER_TASK} XP.`,
-    );
+  const completeTask = (taskId) => {
+    handleTaskComplete({
+      taskId,
+      activePokemonLabel: activePokemon?.label,
+      currentLevel: level,
+      resolveLevelForEarnedXp: getLevelForEarnedXp,
+    });
   };
 
   const canEvolveByLevel =
@@ -195,14 +91,14 @@ export default function App() {
     }
 
     if (typeof nextEvolution.minLevel !== "number") {
-      setStatusMessage(
+      updateStatusMessage(
         `${activePokemon?.label ?? "Your Pokemon"} cannot evolve by level in this line.`,
       );
       return;
     }
 
     if (level < nextEvolution.minLevel) {
-      setStatusMessage(
+      updateStatusMessage(
         `${activePokemon?.label ?? "Your Pokemon"} evolves at level ${nextEvolution.minLevel}.`,
       );
       return;
@@ -217,96 +113,67 @@ export default function App() {
     };
 
     setActivePokemon(evolvedPokemon);
-    setStatusMessage(
+    updateStatusMessage(
       `${activePokemon?.label ?? "Your Pokemon"} evolved into ${nextEvolution.label}!`,
     );
   };
 
   if (!activePokemon) {
     return (
-      <Box
-        className="study-shell"
-        minH="100vh"
-        bg="study.cream"
-        bgGradient="linear(to-b, #f9f8f4 0%, #f2efe8 44%, #eef4ef 100%)"
-      >
-        <Box className="ambient-orb ambient-orb-one" />
-        <Box className="ambient-orb ambient-orb-two" />
-        <Box className="ambient-noise" />
-        <NavbarComp />
-        <Container maxW="6xl" py={{ base: 8, md: 12 }} position="relative" zIndex={1}>
-          <StarterSelection
-            starters={STARTERS}
-            previewStarterKey={previewStarter}
-            playingStarterKey={playingStarter}
-            onPreviewStarter={playStarterCry}
-            onBeginSession={beginSession}
-            previewStarterLabel={previewStarterData.label}
-          />
-        </Container>
-      </Box>
+      <StudyShell>
+        <StarterSelection
+          starters={STARTERS}
+          previewStarterKey={previewStarter}
+          playingStarterKey={playingStarter}
+          onPreviewStarter={playStarterCry}
+          onBeginSession={beginSession}
+          previewStarterLabel={previewStarterData.label}
+        />
+      </StudyShell>
     );
   }
 
   return (
-    <Box
-      className="study-shell"
-      minH="100vh"
-      bg="study.cream"
-      bgGradient="linear(to-b, #f9f8f4 0%, #f2efe8 44%, #eef4ef 100%)"
-    >
-      <Box className="ambient-orb ambient-orb-one" />
-      <Box className="ambient-orb ambient-orb-two" />
-      <Box className="ambient-noise" />
-      <NavbarComp />
-      <Container maxW="6xl" py={{ base: 8, md: 12 }} position="relative" zIndex={1}>
-        <Box mb={6}>
-          <StudyMoodBanner
-            greetingLabel={greetingLabel}
-            activePokemonLabel={activePokemon.label}
-            currentLevel={level}
-            openTasks={tasks.filter((task) => !task.done).length}
-            availableTaskClaims={availableTaskClaims}
-          />
-        </Box>
-        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6} mb={6}>
-          <FocusPanel
-            statusMessage={statusMessage}
-            onPomodoroStart={handlePomodoroStart}
-            onPomodoroComplete={handlePomodoroComplete}
-          />
-          <CompanionPanel
-            activePokemon={activePokemon}
-            level={level}
-            xpInCurrentLevel={xpInCurrentLevel}
-            xpNeededForNextLevel={xpNeededForNextLevel}
-            xpProgress={xpProgress}
-            nextLevel={nextLevel}
-            maxLevel={MAX_LEVEL}
-            isGrowthDataLoading={isGrowthDataLoading}
-            growthDataError={growthDataError}
-            nextEvolution={nextEvolution}
-            canEvolveByLevel={canEvolveByLevel}
-            onEvolve={handleEvolve}
-            xpPerTask={XP_PER_TASK}
-            availableTaskClaims={availableTaskClaims}
-            totalXp={totalXp}
-          />
-        </SimpleGrid>
-
-        <Tasks
-          tasks={tasks}
-          onAddTask={handleTaskCreate}
-          onCompleteTask={handleTaskComplete}
-          canCompleteTask={availableTaskClaims > 0}
-          stats={{
+    <StudyShell>
+      <StudyDashboard
+        greetingLabel={greetingLabel}
+        activePokemon={activePokemon}
+        level={level}
+        openTasks={tasks.filter((task) => !task.done).length}
+        availableTaskClaims={availableTaskClaims}
+        statusMessage={statusMessage}
+        onPomodoroStart={handlePomodoroStart}
+        onPomodoroComplete={handlePomodoroComplete}
+        companionProps={{
+          activePokemon,
+          level,
+          xpInCurrentLevel,
+          xpNeededForNextLevel,
+          xpProgress,
+          nextLevel,
+          maxLevel: MAX_LEVEL,
+          isGrowthDataLoading,
+          growthDataError,
+          nextEvolution,
+          canEvolveByLevel,
+          onEvolve: handleEvolve,
+          xpPerTask: XP_PER_TASK,
+          availableTaskClaims,
+          totalXp,
+        }}
+        taskBoardProps={{
+          tasks,
+          onAddTask: handleTaskCreate,
+          onCompleteTask: completeTask,
+          canCompleteTask: availableTaskClaims > 0,
+          stats: {
             sessionsStarted: pomodorosStarted,
             sessionsCompleted: pomodorosCompleted,
             tasksCompleted,
             currentLevel: level,
-          }}
-        />
-      </Container>
-    </Box>
+          },
+        }}
+      />
+    </StudyShell>
   );
 }
