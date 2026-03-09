@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Box, Button, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 
-const START_MINUTES = 1;
-const START_SECONDS_TOTAL = START_MINUTES * 60;
+const FOCUS_SECONDS_TOTAL = 10;
+const BREAK_SECONDS_TOTAL = 2;
 
 export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
-  const [secondsLeft, setSecondsLeft] = useState(START_SECONDS_TOTAL);
+  const [mode, setMode] = useState("focus");
+  const [secondsLeft, setSecondsLeft] = useState(FOCUS_SECONDS_TOTAL);
   const [isRunning, setIsRunning] = useState(false);
+  const [canStartBreak, setCanStartBreak] = useState(false);
 
   useEffect(() => {
     if (!isRunning) {
@@ -19,25 +21,33 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
           setIsRunning(false);
-          if (onPomodoroComplete) {
-            onPomodoroComplete();
+          if (mode === "focus") {
+            setCanStartBreak(true);
+            if (onPomodoroComplete) {
+              onPomodoroComplete();
+            }
+            return 0;
           }
-          return 0;
+
+          setMode("focus");
+          setCanStartBreak(false);
+          return FOCUS_SECONDS_TOTAL;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning, onPomodoroComplete]);
+  }, [isRunning, mode, onPomodoroComplete]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
 
+  const totalForMode = mode === "focus" ? FOCUS_SECONDS_TOTAL : BREAK_SECONDS_TOTAL;
   const progress = useMemo(() => {
-    const elapsed = START_SECONDS_TOTAL - secondsLeft;
-    return (elapsed / START_SECONDS_TOTAL) * 100;
-  }, [secondsLeft]);
+    const elapsed = totalForMode - secondsLeft;
+    return (elapsed / totalForMode) * 100;
+  }, [secondsLeft, totalForMode]);
 
   const toggleTimer = () => {
     if (isRunning) {
@@ -45,11 +55,15 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
       return;
     }
 
-    if (secondsLeft === 0) {
-      setSecondsLeft(START_SECONDS_TOTAL);
+    if (mode === "focus" && canStartBreak) {
+      setMode("break");
+      setSecondsLeft(BREAK_SECONDS_TOTAL);
+      setCanStartBreak(false);
+      setIsRunning(true);
+      return;
     }
 
-    if (secondsLeft === START_SECONDS_TOTAL || secondsLeft === 0) {
+    if (mode === "focus" && (secondsLeft === FOCUS_SECONDS_TOTAL || secondsLeft === 0)) {
       if (onPomodoroStart) {
         onPomodoroStart();
       }
@@ -60,7 +74,25 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
 
   const resetTimer = () => {
     setIsRunning(false);
-    setSecondsLeft(START_SECONDS_TOTAL);
+    setMode("focus");
+    setCanStartBreak(false);
+    setSecondsLeft(FOCUS_SECONDS_TOTAL);
+  };
+
+  const primaryLabel = () => {
+    if (isRunning) {
+      return mode === "focus" ? "Pause" : "Pause Break";
+    }
+
+    if (mode === "focus" && canStartBreak) {
+      return "Start Break";
+    }
+
+    if (mode === "break") {
+      return "Resume Break";
+    }
+
+    return secondsLeft === FOCUS_SECONDS_TOTAL ? "Start" : "Resume";
   };
 
   return (
@@ -80,7 +112,7 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
           letterSpacing="wide"
           color="whiteAlpha.700"
         >
-          Focus Session
+          {mode === "focus" ? "Focus Session" : "Break Time"}
         </Text>
         <Text
           fontSize={{ base: "5xl", md: "6xl" }}
@@ -104,11 +136,7 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
         />
         <HStack spacing={3} mt={6}>
           <Button colorScheme="orange" onClick={toggleTimer} minW="160px">
-            {isRunning
-              ? "Pause"
-              : secondsLeft === 0
-                ? "Start New Session"
-                : "Start"}
+            {primaryLabel()}
           </Button>
           <Button
             variant="outline"
