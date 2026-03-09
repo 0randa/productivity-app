@@ -8,3 +8,90 @@ body {
   padding: 0;
   min-height: 100%;
 }
+
+body {
+  font-feature-settings: "cv02", "cv03", "cv04";
+}
+
+:root {
+  --study-bg: #f5f3ef;
+  --study-paper: #faf9f7;
+  --study-sage: #6b9b8a;
+  --study-ink: #2d2a26;
+  --study-ink-muted: #6b6560;
+  --study-border: #e8e6e1;
+  --study-shadow: 0 4px 20px rgba(45, 42, 38, 0.08);
+}
+
+.study-shell {
+  position: relative;
+  overflow: clip;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(1px);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.ambient-orb-one {
+  width: 420px;
+  height: 420px;
+  right: -130px;
+  top: 68px;
+  background: radial-gradient(circle at 30% 30%, #fff7d9 0%, #f6dfb2 48%, #efd5a5 100%);
+  animation: driftOne 18s ease-in-out infinite;
+}
+
+.ambient-orb-two {
+  width: 360px;
+  height: 360px;
+  left: -140px;
+  bottom: 30px;
+  background: radial-gradient(circle at 70% 40%, #d8eee2 0%, #b4dac8 52%, #9cc8b4 100%);
+  animation: driftTwo 21s ease-in-out infinite;
+}
+
+.ambient-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.45) 0 1px, transparent 1px),
+    radial-gradient(circle at 78% 74%, rgba(255, 255, 255, 0.4) 0 1px, transparent 1px);
+  background-size: 190px 190px, 230px 230px;
+  opacity: 0.42;
+}
+
+@keyframes driftOne {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(20px) translateX(-18px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes driftTwo {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-16px) translateX(22px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orb-one,
+  .ambient-orb-two {
+    animation: none;
+  }
+}

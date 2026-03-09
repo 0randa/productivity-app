@@ -43,33 +43,34 @@ export default function LoginPage() {
   };
 
   return (
-    <Box minH="100vh" bgGradient="linear(to-b, #0f172a, #172554 35%, #111827)">
+    <Box minH="100vh" bg="study.cream" bgGradient="linear(to-b, #f5f3ef 0%, #faf9f7 50%, #ebe8e2 100%)">
       <NavbarComp />
       <Container maxW="md" py={10}>
         <Box
           p={8}
-          borderRadius="2xl"
-          bg="rgba(15, 23, 42, 0.72)"
+          borderRadius="card"
+          bg="study.paper"
           border="1px solid"
-          borderColor="whiteAlpha.200"
+          borderColor="study.border"
+          boxShadow="card"
         >
-          <Heading size="lg">Welcome back</Heading>
-          <Text color="whiteAlpha.700" mt={2} mb={6}>
+          <Heading size="lg" color="study.ink">Welcome back</Heading>
+          <Text color="study.inkMuted" mt={2} mb={6}>
             Continue your focus streak.
           </Text>
 
           <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
             <FormControl isRequired>
-              <FormLabel>Email</FormLabel>
+              <FormLabel color="study.ink">Email</FormLabel>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel>Password</FormLabel>
+              <FormLabel color="study.ink">Password</FormLabel>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </FormControl>
 
-            <Button type="submit" colorScheme="orange" size="lg" mt={2}>
+            <Button type="submit" colorScheme="brand" size="lg" mt={2}>
               Login
             </Button>
 

@@ -6,6 +6,7 @@ import CompanionPanel from "@/components/companion-panel";
 import FocusPanel from "@/components/focus-panel";
 import { NavbarComp } from "@/components/navbar";
 import StarterSelection from "@/components/starter-selection";
+import StudyMoodBanner from "@/components/study-mood-banner";
 import Tasks from "@/components/tasks";
 import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
 import {
@@ -49,6 +50,16 @@ export default function App() {
       STARTERS.find((starter) => starter.key === previewStarter) ?? STARTERS[0],
     [previewStarter],
   );
+  const greetingLabel = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      return "Morning Momentum";
+    }
+    if (hour < 18) {
+      return "Afternoon Flow";
+    }
+    return "Evening Deep Focus";
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -214,11 +225,16 @@ export default function App() {
   if (!activePokemon) {
     return (
       <Box
+        className="study-shell"
         minH="100vh"
-        bgGradient="linear(to-b, #0f172a, #172554 35%, #111827)"
+        bg="study.cream"
+        bgGradient="linear(to-b, #f9f8f4 0%, #f2efe8 44%, #eef4ef 100%)"
       >
+        <Box className="ambient-orb ambient-orb-one" />
+        <Box className="ambient-orb ambient-orb-two" />
+        <Box className="ambient-noise" />
         <NavbarComp />
-        <Container maxW="6xl" py={{ base: 8, md: 12 }}>
+        <Container maxW="6xl" py={{ base: 8, md: 12 }} position="relative" zIndex={1}>
           <StarterSelection
             starters={STARTERS}
             previewStarterKey={previewStarter}
@@ -233,9 +249,26 @@ export default function App() {
   }
 
   return (
-    <Box minH="100vh" bgGradient="linear(to-b, #0f172a, #172554 35%, #111827)">
+    <Box
+      className="study-shell"
+      minH="100vh"
+      bg="study.cream"
+      bgGradient="linear(to-b, #f9f8f4 0%, #f2efe8 44%, #eef4ef 100%)"
+    >
+      <Box className="ambient-orb ambient-orb-one" />
+      <Box className="ambient-orb ambient-orb-two" />
+      <Box className="ambient-noise" />
       <NavbarComp />
-      <Container maxW="6xl" py={{ base: 8, md: 12 }}>
+      <Container maxW="6xl" py={{ base: 8, md: 12 }} position="relative" zIndex={1}>
+        <Box mb={6}>
+          <StudyMoodBanner
+            greetingLabel={greetingLabel}
+            activePokemonLabel={activePokemon.label}
+            currentLevel={level}
+            openTasks={tasks.filter((task) => !task.done).length}
+            availableTaskClaims={availableTaskClaims}
+          />
+        </Box>
         <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6} mb={6}>
           <FocusPanel
             statusMessage={statusMessage}

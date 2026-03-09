@@ -1,15 +1,17 @@
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Nunito, DM_Sans } from "next/font/google";
 import Providers from "@/components/providers";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata = {
@@ -20,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${spaceGrotesk.variable}`}>
+      <body className={`${nunito.variable} ${dmSans.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

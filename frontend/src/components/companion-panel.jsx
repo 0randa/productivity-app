@@ -29,19 +29,21 @@ export default function CompanionPanel({
   return (
     <Box
       p={7}
-      borderRadius="2xl"
-      bg="rgba(30, 41, 59, 0.72)"
+      borderRadius="card"
+      bg="rgba(250, 249, 247, 0.85)"
       border="1px solid"
-      borderColor="whiteAlpha.200"
+      borderColor="study.border"
+      boxShadow="cardHover"
+      backdropFilter="blur(4px)"
     >
       <Flex align="center" gap={4}>
         <Box
           w="92px"
           h="92px"
           borderRadius="xl"
-          bg="whiteAlpha.200"
+          bg="linear-gradient(160deg, #ffffff 0%, #f3f7f4 100%)"
           border="1px solid"
-          borderColor="whiteAlpha.300"
+          borderColor="study.border"
           p={2}
         >
           <Image
@@ -53,39 +55,42 @@ export default function CompanionPanel({
           />
         </Box>
         <Box>
-          <Heading size="lg">{activePokemon.label}</Heading>
-          <Text color="whiteAlpha.800">Level {level} Focus Companion</Text>
+          <Heading size="lg" color="study.ink">{activePokemon.label}</Heading>
+          <Text color="study.inkMuted">Level {level} Focus Companion</Text>
+          <Text mt={1} fontSize="sm" color="study.inkMuted">
+            Every completed quest helps your companion grow.
+          </Text>
         </Box>
       </Flex>
 
       <Box mt={8}>
-        <Text fontWeight="semibold">Experience</Text>
-        <Text color="whiteAlpha.700" fontSize="sm" mb={2}>
+        <Text fontWeight="semibold" color="study.ink">Experience</Text>
+        <Text color="study.inkMuted" fontSize="sm" mb={2}>
           {level >= maxLevel
             ? "Max level reached"
             : `${xpInCurrentLevel} / ${xpNeededForNextLevel} XP toward level ${nextLevel}`}
         </Text>
         <Progress
           value={xpProgress}
-          colorScheme="green"
+          colorScheme="brand"
           borderRadius="full"
-          bg="whiteAlpha.300"
+          bg="study.border"
         />
         {isGrowthDataLoading ? (
-          <Text mt={2} fontSize="xs" color="whiteAlpha.700">
+          <Text mt={2} fontSize="xs" color="study.inkMuted">
             Loading growth data from PokeAPI...
           </Text>
         ) : null}
         {growthDataError ? (
-          <Text mt={2} fontSize="xs" color="yellow.200">
+          <Text mt={2} fontSize="xs" color="red.500">
             {growthDataError}
           </Text>
         ) : null}
       </Box>
 
       {nextEvolution ? (
-        <Box mt={5}>
-          <Text fontSize="sm" color="whiteAlpha.800">
+        <Box mt={5} p={3.5} borderRadius="lg" bg="whiteAlpha.750" border="1px solid" borderColor="study.border">
+          <Text fontSize="sm" color="study.inkMuted">
             Next evolution: {nextEvolution.label}
             {typeof nextEvolution.minLevel === "number"
               ? ` at level ${nextEvolution.minLevel}`
@@ -94,7 +99,7 @@ export default function CompanionPanel({
           <Button
             mt={3}
             size="sm"
-            colorScheme="orange"
+            colorScheme="brand"
             onClick={onEvolve}
             isDisabled={!canEvolveByLevel}
           >
@@ -117,19 +122,19 @@ function CompanionStatCard({ label, value }) {
     <Box
       p={3}
       borderRadius="lg"
-      bg="rgba(15, 23, 42, 0.7)"
+      bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)"
       border="1px solid"
-      borderColor="whiteAlpha.200"
+      borderColor="study.border"
     >
       <Text
         fontSize="xs"
         textTransform="uppercase"
         letterSpacing="wide"
-        color="whiteAlpha.700"
+        color="study.inkMuted"
       >
         {label}
       </Text>
-      <Text mt={1} fontWeight="bold" fontSize="lg">
+      <Text mt={1} fontWeight="bold" fontSize="lg" color="study.ink">
         {value}
       </Text>
     </Box>

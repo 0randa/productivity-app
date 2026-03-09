@@ -1,4 +1,4 @@
-import { Badge, Box, Heading, Text } from "@chakra-ui/react";
+import { Badge, Box, Heading, HStack, Text } from "@chakra-ui/react";
 import TimerComp from "@/components/timer";
 
 export default function FocusPanel({
@@ -9,20 +9,27 @@ export default function FocusPanel({
   return (
     <Box
       p={7}
-      borderRadius="2xl"
-      bg="rgba(15, 23, 42, 0.65)"
+      borderRadius="card"
+      bg="rgba(250, 249, 247, 0.85)"
       border="1px solid"
-      borderColor="whiteAlpha.200"
+      borderColor="study.border"
+      boxShadow="cardHover"
+      backdropFilter="blur(4px)"
     >
-      <Badge colorScheme="orange" borderRadius="full" px={3} py={1}>
-        Pomodoro RPG
+      <Badge colorScheme="brand" borderRadius="full" px={3} py={1}>
+        Focus Ritual
       </Badge>
-      <Heading mt={4} size="2xl" lineHeight="1.1">
-        Build momentum one focused sprint at a time.
+      <Heading mt={4} size="2xl" lineHeight="1.1" color="study.ink">
+        Protect one calm block of attention.
       </Heading>
-      <Text mt={4} color="whiteAlpha.800" maxW="lg">
-        Complete a pomodoro, then complete a task to claim XP for your companion.
+      <Text mt={4} color="study.inkMuted" maxW="lg">
+        Start small, stay present, and let your streak pull you into deeper work.
       </Text>
+      <HStack mt={4} spacing={2} flexWrap="wrap">
+        <MiniTag label="Breathe In" />
+        <MiniTag label="Single Task" />
+        <MiniTag label="Finish Strong" />
+      </HStack>
       <Box mt={8}>
         <TimerComp
           onPomodoroStart={onPomodoroStart}
@@ -30,10 +37,29 @@ export default function FocusPanel({
         />
       </Box>
       {statusMessage ? (
-        <Text mt={4} fontSize="sm" color="orange.200">
-          {statusMessage}
-        </Text>
+        <Box mt={4} p={3} borderRadius="lg" bg="whiteAlpha.700" border="1px solid" borderColor="study.border">
+          <Text fontSize="sm" color="brand.700">
+            {statusMessage}
+          </Text>
+        </Box>
       ) : null}
+    </Box>
+  );
+}
+
+function MiniTag({ label }) {
+  return (
+    <Box
+      px={2.5}
+      py={1}
+      borderRadius="full"
+      bg="whiteAlpha.800"
+      border="1px solid"
+      borderColor="study.border"
+    >
+      <Text fontSize="xs" color="study.inkMuted" fontWeight="semibold">
+        {label}
+      </Text>
     </Box>
   );
 }

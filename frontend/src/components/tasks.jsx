@@ -34,16 +34,18 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
       <Box
         flex="2"
         p={6}
-        borderRadius="2xl"
-        bg="rgba(30, 41, 59, 0.72)"
+        borderRadius="card"
+        bg="rgba(250, 249, 247, 0.85)"
         border="1px solid"
-        borderColor="whiteAlpha.200"
+        borderColor="study.border"
+        boxShadow="cardHover"
+        backdropFilter="blur(4px)"
       >
-        <Heading size="md" mb={2}>
-          Active Tasks
+        <Heading size="md" mb={2} color="study.ink">
+          Quest Board
         </Heading>
-        <Text fontSize="sm" color="whiteAlpha.700" mb={4}>
-          Finish one pomodoro, then complete one task to claim XP.
+        <Text fontSize="sm" color="study.inkMuted" mb={4}>
+          Capture your study targets, then convert each focus sprint into real momentum.
         </Text>
 
         <Box as="form" onSubmit={handleAddTask} mb={4}>
@@ -51,12 +53,9 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
             <Input
               value={taskDraft}
               onChange={(event) => setTaskDraft(event.target.value)}
-              placeholder="Add a new task"
-              bg="rgba(15, 23, 42, 0.75)"
-              borderColor="whiteAlpha.300"
-              _placeholder={{ color: "whiteAlpha.500" }}
+              placeholder="What do you want to finish next?"
             />
-            <Button type="submit" colorScheme="orange">
+            <Button type="submit" colorScheme="brand">
               Add Task
             </Button>
           </HStack>
@@ -66,12 +65,12 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
           <Box
             p={5}
             borderRadius="lg"
-            bg="rgba(15, 23, 42, 0.7)"
+            bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)"
             border="1px solid"
-            borderColor="whiteAlpha.200"
+            borderColor="study.border"
           >
-            <Text fontWeight="semibold">No active tasks yet.</Text>
-            <Text fontSize="sm" color="whiteAlpha.700" mt={1}>
+            <Text fontWeight="semibold" color="study.ink">No active tasks yet.</Text>
+            <Text fontSize="sm" color="study.inkMuted" mt={1}>
               Add your first task above, then complete a pomodoro to unlock task completion.
             </Text>
           </Box>
@@ -83,21 +82,23 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
               key={task.id}
               p={3}
               borderRadius="lg"
-              bg="rgba(15, 23, 42, 0.7)"
+              bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)"
               border="1px solid"
-              borderColor="whiteAlpha.200"
+              borderColor="study.border"
+              transition="all 0.18s ease"
+              _hover={{ transform: "translateY(-1px)", boxShadow: "soft" }}
             >
               <HStack justify="space-between" align="center" spacing={4}>
                 <VStack spacing={1} align="start">
-                  <Text fontWeight="semibold">{task.name}</Text>
-                  <Text fontSize="sm" color="whiteAlpha.700">
+                  <Text fontWeight="semibold" color="study.ink">{task.name}</Text>
+                  <Text fontSize="sm" color="study.inkMuted">
                     +{task.points} XP when complete
                   </Text>
                 </VStack>
 
                 <HStack spacing={2}>
                   <Badge
-                    colorScheme={task.done ? "green" : "blue"}
+                    colorScheme={task.done ? "green" : "brand"}
                     borderRadius="full"
                     px={2.5}
                     py={1}
@@ -106,7 +107,7 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
                   </Badge>
                   <Button
                     size="sm"
-                    colorScheme="orange"
+                    colorScheme="brand"
                     variant={task.done ? "outline" : "solid"}
                     onClick={() => onCompleteTask(task.id)}
                     isDisabled={task.done || !canCompleteTask}
@@ -123,30 +124,32 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
       <Box
         flex="1"
         p={6}
-        borderRadius="2xl"
-        bg="rgba(30, 41, 59, 0.72)"
+        borderRadius="card"
+        bg="rgba(250, 249, 247, 0.85)"
         border="1px solid"
-        borderColor="whiteAlpha.200"
+        borderColor="study.border"
+        boxShadow="cardHover"
+        backdropFilter="blur(4px)"
       >
-        <Heading size="md" mb={4}>
-          Session Stats
+        <Heading size="md" mb={4} color="study.ink">
+          Momentum Stats
         </Heading>
         <VStack align="stretch" spacing={3}>
-          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
-            <StatLabel color="whiteAlpha.700">Pomodoros Started</StatLabel>
-            <StatNumber>{stats.sessionsStarted}</StatNumber>
+          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
+            <StatLabel color="study.inkMuted">Pomodoros Started</StatLabel>
+            <StatNumber color="study.ink">{stats.sessionsStarted}</StatNumber>
           </Stat>
-          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
-            <StatLabel color="whiteAlpha.700">Pomodoros Completed</StatLabel>
-            <StatNumber>{stats.sessionsCompleted}</StatNumber>
+          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
+            <StatLabel color="study.inkMuted">Pomodoros Completed</StatLabel>
+            <StatNumber color="study.ink">{stats.sessionsCompleted}</StatNumber>
           </Stat>
-          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
-            <StatLabel color="whiteAlpha.700">Tasks Completed</StatLabel>
-            <StatNumber>{stats.tasksCompleted}</StatNumber>
+          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
+            <StatLabel color="study.inkMuted">Tasks Completed</StatLabel>
+            <StatNumber color="study.ink">{stats.tasksCompleted}</StatNumber>
           </Stat>
-          <Stat p={3} borderRadius="lg" bg="rgba(15, 23, 42, 0.7)" border="1px solid" borderColor="whiteAlpha.200">
-            <StatLabel color="whiteAlpha.700">Current Level</StatLabel>
-            <StatNumber>{stats.currentLevel}</StatNumber>
+          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
+            <StatLabel color="study.inkMuted">Current Level</StatLabel>
+            <StatNumber color="study.ink">{stats.currentLevel}</StatNumber>
           </Stat>
         </VStack>
       </Box>

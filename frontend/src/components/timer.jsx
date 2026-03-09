@@ -95,39 +95,50 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
     return secondsLeft === FOCUS_SECONDS_TOTAL ? "Start" : "Resume";
   };
 
+  const modeDescription =
+    mode === "focus"
+      ? "Your focus sprint is active. Keep your attention on one clear target."
+      : "Quick reset. Stand up, breathe, and return ready.";
+
   return (
     <VStack spacing={6} align="stretch">
       <Box
         px={6}
         py={8}
-        borderRadius="2xl"
-        bg="rgba(15, 23, 42, 0.65)"
+        borderRadius="card"
+        bg="linear-gradient(165deg, rgba(255,255,255,0.96) 0%, rgba(245,248,244,0.9) 100%)"
         border="1px solid"
-        borderColor="whiteAlpha.200"
-        boxShadow="0 12px 34px rgba(15, 23, 42, 0.45)"
+        borderColor="study.border"
+        boxShadow={isRunning ? "cardHover" : "card"}
+        transform={isRunning ? "translateY(-1px)" : "none"}
+        transition="all 0.2s ease"
       >
         <Text
           fontSize="sm"
           textTransform="uppercase"
           letterSpacing="wide"
-          color="whiteAlpha.700"
+          color="study.inkMuted"
         >
           {mode === "focus" ? "Focus Session" : "Break Time"}
+        </Text>
+        <Text mt={1} fontSize="sm" color="study.inkMuted">
+          {modeDescription}
         </Text>
         <Text
           fontSize={{ base: "5xl", md: "6xl" }}
           fontWeight="bold"
           lineHeight="1"
           mt={2}
+          color="study.ink"
         >
           {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
         </Text>
         <Progress
           value={progress}
           mt={5}
-          colorScheme="orange"
+          colorScheme="brand"
           borderRadius="full"
-          bg="whiteAlpha.200"
+          bg="study.border"
           sx={{
             ".chakra-progress__filled-track": {
               transition: "width 0.6s ease",
@@ -135,14 +146,14 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
           }}
         />
         <HStack spacing={3} mt={6}>
-          <Button colorScheme="orange" onClick={toggleTimer} minW="160px">
+          <Button colorScheme="brand" onClick={toggleTimer} minW="160px">
             {primaryLabel()}
           </Button>
           <Button
             variant="outline"
-            color="whiteAlpha.900"
-            borderColor="whiteAlpha.400"
-            _hover={{ bg: "whiteAlpha.200" }}
+            borderColor="study.border"
+            color="study.ink"
+            _hover={{ bg: "blackAlpha.50" }}
             onClick={resetTimer}
           >
             Reset
