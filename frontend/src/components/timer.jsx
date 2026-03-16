@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { playVictorySound, stopVictorySound } from "@/lib/victory-sound";
+import { playVictorySound, stopVictorySound, playBreakMusic, stopBreakMusic, stopAllAudio, playHealSound } from "@/lib/victory-sound";
 
 // ─── TEST MODE ────────────────────────────────────────────────────────────────
 // Set to true for quick iteration; overrides the settings-panel values.
@@ -16,6 +16,7 @@ export default function TimerComp({
   longBreakMinutes = 15,
   onPomodoroStart,
   onPomodoroComplete,
+  onPomodoroSkip,
 }) {
   const focusSecs      = TESTING ? TEST_FOCUS_SECS : focusMinutes * 60;
   const shortBreakSecs = TESTING ? TEST_BREAK_SECS : shortBreakMinutes * 60;
@@ -73,6 +74,8 @@ export default function TimerComp({
       setCanStartBreak(true);
       onPomodoroComplete?.();
     } else {
+      stopBreakMusic();
+      playHealSound();
       if (mode === "longBreak") setPomodoroCount(0);
       setMode("focus");
       setCanStartBreak(false);
@@ -96,10 +99,12 @@ export default function TimerComp({
 
   const startBreak = (type) => {
     stopVictorySound();
-    setMode(type === "long" ? "longBreak" : "shortBreak");
+    const breakMode = type === "long" ? "longBreak" : "shortBreak";
+    setMode(breakMode);
     setSecondsLeft(type === "long" ? longBreakSecs : shortBreakSecs);
     setCanStartBreak(false);
     completionFired.current = false;
+    playBreakMusic(breakMode);
     setIsRunning(true);
   };
 
@@ -121,8 +126,32 @@ export default function TimerComp({
     setIsRunning(true);
   };
 
+  const skipTimer = () => {
+    stopAllAudio();
+    setIsRunning(false);
+    completionFired.current = true;
+
+    if (mode === "focus") {
+      // Proportional XP: how much of the session was completed (0–1)
+      const elapsed = focusSecs - secondsLeft;
+      const ratio = focusSecs > 0 ? elapsed / focusSecs : 0;
+
+      setPomodoroCount((c) => c + 1);
+      setCanStartBreak(true);
+      setSecondsLeft(0);
+      onPomodoroSkip?.(ratio);
+    } else {
+      // Skipping a break — no penalty, just return to focus
+      playHealSound();
+      if (mode === "longBreak") setPomodoroCount(0);
+      setMode("focus");
+      setCanStartBreak(false);
+      setSecondsLeft(focusSecs);
+    }
+  };
+
   const resetTimer = () => {
-    stopVictorySound();
+    stopAllAudio();
     setIsRunning(false);
     setMode("focus");
     setCanStartBreak(false);
@@ -192,6 +221,11 @@ export default function TimerComp({
         >
           {primaryLabel()}
         </button>
+        {(isRunning || mode !== "focus") && (
+          <button className="pokemon-btn pokemon-btn-blue" onClick={skipTimer}>
+            Skip ▸▸
+          </button>
+        )}
         <button className="pokemon-btn" onClick={resetTimer}>
           Reset
         </button>
