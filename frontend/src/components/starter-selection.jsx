@@ -1,14 +1,3 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Heading,
-  Image,
-  SimpleGrid,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-
 export default function StarterSelection({
   starters,
   previewStarterKey,
@@ -18,73 +7,44 @@ export default function StarterSelection({
   previewStarterLabel,
 }) {
   return (
-    <Box
-      p={{ base: 6, md: 8 }}
-      borderRadius="card"
-      bg="rgba(250, 249, 247, 0.88)"
-      border="1px solid"
-      borderColor="study.border"
-      boxShadow="cardHover"
-      backdropFilter="blur(4px)"
-    >
-      <Badge colorScheme="brand" borderRadius="full" px={3} py={1}>
-        First Session Setup
-      </Badge>
-      <Heading mt={4} size="xl" color="study.ink">
-        Choose your starter Pokémon
-      </Heading>
-      <Text color="study.inkMuted" mt={2} mb={6}>
+    <div className="pokemon-window">
+      <span className="pokemon-badge pokemon-badge-blue">First Session Setup</span>
+      <h2 className="pixel-heading-lg mt-4">Choose your starter!</h2>
+      <p className="pixel-text mt-3 text-muted">
         This choice is session-only for now. Refreshing the page will reset progress.
-      </Text>
+      </p>
 
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+      <div className="starters-grid mt-6">
         {starters.map((starter) => {
           const isSelected = starter.key === previewStarterKey;
           const isPlaying = starter.key === playingStarterKey;
 
           return (
-            <Box
+            <button
               key={starter.key}
-              as="button"
               type="button"
               onClick={() => onPreviewStarter(starter)}
-              textAlign="left"
-              borderRadius="xl"
-              p={4}
-              border="2px solid"
-              borderColor={isSelected ? "brand.400" : "study.border"}
-              bg={isSelected ? "brand.50" : "white"}
-              color={isSelected ? "brand.800" : "study.ink"}
-              transition="all 0.2s ease"
-              transform={isSelected ? "translateY(-2px)" : "none"}
-              boxShadow={isSelected ? "cardHover" : "soft"}
-              _hover={{ transform: "translateY(-2px)", borderColor: "brand.300" }}
+              className={`starter-card ${isSelected ? "starter-card-selected" : ""}`}
             >
-              <VStack align="start" spacing={2}>
-                <Box
-                  w="full"
-                  h="100px"
-                  borderRadius="lg"
-                  bg={isSelected ? "brand.100" : "study.border"}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Image src={starter.sprite} alt={starter.label} maxH="92px" objectFit="contain" />
-                </Box>
-                <Text fontWeight="bold">{starter.label}</Text>
-                <Text fontSize="xs" color="study.inkMuted">
-                  {isPlaying ? "Playing cry..." : "Click to hear cry"}
-                </Text>
-              </VStack>
-            </Box>
+              <div className="starter-sprite-box">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={starter.sprite} alt={starter.label} />
+              </div>
+              <p className="pixel-heading-sm mt-2">{starter.label}</p>
+              <p className="pixel-text-sm mt-1 text-muted">
+                {isPlaying ? "Playing cry..." : "Click to hear cry"}
+              </p>
+            </button>
           );
         })}
-      </SimpleGrid>
+      </div>
 
-      <Button mt={6} colorScheme="brand" size="lg" onClick={onBeginSession}>
-        Start with {previewStarterLabel}
-      </Button>
-    </Box>
+      <button
+        className="pokemon-btn pokemon-btn-red pokemon-btn-lg mt-6"
+        onClick={onBeginSession}
+      >
+        Start with {previewStarterLabel}!
+      </button>
+    </div>
   );
 }

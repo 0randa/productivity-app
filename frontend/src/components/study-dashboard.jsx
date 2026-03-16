@@ -1,4 +1,3 @@
-import { Box, SimpleGrid } from "@chakra-ui/react";
 import CompanionPanel from "@/components/companion-panel";
 import FocusPanel from "@/components/focus-panel";
 import StudyMoodBanner from "@/components/study-mood-banner";
@@ -18,24 +17,22 @@ export default function StudyDashboard({
 }) {
   return (
     <>
-      <Box mb={6}>
-        <StudyMoodBanner
-          greetingLabel={greetingLabel}
-          activePokemonLabel={activePokemon.label}
-          currentLevel={level}
-          openTasks={openTasks}
-          availableTaskClaims={availableTaskClaims}
-        />
-      </Box>
+      <StudyMoodBanner
+        greetingLabel={greetingLabel}
+        activePokemonLabel={activePokemon.label}
+        currentLevel={level}
+        openTasks={openTasks}
+        availableTaskClaims={availableTaskClaims}
+      />
 
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6} mb={6}>
+      <div className="grid-2 mb-6">
         <FocusPanel
           statusMessage={statusMessage}
           onPomodoroStart={onPomodoroStart}
           onPomodoroComplete={onPomodoroComplete}
         />
         <CompanionPanel {...companionProps} />
-      </SimpleGrid>
+      </div>
 
       <Tasks {...taskBoardProps} />
     </>

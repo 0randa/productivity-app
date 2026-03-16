@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 
 const FOCUS_SECONDS_TOTAL = 10;
 const BREAK_SECONDS_TOTAL = 2;
@@ -97,69 +96,33 @@ export default function TimerComp({ onPomodoroStart, onPomodoroComplete }) {
 
   const modeDescription =
     mode === "focus"
-      ? "Your focus sprint is active. Keep your attention on one clear target."
-      : "Quick reset. Stand up, breathe, and return ready.";
+      ? "Battle in progress! Keep your focus on the target."
+      : "Potion time! Rest up and come back stronger.";
 
   return (
-    <VStack spacing={6} align="stretch">
-      <Box
-        px={6}
-        py={8}
-        borderRadius="card"
-        bg="linear-gradient(165deg, rgba(255,255,255,0.96) 0%, rgba(245,248,244,0.9) 100%)"
-        border="1px solid"
-        borderColor="study.border"
-        boxShadow={isRunning ? "cardHover" : "card"}
-        transform={isRunning ? "translateY(-1px)" : "none"}
-        transition="all 0.2s ease"
-      >
-        <Text
-          fontSize="sm"
-          textTransform="uppercase"
-          letterSpacing="wide"
-          color="study.inkMuted"
+    <div className={`pokemon-window-inner ${isRunning ? "timer-active" : ""}`}>
+      <p className="pixel-heading-sm" style={{ textTransform: "uppercase", letterSpacing: "2px" }}>
+        {mode === "focus" ? "Focus Battle" : "Potion Break"}
+      </p>
+      <p className="pixel-text-sm mt-2 text-muted">{modeDescription}</p>
+      <p className="timer-display mt-4">
+        {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+      </p>
+      <div className={`pokemon-bar-container ${mode === "focus" ? "pokemon-bar-hp" : "pokemon-bar-xp"} mt-4`}>
+        <div className="pokemon-bar-fill" style={{ width: `${progress}%` }} />
+      </div>
+      <div className="flex gap-3 mt-4">
+        <button
+          className="pokemon-btn pokemon-btn-red"
+          onClick={toggleTimer}
+          style={{ minWidth: "160px" }}
         >
-          {mode === "focus" ? "Focus Session" : "Break Time"}
-        </Text>
-        <Text mt={1} fontSize="sm" color="study.inkMuted">
-          {modeDescription}
-        </Text>
-        <Text
-          fontSize={{ base: "5xl", md: "6xl" }}
-          fontWeight="bold"
-          lineHeight="1"
-          mt={2}
-          color="study.ink"
-        >
-          {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
-        </Text>
-        <Progress
-          value={progress}
-          mt={5}
-          colorScheme="brand"
-          borderRadius="full"
-          bg="study.border"
-          sx={{
-            ".chakra-progress__filled-track": {
-              transition: "width 0.6s ease",
-            },
-          }}
-        />
-        <HStack spacing={3} mt={6}>
-          <Button colorScheme="brand" onClick={toggleTimer} minW="160px">
-            {primaryLabel()}
-          </Button>
-          <Button
-            variant="outline"
-            borderColor="study.border"
-            color="study.ink"
-            _hover={{ bg: "blackAlpha.50" }}
-            onClick={resetTimer}
-          >
-            Reset
-          </Button>
-        </HStack>
-      </Box>
-    </VStack>
+          {primaryLabel()}
+        </button>
+        <button className="pokemon-btn" onClick={resetTimer}>
+          Reset
+        </button>
+      </div>
+    </div>
   );
 }

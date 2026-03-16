@@ -1,22 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  HStack,
-  Input,
-  List,
-  ListItem,
-  Stat,
-  StatLabel,
-  StatNumber,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
 
 export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTask, stats }) {
   const [taskDraft, setTaskDraft] = useState("");
@@ -30,129 +14,88 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
   };
 
   return (
-    <Flex direction={{ base: "column", lg: "row" }} gap={6}>
-      <Box
-        flex="2"
-        p={6}
-        borderRadius="card"
-        bg="rgba(250, 249, 247, 0.85)"
-        border="1px solid"
-        borderColor="study.border"
-        boxShadow="cardHover"
-        backdropFilter="blur(4px)"
-      >
-        <Heading size="md" mb={2} color="study.ink">
-          Quest Board
-        </Heading>
-        <Text fontSize="sm" color="study.inkMuted" mb={4}>
-          Capture your study targets, then convert each focus sprint into real momentum.
-        </Text>
+    <div className="quest-layout">
+      <div className="quest-board pokemon-window">
+        <h3 className="pixel-heading">Quest Board</h3>
+        <p className="pixel-text mt-2 text-muted">
+          Set your study targets and convert each focus sprint into real XP.
+        </p>
 
-        <Box as="form" onSubmit={handleAddTask} mb={4}>
-          <HStack spacing={3}>
-            <Input
-              value={taskDraft}
-              onChange={(event) => setTaskDraft(event.target.value)}
-              placeholder="What do you want to finish next?"
-            />
-            <Button type="submit" colorScheme="brand">
-              Add Task
-            </Button>
-          </HStack>
-        </Box>
+        <form onSubmit={handleAddTask} className="flex gap-3 mt-4">
+          <input
+            className="pokemon-input"
+            value={taskDraft}
+            onChange={(e) => setTaskDraft(e.target.value)}
+            placeholder="What will you conquer next?"
+          />
+          <button type="submit" className="pokemon-btn pokemon-btn-red">
+            Add
+          </button>
+        </form>
 
-        {tasks.length === 0 ? (
-          <Box
-            p={5}
-            borderRadius="lg"
-            bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)"
-            border="1px solid"
-            borderColor="study.border"
-          >
-            <Text fontWeight="semibold" color="study.ink">No active tasks yet.</Text>
-            <Text fontSize="sm" color="study.inkMuted" mt={1}>
-              Add your first task above, then complete a pomodoro to unlock task completion.
-            </Text>
-          </Box>
-        ) : null}
+        {tasks.length === 0 && (
+          <div className="quest-item mt-4">
+            <p className="pixel-text" style={{ fontWeight: "bold" }}>
+              No active quests yet.
+            </p>
+            <p className="pixel-text-sm mt-1 text-muted">
+              Add your first quest above, then complete a pomodoro to unlock quest completion.
+            </p>
+          </div>
+        )}
 
-        <List spacing={3}>
+        <div className="flex-col gap-3 mt-4">
           {tasks.map((task) => (
-            <ListItem
-              key={task.id}
-              p={3}
-              borderRadius="lg"
-              bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)"
-              border="1px solid"
-              borderColor="study.border"
-              transition="all 0.18s ease"
-              _hover={{ transform: "translateY(-1px)", boxShadow: "soft" }}
-            >
-              <HStack justify="space-between" align="center" spacing={4}>
-                <VStack spacing={1} align="start">
-                  <Text fontWeight="semibold" color="study.ink">{task.name}</Text>
-                  <Text fontSize="sm" color="study.inkMuted">
-                    +{task.points} XP when complete
-                  </Text>
-                </VStack>
-
-                <HStack spacing={2}>
-                  <Badge
-                    colorScheme={task.done ? "green" : "brand"}
-                    borderRadius="full"
-                    px={2.5}
-                    py={1}
-                  >
-                    {task.done ? "Completed" : "Queued"}
-                  </Badge>
-                  <Button
-                    size="sm"
-                    colorScheme="brand"
-                    variant={task.done ? "outline" : "solid"}
+            <div key={task.id} className="quest-item">
+              <div className="flex items-center justify-between" style={{ flexWrap: "wrap", gap: "8px" }}>
+                <div>
+                  <p className="pixel-text" style={{ fontWeight: "bold" }}>
+                    {task.done ? "✓" : "▶"} {task.name}
+                  </p>
+                  <p className="pixel-text-sm text-muted">
+                    +{task.points} XP
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`pokemon-badge ${task.done ? "pokemon-badge-green" : "pokemon-badge-yellow"}`}>
+                    {task.done ? "Done" : "Queued"}
+                  </span>
+                  <button
+                    className={`pokemon-btn ${task.done ? "" : "pokemon-btn-blue"}`}
                     onClick={() => onCompleteTask(task.id)}
-                    isDisabled={task.done || !canCompleteTask}
+                    disabled={task.done || !canCompleteTask}
+                    style={{ fontSize: "8px", padding: "6px 12px" }}
                   >
-                    {task.done ? "Done" : "Complete"}
-                  </Button>
-                </HStack>
-              </HStack>
-            </ListItem>
+                    {task.done ? "Done" : "Clear!"}
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
-        </List>
-      </Box>
+        </div>
+      </div>
 
-      <Box
-        flex="1"
-        p={6}
-        borderRadius="card"
-        bg="rgba(250, 249, 247, 0.85)"
-        border="1px solid"
-        borderColor="study.border"
-        boxShadow="cardHover"
-        backdropFilter="blur(4px)"
-      >
-        <Heading size="md" mb={4} color="study.ink">
-          Momentum Stats
-        </Heading>
-        <VStack align="stretch" spacing={3}>
-          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
-            <StatLabel color="study.inkMuted">Pomodoros Started</StatLabel>
-            <StatNumber color="study.ink">{stats.sessionsStarted}</StatNumber>
-          </Stat>
-          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
-            <StatLabel color="study.inkMuted">Pomodoros Completed</StatLabel>
-            <StatNumber color="study.ink">{stats.sessionsCompleted}</StatNumber>
-          </Stat>
-          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
-            <StatLabel color="study.inkMuted">Tasks Completed</StatLabel>
-            <StatNumber color="study.ink">{stats.tasksCompleted}</StatNumber>
-          </Stat>
-          <Stat p={3} borderRadius="lg" bg="linear-gradient(165deg, #ffffff 0%, #f6f8f5 100%)" border="1px solid" borderColor="study.border">
-            <StatLabel color="study.inkMuted">Current Level</StatLabel>
-            <StatNumber color="study.ink">{stats.currentLevel}</StatNumber>
-          </Stat>
-        </VStack>
-      </Box>
-    </Flex>
+      <div className="quest-stats pokemon-window">
+        <h3 className="pixel-heading">Trainer Stats</h3>
+        <div className="flex-col gap-3 mt-4">
+          <div className="pokemon-stat-card">
+            <p className="pokemon-stat-label">Battles Started</p>
+            <p className="pokemon-stat-value">{stats.sessionsStarted}</p>
+          </div>
+          <div className="pokemon-stat-card">
+            <p className="pokemon-stat-label">Battles Won</p>
+            <p className="pokemon-stat-value">{stats.sessionsCompleted}</p>
+          </div>
+          <div className="pokemon-stat-card">
+            <p className="pokemon-stat-label">Quests Cleared</p>
+            <p className="pokemon-stat-value">{stats.tasksCompleted}</p>
+          </div>
+          <div className="pokemon-stat-card">
+            <p className="pokemon-stat-label">Trainer Level</p>
+            <p className="pokemon-stat-value">{stats.currentLevel}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

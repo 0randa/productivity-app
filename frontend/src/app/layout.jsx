@@ -1,17 +1,17 @@
-import { Nunito, DM_Sans } from "next/font/google";
+import { Press_Start_2P, VT323 } from "next/font/google";
 import Providers from "@/components/providers";
 import "./globals.css";
 
-const nunito = Nunito({
-  variable: "--font-nunito",
+const pressStart2P = Press_Start_2P({
+  variable: "--font-pixel",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const vt323 = VT323({
+  variable: "--font-pixel-body",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400",
 });
 
 export const metadata = {
@@ -22,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${nunito.variable} ${dmSans.variable}`}>
+      <body className={`${pressStart2P.variable} ${vt323.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>
