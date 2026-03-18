@@ -11,7 +11,11 @@ import { useSessionState } from "@/hooks/use-session-state";
 import { useStarterSelection } from "@/hooks/use-starter-selection";
 import { useWildEncounter } from "@/hooks/use-wild-encounter";
 import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
-import { loadUserProgress, saveUserProgress, addCaughtPokemon } from "@/lib/user-progress";
+import {
+  loadUserProgress,
+  saveUserProgress,
+  addCaughtPokemon,
+} from "@/lib/user-progress";
 import {
   MAX_LEVEL,
   MAX_PARTY_SIZE,
@@ -28,12 +32,8 @@ export default function App() {
   const [caughtPokemon, setCaughtPokemon] = useState([]);
   const [progressLoaded, setProgressLoaded] = useState(false);
 
-  const {
-    previewStarter,
-    previewStarterData,
-    playingStarter,
-    playStarterCry,
-  } = useStarterSelection(STARTERS);
+  const { previewStarter, previewStarterData, playingStarter, playStarterCry } =
+    useStarterSelection(STARTERS);
 
   const {
     tasks,
@@ -53,8 +53,13 @@ export default function App() {
     handleTaskComplete,
   } = useSessionState();
 
-  const { wildPokemon, catchResult, triggerEncounterChance, attemptCatch, dismissEncounter } =
-    useWildEncounter({ partySize: caughtPokemon.length });
+  const {
+    wildPokemon,
+    catchResult,
+    triggerEncounterChance,
+    attemptCatch,
+    dismissEncounter,
+  } = useWildEncounter({ partySize: caughtPokemon.length });
 
   // Load progress once auth resolves, resetting state first on every change
   useEffect(() => {
@@ -68,18 +73,26 @@ export default function App() {
     setProgressLoaded(false);
 
     if (user) {
-      loadUserProgress().then(({ activePokemon: ap, totalXp: xp, pomodorosCompleted: pc, caughtPokemon: caught }) => {
-        if (ap) setActivePokemon(ap);
-        setTotalXp(xp);
-        setPomodorosCompleted(pc);
-        setCaughtPokemon(caught ?? []);
-        setProgressLoaded(true);
-      });
+      loadUserProgress().then(
+        ({
+          activePokemon: ap,
+          totalXp: xp,
+          pomodorosCompleted: pc,
+          caughtPokemon: caught,
+        }) => {
+          if (ap) setActivePokemon(ap);
+          setTotalXp(xp);
+          setPomodorosCompleted(pc);
+          setCaughtPokemon(caught ?? []);
+          setProgressLoaded(true);
+        },
+      );
     } else {
       const saved = loadGuestData();
       if (saved?.activePokemon) setActivePokemon(saved.activePokemon);
       if (saved?.totalXp) setTotalXp(saved.totalXp);
-      if (saved?.pomodorosCompleted) setPomodorosCompleted(saved.pomodorosCompleted);
+      if (saved?.pomodorosCompleted)
+        setPomodorosCompleted(saved.pomodorosCompleted);
       setCaughtPokemon(saved?.caughtPokemon ?? []);
       setProgressLoaded(true);
     }
@@ -92,9 +105,21 @@ export default function App() {
     if (user) {
       saveUserProgress({ activePokemon, totalXp, pomodorosCompleted });
     } else {
-      saveGuestData({ activePokemon, totalXp, pomodorosCompleted, caughtPokemon });
+      saveGuestData({
+        activePokemon,
+        totalXp,
+        pomodorosCompleted,
+        caughtPokemon,
+      });
     }
-  }, [activePokemon, totalXp, pomodorosCompleted, caughtPokemon, user, progressLoaded]);
+  }, [
+    activePokemon,
+    totalXp,
+    pomodorosCompleted,
+    caughtPokemon,
+    user,
+    progressLoaded,
+  ]);
 
   const {
     level,
@@ -151,6 +176,7 @@ export default function App() {
 
   const handleSetCaughtActive = () => {
     if (wildPokemon) {
+      
       setActivePokemon(wildPokemon);
     }
     dismissEncounter();
