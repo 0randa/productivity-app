@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import {
   Alert,
   AlertIcon,
@@ -22,23 +23,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-    try {
-      const response = await axios.post("/api/login", {
-        email,
-        password,
-      });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      setIsError(false);
-      setMessage(response.data.msg ?? "Logged in successfully.");
-      setEmail("");
-      setPassword("");
-    } catch (error) {
+    setLoading(false);
+    if (error) {
       setIsError(true);
-      setMessage(error?.response?.data?.msg ?? "Login failed.");
+      setMessage(error.message);
+    } else {
+      router.push("/");
     }
   };
 
@@ -70,16 +70,16 @@ export default function LoginPage() {
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </FormControl>
 
-            <Button type="submit" colorScheme="brand" size="lg" mt={2}>
+            <Button type="submit" colorScheme="brand" size="lg" mt={2} isLoading={loading}>
               Login
             </Button>
 
-            {message ? (
+            {message && (
               <Alert status={isError ? "error" : "success"} borderRadius="lg">
                 <AlertIcon />
                 {message}
               </Alert>
-            ) : null}
+            )}
           </VStack>
         </Box>
       </Container>
