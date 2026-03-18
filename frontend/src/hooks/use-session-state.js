@@ -3,13 +3,13 @@ import { XP_PER_TASK, createTaskId } from "@/lib/pokemon";
 
 const INITIAL_TASKS = [];
 
-export function useSessionState() {
+export function useSessionState({ initialTotalXp = 0, initialPomodorosCompleted = 0 } = {}) {
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [pomodorosStarted, setPomodorosStarted] = useState(0);
-  const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
+  const [pomodorosCompleted, setPomodorosCompleted] = useState(initialPomodorosCompleted);
   const [tasksCompleted, setTasksCompleted] = useState(0);
   const [availableTaskClaims, setAvailableTaskClaims] = useState(0);
-  const [totalXp, setTotalXp] = useState(0);
+  const [totalXp, setTotalXp] = useState(initialTotalXp);
   const [statusMessage, setStatusMessage] = useState("");
 
   const setWelcomeMessage = ({ starterLabel, startLevel }) => {

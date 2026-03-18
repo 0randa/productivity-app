@@ -2,22 +2,53 @@
 
 import { useState } from "react";
 import TimerComp from "@/components/timer";
+import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
 
-const DEFAULT_SETTINGS = { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15 };
+const DEFAULTS = { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15 };
+
+const toStrDraft = (s) => ({
+  focusMinutes:      String(s.focusMinutes),
+  shortBreakMinutes: String(s.shortBreakMinutes),
+  longBreakMinutes:  String(s.longBreakMinutes),
+});
+
+const isValidMinutes = (v) => {
+  const n = parseInt(v, 10);
+  return v !== "" && !isNaN(n) && n >= 1;
+};
 
 export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroComplete }) {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [draft, setDraft] = useState(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(() => {
+    const saved = loadGuestData();
+    return saved?.timerSettings ?? DEFAULTS;
+  });
+  // draft stores raw strings so the user can clear a field and retype freely
+  const [draft, setDraft]       = useState(() => toStrDraft(loadGuestData()?.timerSettings ?? DEFAULTS));
   const [showSettings, setShowSettings] = useState(false);
 
+  const canSave = isValidMinutes(draft.focusMinutes)
+               && isValidMinutes(draft.shortBreakMinutes)
+               && isValidMinutes(draft.longBreakMinutes);
+
   const openSettings = () => {
-    setDraft({ ...settings });
+    setDraft(toStrDraft(settings));
     setShowSettings(true);
   };
 
+  const restoreDefaults = () => setDraft(toStrDraft(DEFAULTS));
+
   const saveSettings = (e) => {
     e.preventDefault();
-    setSettings({ ...draft });
+    if (!canSave) return;
+    const newSettings = {
+      focusMinutes:      parseInt(draft.focusMinutes, 10),
+      shortBreakMinutes: parseInt(draft.shortBreakMinutes, 10),
+      longBreakMinutes:  parseInt(draft.longBreakMinutes, 10),
+    };
+    setSettings(newSettings);
+    // Merge timer settings into existing guest data so other fields aren't overwritten
+    const existing = loadGuestData() ?? {};
+    saveGuestData({ ...existing, timerSettings: newSettings });
     setShowSettings(false);
   };
 
@@ -53,9 +84,14 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
               value={draft.longBreakMinutes}
               onChange={(v) => setDraft((d) => ({ ...d, longBreakMinutes: v }))}
             />
-            <button type="submit" className="pokemon-btn pokemon-btn-red mt-2">
-              Save
-            </button>
+            <div className="flex gap-3 mt-2">
+              <button type="submit" className="pokemon-btn pokemon-btn-red" disabled={!canSave}>
+                Save
+              </button>
+              <button type="button" className="pokemon-btn" onClick={restoreDefaults}>
+                Restore Defaults
+              </button>
+            </div>
           </form>
         </div>
       ) : (
@@ -94,6 +130,7 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
 }
 
 function SettingRow({ label, value, onChange }) {
+  const invalid = !isValidMinutes(value);
   return (
     <div className="flex items-center justify-between gap-3">
       <p className="pixel-text-sm" style={{ minWidth: "100px" }}>{label}</p>
@@ -103,9 +140,13 @@ function SettingRow({ label, value, onChange }) {
           min="1"
           max="120"
           value={value}
-          onChange={(e) => onChange(Math.max(1, Math.min(120, Number(e.target.value))))}
+          onChange={(e) => onChange(e.target.value)}
           className="pokemon-input"
-          style={{ width: "70px", textAlign: "center" }}
+          style={{
+            width: "70px",
+            textAlign: "center",
+            borderColor: invalid ? "var(--poke-red)" : undefined,
+          }}
         />
         <span className="pixel-text-sm text-muted">min</span>
       </div>

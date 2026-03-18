@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import StarterSelection from "@/components/starter-selection";
 import StudyDashboard from "@/components/study-dashboard";
 import StudyShell from "@/components/study-shell";
 import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
 import { useSessionState } from "@/hooks/use-session-state";
 import { useStarterSelection } from "@/hooks/use-starter-selection";
+import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
 import {
   MAX_LEVEL,
   STARTERS,
@@ -16,7 +17,10 @@ import {
 } from "@/lib/pokemon";
 
 export default function App() {
-  const [activePokemon, setActivePokemon] = useState(null);
+  // Lazy-load saved guest data once on mount (client-only)
+  const saved = useMemo(() => loadGuestData(), []);
+
+  const [activePokemon, setActivePokemon] = useState(() => saved?.activePokemon ?? null);
   const {
     previewStarter,
     previewStarterData,
@@ -38,7 +42,15 @@ export default function App() {
     handlePomodoroComplete,
     handleTaskCreate,
     handleTaskComplete,
-  } = useSessionState();
+  } = useSessionState({
+    initialTotalXp: saved?.totalXp ?? 0,
+    initialPomodorosCompleted: saved?.pomodorosCompleted ?? 0,
+  });
+
+  // Persist guest progress to localStorage whenever key values change
+  useEffect(() => {
+    saveGuestData({ activePokemon, totalXp, pomodorosCompleted });
+  }, [activePokemon, totalXp, pomodorosCompleted]);
 
   const {
     level,
