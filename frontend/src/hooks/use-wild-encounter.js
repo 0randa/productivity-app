@@ -5,12 +5,14 @@ import {
   CATCH_RATE,
   MAX_PARTY_SIZE,
   getPokemonAssets,
+  formatPokemonName,
 } from "@/lib/pokemon";
 
 function pickRandomWild() {
   const entry = WILD_POKEMON[Math.floor(Math.random() * WILD_POKEMON.length)];
   return {
     ...entry,
+    label: formatPokemonName(entry.speciesName),
     ...getPokemonAssets(entry.pokemonId),
   };
 }
