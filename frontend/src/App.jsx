@@ -176,7 +176,6 @@ export default function App() {
 
   const handleSetCaughtActive = () => {
     if (wildPokemon) {
-      
       setActivePokemon(wildPokemon);
     }
     dismissEncounter();
