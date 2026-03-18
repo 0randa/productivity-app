@@ -1,3 +1,9 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+
 export default function CompanionPanel({
   activePokemon,
   level,
@@ -16,73 +22,105 @@ export default function CompanionPanel({
   totalXp,
 }) {
   return (
-    <div className="pokemon-window">
-      <div className="flex items-center gap-4">
-        <div className="sprite-frame">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={activePokemon.sprite} alt={activePokemon.label} />
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Companion</CardTitle>
+          <Badge variant="blue">Partner</Badge>
         </div>
-        <div>
-          <h3 className="pixel-heading">{activePokemon.label}</h3>
-          <p className="pixel-text text-muted">Lv.{level} Partner</p>
-          <p className="pixel-text-sm mt-1 text-muted">
-            Every completed quest helps your Pokemon grow!
-          </p>
-        </div>
-      </div>
+      </CardHeader>
 
-      <div className="mt-6">
-        <p className="pixel-heading-sm">EXP Points</p>
-        <p className="pixel-text-sm mt-2 text-muted">
-          {level >= maxLevel
-            ? "MAX LEVEL!"
-            : `${xpInCurrentLevel} / ${xpNeededForNextLevel} XP → Lv.${nextLevel}`}
-        </p>
-        <div className="pokemon-bar-container pokemon-bar-xp mt-2">
-          <div className="pokemon-bar-fill" style={{ width: `${xpProgress}%` }} />
-        </div>
-        {isGrowthDataLoading && (
-          <p className="pixel-text-sm mt-2 text-muted">Loading growth data...</p>
-        )}
-        {growthDataError && (
-          <p className="pixel-text-sm mt-2" style={{ color: "var(--poke-red)" }}>
-            {growthDataError}
-          </p>
-        )}
-      </div>
-
-      {nextEvolution && (
-        <div className="evolution-box mt-4">
-          <p className="pixel-text-sm">
-            Next evolution: <strong>{nextEvolution.label}</strong>
-            {typeof nextEvolution.minLevel === "number"
-              ? ` at Lv.${nextEvolution.minLevel}`
-              : " (special)"}
-          </p>
-          <button
-            className="pokemon-btn pokemon-btn-blue mt-3"
-            onClick={onEvolve}
-            disabled={!canEvolveByLevel}
+      <CardContent className="space-y-5">
+        {/* Sprite + identity */}
+        <div className="flex items-center gap-4">
+          <div
+            className="relative flex-shrink-0 w-28 h-28 border-[3px] border-[var(--window-border)] bg-white shadow-[inset_2px_2px_0_#f0f0f0,inset_-2px_-2px_0_#d0d0d0] flex items-center justify-center p-1"
+            style={{ imageRendering: "pixelated" }}
           >
-            Evolve!
-          </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={activePokemon.sprite}
+              alt={activePokemon.label}
+              className="w-full h-full object-contain"
+              style={{ imageRendering: "pixelated" }}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-pixel text-[13px] leading-relaxed tracking-wide text-[var(--text-dark)] truncate">
+              {activePokemon.label}
+            </h3>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="yellow">Lv.{level}</Badge>
+              {level >= maxLevel && <Badge variant="red">MAX</Badge>}
+            </div>
+            <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-2">
+              Every quest grows your partner!
+            </p>
+          </div>
         </div>
-      )}
 
-      <div className="grid-3 mt-6">
-        <div className="pokemon-stat-card">
-          <p className="pokemon-stat-label">XP / Task</p>
-          <p className="pokemon-stat-value">{xpPerTask}</p>
+        <Separator />
+
+        {/* XP Bar */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-pixel text-[8px] tracking-widest uppercase text-[var(--text-muted)]">EXP Points</span>
+            <span className="font-pixel-body text-[18px] text-[var(--text-muted)]">
+              {level >= maxLevel
+                ? "MAX LEVEL!"
+                : `${xpInCurrentLevel} / ${xpNeededForNextLevel} → Lv.${nextLevel}`}
+            </span>
+          </div>
+          <Progress value={xpProgress} indicatorClassName="bg-[var(--xp-blue)]" />
+          {isGrowthDataLoading && (
+            <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-1">Loading…</p>
+          )}
+          {growthDataError && (
+            <p className="font-pixel-body text-[16px] mt-1" style={{ color: "var(--poke-red)" }}>
+              {growthDataError}
+            </p>
+          )}
         </div>
-        <div className="pokemon-stat-card">
-          <p className="pokemon-stat-label">Claims</p>
-          <p className="pokemon-stat-value">{availableTaskClaims}</p>
+
+        {/* Evolution hint */}
+        {nextEvolution && (
+          <div className="border-[2px] border-[var(--poke-blue)] bg-[rgba(88,160,232,0.08)] p-3 flex items-center justify-between gap-3 flex-wrap">
+            <p className="font-pixel-body text-[18px] text-[var(--text-dark)]">
+              → <strong>{nextEvolution.label}</strong>
+              {typeof nextEvolution.minLevel === "number"
+                ? ` at Lv.${nextEvolution.minLevel}`
+                : " (special)"}
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onEvolve}
+              disabled={!canEvolveByLevel}
+            >
+              Evolve!
+            </Button>
+          </div>
+        )}
+
+        <Separator />
+
+        {/* Stats grid */}
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "XP / Task", value: xpPerTask },
+            { label: "Claims", value: availableTaskClaims },
+            { label: "Total XP", value: totalXp },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="bg-[var(--window-bg)] border-[2px] border-[var(--window-border)] shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)] p-2 text-center"
+            >
+              <p className="font-pixel text-[7px] tracking-widest uppercase text-[var(--text-muted)] mb-1">{label}</p>
+              <p className="font-pixel text-[14px] text-[var(--text-dark)]">{value}</p>
+            </div>
+          ))}
         </div>
-        <div className="pokemon-stat-card">
-          <p className="pokemon-stat-label">Total XP</p>
-          <p className="pokemon-stat-value">{totalXp}</p>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

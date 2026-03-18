@@ -2,21 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Container,
-  FormControl,
-  FormLabel,
-  Heading,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
 import StudyShell from "@/components/study-shell";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -29,102 +22,120 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setIsError(true);
-      setMessage("Passwords do not match.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setIsError(true);
-      setMessage("Password must be at least 6 characters.");
-      return;
-    }
+    if (password !== confirmPassword) { setIsError(true); setMessage("Passwords do not match."); return; }
+    if (password.length < 6) { setIsError(true); setMessage("Password must be at least 6 characters."); return; }
 
     setLoading(true);
     setMessage("");
-
     const { data, error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      setLoading(false);
-      setIsError(true);
-      setMessage(error.message);
-      return;
-    }
+    if (error) { setLoading(false); setIsError(true); setMessage(error.message); return; }
+    if (data.session) { router.push("/"); return; }
 
-    if (data.session) {
-      // signUp returned a session directly — already logged in, go to app
-      router.push("/");
-      return;
-    }
-
-    // No session yet — attempt immediate sign-in.
-    // This works when email confirmation is disabled in Supabase.
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
 
     if (!signInError) {
       router.push("/");
     } else {
-      // Email confirmation is required — ask the user to check their inbox
       setIsError(false);
-      setMessage("Account created! Check your email to confirm your account before logging in.");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
+      setMessage("Account created! Check your email to confirm before logging in.");
+      setEmail(""); setPassword(""); setConfirmPassword("");
     }
   };
 
   return (
     <StudyShell>
-      <Container maxW="md" py={10}>
-        <Box
-          p={8}
-          borderRadius="lg"
-          bg="var(--window-bg)"
-          border="1px solid"
-          borderColor="var(--window-border)"
-        >
-          <Heading size="lg" color="var(--text-dark)">Create your account</Heading>
-          <Text color="var(--text-muted)" mt={2} mb={6}>
-            Join PomoPet to track focused sessions and task progress.
-          </Text>
+      <div className="max-w-md mx-auto">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <CardTitle>Create Account</CardTitle>
+              <Badge variant="red">New Trainer</Badge>
+            </div>
+            <CardDescription>
+              Join PomoPet to track focused sessions and task progress.
+            </CardDescription>
+          </CardHeader>
 
-          <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
-            <FormControl isRequired>
-              <FormLabel color="var(--text-dark)">Email</FormLabel>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </FormControl>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="trainer@example.com"
+                />
+              </div>
 
-            <FormControl isRequired>
-              <FormLabel color="var(--text-dark)">Password (min 6 characters)</FormLabel>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </FormControl>
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password (min 6 characters)</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
 
-            <FormControl isRequired>
-              <FormLabel color="var(--text-dark)">Confirm Password</FormLabel>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </FormControl>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm">Confirm Password</Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
 
-            <Button type="submit" colorScheme="brand" size="lg" mt={2} isLoading={loading}>
-              Create Account
-            </Button>
+              {message && (
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className={[
+                    "border-[2px] p-3",
+                    isError
+                      ? "border-[var(--poke-red)] bg-[rgba(224,64,56,0.08)]"
+                      : "border-[var(--poke-green)] bg-[rgba(120,200,80,0.08)]",
+                  ].join(" ")}
+                >
+                  <p className={[
+                    "font-pixel-body text-[18px]",
+                    isError ? "text-[var(--poke-red)]" : "text-[var(--poke-green)]",
+                  ].join(" ")}>
+                    {message}
+                  </p>
+                </div>
+              )}
 
-            {message && (
-              <Alert status={isError ? "error" : "success"} borderRadius="lg">
-                <AlertIcon />
-                {message}
-              </Alert>
-            )}
-          </VStack>
-        </Box>
-      </Container>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? "Creating account…" : "Create Account"}
+              </Button>
+            </form>
+
+            <p className="font-pixel-body text-[18px] text-[var(--text-muted)] text-center mt-4">
+              Already a trainer?{" "}
+              <Link href="/login" className="text-[var(--poke-blue)] hover:underline">
+                Login here
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </StudyShell>
   );
 }

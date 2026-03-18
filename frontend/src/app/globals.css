@@ -1,3 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================
+   ShadCN CSS Variables — mapped to Pokemon palette
+   ================================================ */
+@layer base {
+  :root {
+    --background: 43 78% 92%;
+    --foreground: 0 0% 22%;
+    --card: 43 78% 92%;
+    --card-foreground: 0 0% 22%;
+    --popover: 43 78% 92%;
+    --popover-foreground: 0 0% 22%;
+    --primary: 2 75% 55%;
+    --primary-foreground: 0 0% 97%;
+    --secondary: 216 54% 46%;
+    --secondary-foreground: 0 0% 97%;
+    --muted: 42 22% 72%;
+    --muted-foreground: 0 4% 45%;
+    --accent: 42 22% 85%;
+    --accent-foreground: 0 0% 22%;
+    --destructive: 2 75% 55%;
+    --destructive-foreground: 0 0% 97%;
+    --border: 0 0% 28%;
+    --input: 0 0% 28%;
+    --ring: 2 75% 55%;
+    --radius: 0rem;
+  }
+
+  [data-theme="dark"], .dark {
+    --background: 230 24% 14%;
+    --foreground: 240 47% 90%;
+    --card: 230 24% 14%;
+    --card-foreground: 240 47% 90%;
+    --popover: 230 24% 14%;
+    --popover-foreground: 240 47% 90%;
+    --primary: 2 75% 55%;
+    --primary-foreground: 0 0% 97%;
+    --secondary: 216 54% 46%;
+    --secondary-foreground: 0 0% 97%;
+    --muted: 230 30% 20%;
+    --muted-foreground: 240 20% 65%;
+    --accent: 230 30% 22%;
+    --accent-foreground: 240 47% 90%;
+    --destructive: 2 75% 55%;
+    --destructive-foreground: 0 0% 97%;
+    --border: 230 40% 40%;
+    --input: 230 40% 40%;
+    --ring: 2 75% 55%;
+  }
+
+  /* Font utility classes for Tailwind */
+  .font-pixel {
+    font-family: var(--font-pixel), 'Press Start 2P', monospace;
+  }
+  .font-pixel-body {
+    font-family: var(--font-pixel-body), 'VT323', monospace;
+  }
+}
+
 /* ================================================
    PomoPet — Pokemon Gen 3/4/5 Pixel Art Theme
    ================================================ */
@@ -809,10 +871,30 @@ body {
   .pixel-trees::after { bottom: -40px; }
 }
 
+/* Clickable elements get pointer cursor */
+button, [role="button"], a, label[for], summary {
+  cursor: pointer;
+}
+
+/* Restore focus rings removed by Tailwind's base reset */
+:focus-visible {
+  outline: 2px solid var(--poke-red);
+  outline-offset: 2px;
+}
+
 /* Respect user preference for reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .sky-clouds::before,
   .sky-clouds::after {
     animation: none;
+  }
+
+  /* Tone down all transitions for motion-sensitive users */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

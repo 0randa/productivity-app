@@ -11,6 +11,7 @@ export function useTheme() {
     const isDark = stored ? stored === "dark" : prefersDark;
     setDark(isDark);
     document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", isDark);
   }, []);
 
   const toggle = () => {
@@ -19,6 +20,7 @@ export function useTheme() {
     const value = next ? "dark" : "light";
     localStorage.setItem("theme", value);
     document.documentElement.setAttribute("data-theme", value);
+    document.documentElement.classList.toggle("dark", next);
   };
 
   return { dark, toggle };

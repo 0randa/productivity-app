@@ -8,7 +8,12 @@ import { useAuth } from "@/context/auth-context";
 import { clearGuestData } from "@/lib/guest-storage";
 import { loadUserProgress } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
-import { getPokemonAssets } from "@/lib/pokemon";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth();
@@ -30,8 +35,12 @@ export default function AccountPage() {
   if (loading) {
     return (
       <StudyShell>
-        <div className="pokemon-window">
-          <p className="pixel-text">Loading…</p>
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="pt-5">
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">Loading…</p>
+            </CardContent>
+          </Card>
         </div>
       </StudyShell>
     );
@@ -40,15 +49,19 @@ export default function AccountPage() {
   if (!user) {
     return (
       <StudyShell>
-        <div className="pokemon-window">
-          <h2 className="pixel-heading">Not logged in</h2>
-          <p className="pixel-text mt-3 text-muted">
-            Please{" "}
-            <Link href="/login" className="pokemon-nav-link">
-              log in
-            </Link>{" "}
-            to access account settings.
-          </p>
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="pt-5">
+              <p className="font-pixel text-[11px] text-[var(--text-dark)]">Not logged in</p>
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)] mt-3">
+                Please{" "}
+                <Link href="/login" className="text-[var(--poke-blue)] hover:underline">
+                  log in
+                </Link>{" "}
+                to access account settings.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </StudyShell>
     );
@@ -56,19 +69,10 @@ export default function AccountPage() {
 
   const handleDeleteAccount = async () => {
     if (confirmText !== "DELETE") return;
-
     setDeleting(true);
     setError("");
-
     const { error: rpcError } = await supabase.rpc("delete_own_account");
-
-    if (rpcError) {
-      setDeleting(false);
-      setError(rpcError.message);
-      return;
-    }
-
-    // Clean up: sign out and wipe local guest data, then go home
+    if (rpcError) { setDeleting(false); setError(rpcError.message); return; }
     await signOut();
     clearGuestData();
     router.push("/");
@@ -76,114 +80,109 @@ export default function AccountPage() {
 
   return (
     <StudyShell>
-      <div className="pokemon-window" style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <span className="pokemon-badge pokemon-badge-red">Account Settings</span>
-
-        {/* User info */}
-        <div className="pokemon-window-inner mt-4">
-          <p className="pixel-heading-sm">Trainer Info</p>
-          <p className="pixel-text mt-2" style={{ color: "var(--poke-blue)" }}>
-            {user.email}
-          </p>
+      <div className="max-w-2xl mx-auto space-y-4">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <Badge variant="red">Account Settings</Badge>
         </div>
+
+        {/* Trainer Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Trainer Info</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-pixel-body text-[22px]" style={{ color: "var(--poke-blue)" }}>
+              {user.email}
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Party */}
-        <div className="pokemon-window-inner mt-4">
-          <p className="pixel-heading-sm">Your Party</p>
-          {party.length === 0 ? (
-            <p className="pixel-text mt-2 text-muted">
-              No caught Pokémon yet. Complete pomodoros to encounter wild Pokémon!
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "12px",
-                marginTop: "12px",
-              }}
-            >
-              {party.map((pokemon, i) => {
-                const isActive = activePokemon?.speciesName === pokemon.speciesName;
-                return (
-                  <div
-                    key={i}
-                    className="pokemon-window-inner"
-                    style={{
-                      textAlign: "center",
-                      padding: "8px",
-                      borderColor: isActive ? "var(--poke-blue)" : undefined,
-                      position: "relative",
-                    }}
-                  >
-                    {isActive && (
-                      <span
-                        className="pokemon-badge"
-                        style={{ fontSize: "9px", marginBottom: "4px", display: "inline-block" }}
-                      >
-                        Active
-                      </span>
-                    )}
-                    <img
-                      src={pokemon.sprite}
-                      alt={pokemon.label}
-                      style={{ width: "64px", height: "64px", imageRendering: "pixelated", margin: "0 auto", display: "block" }}
-                    />
-                    <p className="pixel-text-sm" style={{ marginTop: "4px" }}>{pokemon.label}</p>
-                  </div>
-                );
-              })}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Your Party</CardTitle>
+              <Badge variant={party.length >= 6 ? "red" : "outline"}>{party.length}/6</Badge>
             </div>
-          )}
-          <p className="pixel-text-sm mt-3 text-muted">
-            {party.length}/6 party slots filled. Switch your active Pokémon from the main screen after catching one.
-          </p>
-        </div>
-
-        {/* Danger zone */}
-        <div
-          className="pokemon-window-inner mt-4"
-          style={{ borderColor: "var(--poke-red)" }}
-        >
-          <p className="pixel-heading-sm" style={{ color: "var(--poke-red)" }}>
-            Danger Zone
-          </p>
-          <p className="pixel-text mt-2 text-muted">
-            Permanently delete your account and all your saved data. This
-            cannot be undone.
-          </p>
-
-          <div className="mt-3">
-            <p className="pixel-text-sm mb-2">
-              Type <strong>DELETE</strong> to confirm:
+          </CardHeader>
+          <CardContent>
+            {party.length === 0 ? (
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+                No caught Pokémon yet. Complete pomodoros to encounter wild Pokémon!
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 gap-3">
+                {party.map((pokemon, i) => {
+                  const isActive = activePokemon?.speciesName === pokemon.speciesName;
+                  return (
+                    <div
+                      key={i}
+                      className={[
+                        "flex flex-col items-center p-3 text-center",
+                        "border-[2px] shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
+                        isActive
+                          ? "border-[var(--poke-blue)] bg-[rgba(56,104,176,0.06)]"
+                          : "border-[var(--window-border)] bg-[var(--window-bg)]",
+                      ].join(" ")}
+                    >
+                      {isActive && (
+                        <Badge variant="blue" className="mb-2 text-[7px]">Active</Badge>
+                      )}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={pokemon.sprite}
+                        alt={pokemon.label}
+                        className="w-16 h-16 object-contain"
+                        style={{ imageRendering: "pixelated" }}
+                      />
+                      <p className="font-pixel-body text-[18px] text-[var(--text-dark)] mt-1">{pokemon.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-3">
+              Switch your active Pokémon from the main screen after catching one.
             </p>
-            <input
-              type="text"
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
-              className="pokemon-input"
-              placeholder="DELETE"
-              style={{ width: "160px", marginBottom: "12px" }}
-            />
-          </div>
+          </CardContent>
+        </Card>
 
-          {error && (
-            <p
-              className="pixel-text-sm mt-2"
-              style={{ color: "var(--poke-red)" }}
+        {/* Danger Zone */}
+        <Card className="border-[var(--poke-red)]!">
+          <CardHeader>
+            <CardTitle style={{ color: "var(--poke-red)" }}>Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+              Permanently delete your account and all saved data. This cannot be undone.
+            </p>
+            <Separator />
+            <div className="space-y-2">
+              <Label>
+                Type <span className="font-pixel text-[8px] text-[var(--poke-red)]">DELETE</span> to confirm:
+              </Label>
+              <Input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="max-w-[200px]"
+                style={{ borderColor: confirmText === "DELETE" ? "var(--poke-red)" : undefined }}
+              />
+            </div>
+            {error && (
+              <p className="font-pixel-body text-[18px]" style={{ color: "var(--poke-red)" }}>{error}</p>
+            )}
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={confirmText !== "DELETE" || deleting}
             >
-              {error}
-            </p>
-          )}
-
-          <button
-            className="pokemon-btn pokemon-btn-red"
-            onClick={handleDeleteAccount}
-            disabled={confirmText !== "DELETE" || deleting}
-          >
-            {deleting ? "Deleting…" : "Delete My Account"}
-          </button>
-        </div>
+              {deleting ? "Deleting…" : "Delete My Account"}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </StudyShell>
   );

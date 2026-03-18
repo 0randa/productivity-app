@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { playVictorySound, stopVictorySound, playBreakMusic, stopBreakMusic, stopAllAudio, playHealSound } from "@/lib/victory-sound";
 
-// ─── TEST MODE ────────────────────────────────────────────────────────────────
-// Set to true for quick iteration; overrides the settings-panel values.
 const TESTING = false;
 const TEST_FOCUS_SECS = 10;
 const TEST_BREAK_SECS = 2;
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function TimerComp({
   focusMinutes = 25,
@@ -22,16 +22,13 @@ export default function TimerComp({
   const shortBreakSecs = TESTING ? TEST_BREAK_SECS : shortBreakMinutes * 60;
   const longBreakSecs  = TESTING ? TEST_BREAK_SECS : longBreakMinutes * 60;
 
-  const [mode, setMode]               = useState("focus"); // "focus" | "shortBreak" | "longBreak"
+  const [mode, setMode]               = useState("focus");
   const [secondsLeft, setSecondsLeft] = useState(focusSecs);
   const [isRunning, setIsRunning]     = useState(false);
   const [canStartBreak, setCanStartBreak] = useState(false);
-  const [pomodoroCount, setPomodoroCount] = useState(0); // resets to 0 after long break
-
-  // Prevent the completion effect from firing more than once per countdown
+  const [pomodoroCount, setPomodoroCount] = useState(0);
   const completionFired = useRef(false);
 
-  // ── Reset when settings (or test mode) change ──────────────────────────────
   useEffect(() => {
     setIsRunning(false);
     setMode("focus");
@@ -41,31 +38,21 @@ export default function TimerComp({
     completionFired.current = false;
   }, [focusSecs, shortBreakSecs, longBreakSecs]);
 
-  // ── Countdown tick — ONLY decrements secondsLeft ───────────────────────────
-  // No other setState calls here, which avoids the React "setState during
-  // render of another component" warning.
   useEffect(() => {
     if (!isRunning) return undefined;
-
     const interval = setInterval(() => {
       setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
-
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // ── Completion handler — fires when secondsLeft reaches 0 ──────────────────
   useEffect(() => {
-    // Reset the guard whenever the clock is ticking above 0
     if (secondsLeft > 0) {
       completionFired.current = false;
       return;
     }
-
-    // Only act once per countdown-to-zero, and only while the timer was running
     if (!isRunning || completionFired.current) return;
     completionFired.current = true;
-
     setIsRunning(false);
 
     if (mode === "focus") {
@@ -83,19 +70,16 @@ export default function TimerComp({
     }
   }, [secondsLeft, isRunning, mode, focusSecs, onPomodoroComplete]);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-
-  const totalForMode =
-    mode === "focus" ? focusSecs : mode === "longBreak" ? longBreakSecs : shortBreakSecs;
-
+  const totalForMode = mode === "focus" ? focusSecs : mode === "longBreak" ? longBreakSecs : shortBreakSecs;
   const progress = useMemo(() => {
     const elapsed = totalForMode - secondsLeft;
     return (elapsed / totalForMode) * 100;
   }, [secondsLeft, totalForMode]);
 
   const isLongBreakDue = pomodoroCount > 0 && pomodoroCount % 4 === 0;
+  const countInCycle = pomodoroCount % 4;
 
   const startBreak = (type) => {
     stopVictorySound();
@@ -109,20 +93,9 @@ export default function TimerComp({
   };
 
   const toggleTimer = () => {
-    if (isRunning) {
-      setIsRunning(false);
-      return;
-    }
-
-    if (mode === "focus" && canStartBreak) {
-      startBreak(isLongBreakDue ? "long" : "short");
-      return;
-    }
-
-    if (mode === "focus" && (secondsLeft === focusSecs || secondsLeft === 0)) {
-      onPomodoroStart?.();
-    }
-
+    if (isRunning) { setIsRunning(false); return; }
+    if (mode === "focus" && canStartBreak) { startBreak(isLongBreakDue ? "long" : "short"); return; }
+    if (mode === "focus" && (secondsLeft === focusSecs || secondsLeft === 0)) { onPomodoroStart?.(); }
     setIsRunning(true);
   };
 
@@ -130,18 +103,14 @@ export default function TimerComp({
     stopAllAudio();
     setIsRunning(false);
     completionFired.current = true;
-
     if (mode === "focus") {
-      // Proportional XP: how much of the session was completed (0–1)
       const elapsed = focusSecs - secondsLeft;
       const ratio = focusSecs > 0 ? elapsed / focusSecs : 0;
-
       setPomodoroCount((c) => c + 1);
       setCanStartBreak(true);
       setSecondsLeft(0);
       onPomodoroSkip?.(ratio);
     } else {
-      // Skipping a break — no penalty, just return to focus
       playHealSound();
       if (mode === "longBreak") setPomodoroCount(0);
       setMode("focus");
@@ -172,67 +141,82 @@ export default function TimerComp({
 
   const modeDescription =
     mode === "focus"
-      ? "Battle in progress! Keep your focus on the target."
+      ? "Lock in. Give it everything you have."
       : mode === "longBreak"
-      ? "Long rest! Recover fully before the next challenge."
-      : "Potion time! Rest up and come back stronger.";
+      ? "Long rest — recover fully before the next challenge."
+      : "Potion time — rest up and come back stronger.";
 
-  const countInCycle = pomodoroCount % 4;
+  const modeVariant = mode === "focus" ? "red" : "blue";
+  const barColor = mode === "focus" ? "bg-[var(--hp-green)]" : "bg-[var(--xp-blue)]";
 
   return (
-    <div className={`pokemon-window-inner ${isRunning ? "timer-active" : ""}`}>
-      <div className="flex items-center justify-between">
-        <p className="pixel-heading-sm" style={{ textTransform: "uppercase", letterSpacing: "2px" }}>
-          {modeLabel}
-        </p>
-        {/* Pomodoro progress dots — fill red as each session completes */}
-        <div className="flex gap-2" style={{ alignItems: "center" }}>
+    <div
+      className={[
+        "bg-[var(--window-bg)] border-[2px] border-[var(--window-border)]",
+        "shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)] p-5",
+        isRunning ? "shadow-[inset_2px_2px_0_var(--window-highlight),inset_-2px_-2px_0_var(--window-shadow),8px_8px_0_rgba(0,0,0,0.25)] -translate-x-0.5 -translate-y-0.5" : "",
+        "transition-all duration-200"
+      ].join(" ")}
+    >
+      {/* Mode label + session dots */}
+      <div className="flex items-center justify-between mb-3">
+        <Badge variant={modeVariant}>{modeLabel}</Badge>
+        <div className="flex items-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (
             <span
               key={i}
-              style={{
-                width: "10px",
-                height: "10px",
-                borderRadius: "50%",
-                border: "2px solid var(--poke-red)",
-                background: i < countInCycle ? "var(--poke-red)" : "transparent",
-                display: "inline-block",
-              }}
+              className="w-3 h-3 rounded-full border-[2px] border-[var(--poke-red)] inline-block transition-colors duration-200"
+              style={{ background: i < countInCycle ? "var(--poke-red)" : "transparent" }}
             />
           ))}
         </div>
       </div>
 
-      <p className="pixel-text-sm mt-2 text-muted">{modeDescription}</p>
+      <p className="font-pixel-body text-[18px] text-[var(--text-muted)] mb-5">{modeDescription}</p>
 
-      <p className="timer-display mt-4">
+      {/* Hero timer display */}
+      <p
+        className="font-pixel text-center leading-none tracking-widest text-[var(--text-dark)]"
+        style={{
+          fontSize: "clamp(48px, 8vw, 72px)",
+          textShadow: "4px 4px 0 rgba(0,0,0,0.08)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+        aria-label={`${String(minutes).padStart(2, "0")} minutes and ${String(seconds).padStart(2, "0")} seconds remaining`}
+        aria-live="off"
+        role="timer"
+      >
         {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
       </p>
 
-      <div className={`pokemon-bar-container ${mode === "focus" ? "pokemon-bar-hp" : "pokemon-bar-xp"} mt-4`}>
-        <div className="pokemon-bar-fill" style={{ width: `${progress}%` }} />
-      </div>
+      <Progress
+        value={progress}
+        className="mt-5"
+        indicatorClassName={barColor}
+      />
 
-      <div className="flex flex-wrap gap-3 mt-4">
-        <button
-          className="pokemon-btn pokemon-btn-red"
+      {/* Controls */}
+      <div className="flex flex-wrap gap-3 mt-5">
+        <Button
+          variant="primary"
+          size="lg"
           onClick={toggleTimer}
-          style={{ minWidth: "130px" }}
+          className="flex-1 min-w-[120px]"
         >
           {primaryLabel()}
-        </button>
+        </Button>
         {(isRunning || mode !== "focus") && (
-          <button className="pokemon-btn pokemon-btn-blue" onClick={skipTimer}>
+          <Button variant="secondary" onClick={skipTimer}>
             Skip ▸▸
-          </button>
+          </Button>
         )}
-        <button className="pokemon-btn" onClick={resetTimer}>
+        <Button variant="ghost" onClick={resetTimer}>
           Reset
-        </button>
+        </Button>
       </div>
 
       {TESTING && (
-        <p className="pixel-text-sm mt-3" style={{ color: "var(--poke-blue)", opacity: 0.7 }}>
+        <p className="font-pixel-body text-[16px] mt-3" style={{ color: "var(--poke-blue)", opacity: 0.7 }}>
           ⚠ TEST MODE: {TEST_FOCUS_SECS}s focus / {TEST_BREAK_SECS}s breaks
         </p>
       )}

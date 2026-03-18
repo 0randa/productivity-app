@@ -1,18 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
-  Box,
-  Button,
-  Image,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 
 export function WildEncounterModal({
   wildPokemon,
@@ -24,84 +15,69 @@ export function WildEncounterModal({
 }) {
   if (!wildPokemon) return null;
 
+  const title = catchResult === "success"
+    ? `Gotcha! ${wildPokemon.label} was caught!`
+    : catchResult === "fail"
+    ? `Oh no! ${wildPokemon.label} broke free!`
+    : `A wild ${wildPokemon.label} appeared!`;
+
   return (
-    <Modal isOpen onClose={onDismiss} isCentered size="sm">
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent borderRadius="xl" bg="study.paper" border="1px solid" borderColor="study.border">
-        <ModalHeader textAlign="center" color="study.ink" pb={0}>
-          {catchResult === "success"
-            ? `Gotcha! ${wildPokemon.label} was caught!`
-            : catchResult === "fail"
-            ? `Oh no! ${wildPokemon.label} broke free!`
-            : `A wild ${wildPokemon.label} appeared!`}
-        </ModalHeader>
+    <Dialog open onOpenChange={(open) => !open && onDismiss()}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
 
-        <ModalBody>
-          <VStack spacing={3} align="center">
-            <Box
-              bg="study.cream"
-              borderRadius="xl"
-              p={4}
-              border="1px solid"
-              borderColor="study.border"
-              w="100%"
-              textAlign="center"
-            >
-              <Image
-                src={wildPokemon.sprite}
-                alt={wildPokemon.label}
-                mx="auto"
-                w="96px"
-                h="96px"
-                style={{ imageRendering: "pixelated" }}
-              />
-              <Text fontWeight="bold" color="study.ink" mt={1}>
-                {wildPokemon.label}
-              </Text>
-            </Box>
+        {/* Pokemon sprite */}
+        <div className="flex flex-col items-center gap-3 py-2">
+          <div className="w-28 h-28 border-[3px] border-[var(--window-border)] bg-white shadow-[inset_2px_2px_0_#f0f0f0,inset_-2px_-2px_0_#d0d0d0] flex items-center justify-center p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={wildPokemon.sprite}
+              alt={wildPokemon.label}
+              className="w-full h-full object-contain"
+              style={{ imageRendering: "pixelated" }}
+            />
+          </div>
+          <p className="font-pixel text-[11px] tracking-wide text-[var(--text-dark)]">
+            {wildPokemon.label}
+          </p>
 
-            {!catchResult && partyFull && (
-              <Text fontSize="sm" color="study.inkMuted" textAlign="center">
-                Your party is full (6/6). Release a Pokemon from your party to catch more.
-              </Text>
-            )}
-          </VStack>
-        </ModalBody>
+          {!catchResult && partyFull && (
+            <p className="font-pixel-body text-[18px] text-[var(--text-muted)] text-center">
+              Your party is full (6/6). Release a Pokémon to catch more.
+            </p>
+          )}
+        </div>
 
-        <ModalFooter gap={2} justifyContent="center">
+        <DialogFooter>
           {!catchResult && (
             <>
-              <Button
-                colorScheme="brand"
-                onClick={onAttemptCatch}
-                isDisabled={partyFull}
-              >
+              <Button variant="primary" onClick={onAttemptCatch} disabled={partyFull}>
                 Throw Pokéball!
               </Button>
-              <Button variant="ghost" onClick={onDismiss} color="study.inkMuted">
+              <Button variant="ghost" onClick={onDismiss}>
                 Run
               </Button>
             </>
           )}
-
           {catchResult === "success" && (
             <>
-              <Button colorScheme="brand" onClick={onSetActive}>
+              <Button variant="primary" onClick={onSetActive}>
                 Set as Active
               </Button>
-              <Button variant="ghost" onClick={onDismiss} color="study.inkMuted">
+              <Button variant="ghost" onClick={onDismiss}>
                 Keep Current
               </Button>
             </>
           )}
-
           {catchResult === "fail" && (
-            <Button colorScheme="brand" onClick={onDismiss}>
+            <Button variant="secondary" onClick={onDismiss}>
               Continue Studying
             </Button>
           )}
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

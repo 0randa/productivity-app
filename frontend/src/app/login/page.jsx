@@ -2,21 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Container,
-  FormControl,
-  FormLabel,
-  Heading,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
 import StudyShell from "@/components/study-shell";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,9 +23,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-
     setLoading(false);
     if (error) {
       setIsError(true);
@@ -44,43 +35,82 @@ export default function LoginPage() {
 
   return (
     <StudyShell>
-      <Container maxW="md" py={10}>
-        <Box
-          p={8}
-          borderRadius="lg"
-          bg="var(--window-bg)"
-          border="1px solid"
-          borderColor="var(--window-border)"
-        >
-          <Heading size="lg" color="var(--text-dark)">Welcome back</Heading>
-          <Text color="var(--text-muted)" mt={2} mb={6}>
-            Continue your focus streak.
-          </Text>
+      <div className="max-w-md mx-auto">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <CardTitle>Welcome Back</CardTitle>
+              <Badge variant="blue">Trainer Login</Badge>
+            </div>
+            <CardDescription>Continue your focus streak.</CardDescription>
+          </CardHeader>
 
-          <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
-            <FormControl isRequired>
-              <FormLabel color="var(--text-dark)">Email</FormLabel>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </FormControl>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="trainer@example.com"
+                />
+              </div>
 
-            <FormControl isRequired>
-              <FormLabel color="var(--text-dark)">Password</FormLabel>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </FormControl>
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
 
-            <Button type="submit" colorScheme="brand" size="lg" mt={2} isLoading={loading}>
-              Login
-            </Button>
+              {message && (
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className={[
+                    "border-[2px] p-3",
+                    isError
+                      ? "border-[var(--poke-red)] bg-[rgba(224,64,56,0.08)]"
+                      : "border-[var(--poke-green)] bg-[rgba(120,200,80,0.08)]",
+                  ].join(" ")}
+                >
+                  <p className={[
+                    "font-pixel-body text-[18px]",
+                    isError ? "text-[var(--poke-red)]" : "text-[var(--poke-green)]",
+                  ].join(" ")}>
+                    {message}
+                  </p>
+                </div>
+              )}
 
-            {message && (
-              <Alert status={isError ? "error" : "success"} borderRadius="lg">
-                <AlertIcon />
-                {message}
-              </Alert>
-            )}
-          </VStack>
-        </Box>
-      </Container>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? "Logging in…" : "Login"}
+              </Button>
+            </form>
+
+            <p className="font-pixel-body text-[18px] text-[var(--text-muted)] text-center mt-4">
+              No account?{" "}
+              <Link href="/register" className="text-[var(--poke-blue)] hover:underline">
+                Register here
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </StudyShell>
   );
 }
