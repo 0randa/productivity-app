@@ -203,10 +203,31 @@
   box-shadow: 0 0 0 2px #22263a, 0 0 0 4px var(--window-border);
 }
 
-/* Night sky stars */
+/* Night sky — clouds barely visible */
 [data-theme="dark"] .sky-clouds::before,
 [data-theme="dark"] .sky-clouds::after {
   opacity: 0.15;
+}
+
+/* Night mountains — dark silhouettes with no snow */
+[data-theme="dark"] .mountain-layer {
+  background-image: url("data:image/svg+xml,%3Csvg width='320' height='80' viewBox='0 0 320 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='56' y='0' width='16' height='8' fill='%232a3850'/%3E%3Crect x='48' y='8' width='32' height='8' fill='%231e2c40'/%3E%3Crect x='40' y='16' width='48' height='8' fill='%231e2c40'/%3E%3Crect x='32' y='24' width='64' height='8' fill='%231a2838'/%3E%3Crect x='24' y='32' width='80' height='8' fill='%23182030'/%3E%3Crect x='16' y='40' width='96' height='8' fill='%23141c28'/%3E%3Crect x='0' y='48' width='128' height='32' fill='%23121820'/%3E%3Crect x='236' y='16' width='8' height='8' fill='%231e2c40'/%3E%3Crect x='228' y='24' width='24' height='8' fill='%231a2838'/%3E%3Crect x='216' y='32' width='48' height='8' fill='%231a2838'/%3E%3Crect x='208' y='40' width='64' height='8' fill='%23182030'/%3E%3Crect x='200' y='48' width='80' height='8' fill='%23141c28'/%3E%3Crect x='192' y='56' width='128' height='24' fill='%23121820'/%3E%3C/svg%3E");
+}
+
+/* Night hills — dark forest silhouettes */
+[data-theme="dark"] .hill-layer {
+  background-image: url("data:image/svg+xml,%3Csvg width='256' height='50' viewBox='0 0 256 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='48' y='8' width='32' height='8' fill='%23102018'/%3E%3Crect x='32' y='16' width='64' height='8' fill='%230e1a14'/%3E%3Crect x='0' y='24' width='128' height='26' fill='%230c1812'/%3E%3Crect x='176' y='0' width='32' height='8' fill='%23102018'/%3E%3Crect x='160' y='8' width='64' height='8' fill='%23102018'/%3E%3Crect x='144' y='16' width='96' height='8' fill='%230e1a14'/%3E%3Crect x='128' y='24' width='128' height='26' fill='%230c1812'/%3E%3C/svg%3E");
+}
+
+/* Night trees — near-black silhouettes */
+[data-theme="dark"] .pixel-trees {
+  background-image: url("data:image/svg+xml,%3Csvg width='160' height='72' viewBox='0 0 160 72' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='12' y='56' width='8' height='16' fill='%23181008'/%3E%3Crect x='0' y='48' width='32' height='8' fill='%230a1a0c'/%3E%3Crect x='4' y='40' width='24' height='8' fill='%230c1c0e'/%3E%3Crect x='4' y='32' width='24' height='8' fill='%230c1c0e'/%3E%3Crect x='8' y='24' width='16' height='8' fill='%230e1e10'/%3E%3Crect x='8' y='16' width='16' height='8' fill='%230e1e10'/%3E%3Crect x='10' y='8' width='12' height='8' fill='%230e1e10'/%3E%3Crect x='12' y='0' width='8' height='8' fill='%23102010'/%3E%3Crect x='52' y='56' width='8' height='16' fill='%23181008'/%3E%3Crect x='36' y='48' width='40' height='8' fill='%230a1a0c'/%3E%3Crect x='40' y='40' width='32' height='8' fill='%230a1a0c'/%3E%3Crect x='40' y='32' width='32' height='8' fill='%230c1c0e'/%3E%3Crect x='44' y='24' width='24' height='8' fill='%230e1e10'/%3E%3Crect x='44' y='16' width='24' height='8' fill='%230e1e10'/%3E%3Crect x='48' y='8' width='16' height='8' fill='%23102010'/%3E%3Crect x='100' y='64' width='16' height='8' fill='%230a1a0c'/%3E%3Crect x='96' y='56' width='24' height='8' fill='%230c1c0e'/%3E%3Crect x='100' y='48' width='16' height='8' fill='%230e1e10'/%3E%3Crect x='104' y='40' width='8' height='8' fill='%23102010'/%3E%3Crect x='132' y='56' width='8' height='16' fill='%23181008'/%3E%3Crect x='124' y='48' width='24' height='8' fill='%230a1a0c'/%3E%3Crect x='128' y='40' width='16' height='8' fill='%230c1c0e'/%3E%3Crect x='128' y='32' width='16' height='8' fill='%230e1e10'/%3E%3Crect x='130' y='24' width='12' height='8' fill='%230c1c0e'/%3E%3Crect x='130' y='16' width='12' height='8' fill='%230e1e10'/%3E%3Crect x='132' y='8' width='8' height='8' fill='%23102010'/%3E%3Crect x='134' y='0' width='4' height='8' fill='%23102010'/%3E%3C/svg%3E");
+}
+
+/* Night — hide daytime flowers */
+[data-theme="dark"] .pixel-trees::before,
+[data-theme="dark"] .pixel-trees::after {
+  opacity: 0;
 }
 
 * {
@@ -227,59 +248,56 @@ body {
   line-height: 1.4;
 }
 
-/* ===== GRASS WORLD — SKY + GRASS SCENE ===== */
+/* ===== GRASS WORLD — FULL-SCREEN GAME WORLD ===== */
 .grass-world {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  /* Sky from top through sky-zone (navbar~50px + sky 120px = 170px), then grass */
-  background: linear-gradient(
-    to bottom,
-    var(--sky-top)    0px,
-    var(--sky-mid)    80px,
-    var(--sky-bottom) 160px,
-    var(--grass-light) 175px,
-    var(--grass)      210px,
-    var(--grass)      100%
-  );
+  /* Background handled by fixed ::before — always fills viewport at correct proportions */
 }
 
-/* Grass checkerboard — covers the entire area below the tree line */
+/* Fixed grass checkerboard — always covers the lower grass portion of viewport */
 .grass-world::after {
   content: '';
-  position: absolute;
-  /* navbar ~50px + sky-zone 120px + trees 48px = ~218px */
-  top: 218px;
+  position: fixed;
+  top: 52vh;
   left: 0;
   right: 0;
   bottom: 0;
   background-image:
-    linear-gradient(0deg, rgba(0,0,0,0.03) 50%, transparent 50%),
-    linear-gradient(90deg, rgba(0,0,0,0.03) 50%, transparent 50%);
+    linear-gradient(0deg, rgba(0,0,0,0.025) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(0,0,0,0.025) 50%, transparent 50%);
   background-size: 16px 16px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Horizon path strip — sits between sky-zone and trees */
+/* Fixed full-viewport background — always fills screen at correct sky/grass proportions */
 .grass-world::before {
   content: '';
-  display: block;
-  height: 6px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--path) 0px, var(--path) 16px,
-    var(--path-dark) 16px, var(--path-dark) 32px
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--sky-top)     0%,
+    var(--sky-mid)     18%,
+    var(--sky-bottom)  38%,
+    var(--grass-light) 55%,
+    var(--grass)       70%,
+    var(--grass)       100%
   );
-  position: relative;
-  z-index: 3;
 }
 
 /* ===== ANIMATED PIXEL CLOUDS ===== */
-/* Sky zone sits in normal flow — always visible below navbar, above trees */
+/* Absolute — no flow impact, drifts just below the sticky navbar */
 .sky-clouds {
-  position: relative;
-  height: 120px;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  height: 100px;
   overflow: hidden;
   pointer-events: none;
   z-index: 1;
@@ -327,6 +345,40 @@ body {
   to   { transform: translateX(-50%); }
 }
 
+/* ===== MOUNTAIN LAYER — fixed at bottom, peeks above hills ===== */
+.mountain-layer {
+  position: fixed;
+  bottom: 122px;
+  left: 0;
+  right: 0;
+  height: 80px;
+  z-index: 2;
+  image-rendering: pixelated;
+  background-repeat: repeat-x;
+  background-size: 320px 80px;
+  background-position: bottom center;
+  pointer-events: none;
+  /* Two mountains: tall left (peak y=0) and medium right (peak y=16) */
+  background-image: url("data:image/svg+xml,%3Csvg width='320' height='80' viewBox='0 0 320 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='56' y='0' width='16' height='8' fill='%23e0e8f0'/%3E%3Crect x='48' y='8' width='32' height='8' fill='%23e0e8f0'/%3E%3Crect x='40' y='16' width='48' height='8' fill='%237898b8'/%3E%3Crect x='48' y='16' width='16' height='8' fill='%23e0e8f0'/%3E%3Crect x='32' y='24' width='64' height='8' fill='%236888a8'/%3E%3Crect x='24' y='32' width='80' height='8' fill='%23587898'/%3E%3Crect x='16' y='40' width='96' height='8' fill='%23506888'/%3E%3Crect x='0' y='48' width='128' height='32' fill='%23506888'/%3E%3Crect x='236' y='16' width='8' height='8' fill='%23e0e8f0'/%3E%3Crect x='228' y='24' width='24' height='8' fill='%23e0e8f0'/%3E%3Crect x='216' y='32' width='48' height='8' fill='%237898b8'/%3E%3Crect x='208' y='40' width='64' height='8' fill='%236888a8'/%3E%3Crect x='200' y='48' width='80' height='8' fill='%23587898'/%3E%3Crect x='192' y='56' width='128' height='24' fill='%23506888'/%3E%3C/svg%3E");
+}
+
+/* ===== HILL LAYER — fixed just above the trees ===== */
+.hill-layer {
+  position: fixed;
+  bottom: 72px;
+  left: 0;
+  right: 0;
+  height: 50px;
+  z-index: 3;
+  image-rendering: pixelated;
+  background-repeat: repeat-x;
+  background-size: 256px 50px;
+  background-position: bottom center;
+  pointer-events: none;
+  /* Two overlapping hills for depth */
+  background-image: url("data:image/svg+xml,%3Csvg width='256' height='50' viewBox='0 0 256 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='48' y='8' width='32' height='8' fill='%2378b860'/%3E%3Crect x='32' y='16' width='64' height='8' fill='%2378b860'/%3E%3Crect x='16' y='24' width='96' height='8' fill='%235a9848'/%3E%3Crect x='0' y='32' width='128' height='18' fill='%234a8840'/%3E%3Crect x='176' y='0' width='32' height='8' fill='%2378b860'/%3E%3Crect x='160' y='8' width='64' height='8' fill='%2378b860'/%3E%3Crect x='144' y='16' width='96' height='8' fill='%235a9848'/%3E%3Crect x='128' y='24' width='128' height='26' fill='%234a8840'/%3E%3C/svg%3E");
+}
+
 /* ===== CONTAINER ===== */
 .poke-container {
   max-width: 1100px;
@@ -335,9 +387,9 @@ body {
 }
 
 .main-content {
-  padding: 16px 0 48px;
+  padding: 16px 0 108px; /* 108px = trees(72) + hills(50) - some overlap tolerance */
   position: relative;
-  z-index: 5;
+  z-index: 10;
 }
 
 /* ===== POKEMON WINDOW ===== */
@@ -751,17 +803,19 @@ body {
   image-rendering: pixelated;
 }
 
-/* ===== PIXEL TREE DECORATION ===== */
+/* ===== PIXEL TREE DECORATION — fixed at viewport bottom, always visible ===== */
 .pixel-trees {
-  height: 48px;
-  position: relative;
-  z-index: 2;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: 4;
   image-rendering: pixelated;
-  /* 128px wide tile: pine, bush, oak, gap for variety */
-  background-image:
-    url("data:image/svg+xml,%3Csvg width='128' height='48' viewBox='0 0 128 48' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- Pine tree --%3E%3Crect x='12' y='40' width='8' height='8' fill='%23886840'/%3E%3Crect x='4' y='24' width='24' height='8' fill='%23408040'/%3E%3Crect x='8' y='16' width='16' height='8' fill='%23509850'/%3E%3Crect x='0' y='32' width='32' height='8' fill='%23306830'/%3E%3Crect x='12' y='8' width='8' height='8' fill='%2360a848'/%3E%3C!-- Small bush --%3E%3Crect x='40' y='40' width='16' height='8' fill='%23408040'/%3E%3Crect x='44' y='32' width='8' height='8' fill='%23509850'/%3E%3C!-- Oak tree --%3E%3Crect x='72' y='40' width='8' height='8' fill='%23886840'/%3E%3Crect x='60' y='24' width='32' height='8' fill='%23408040'/%3E%3Crect x='64' y='16' width='24' height='8' fill='%23509850'/%3E%3Crect x='56' y='32' width='40' height='8' fill='%23306830'/%3E%3Crect x='68' y='8' width='16' height='8' fill='%2360a848'/%3E%3C!-- Small shrub --%3E%3Crect x='108' y='40' width='12' height='8' fill='%23509850'/%3E%3Crect x='112' y='32' width='4' height='8' fill='%2360a848'/%3E%3C/svg%3E");
+  /* 160px tile: tall pine, wide oak, shrub, thin pine — richer canopy layers */
+  background-image: url("data:image/svg+xml,%3Csvg width='160' height='72' viewBox='0 0 160 72' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='12' y='56' width='8' height='16' fill='%23804020'/%3E%3Crect x='0' y='48' width='32' height='8' fill='%23285020'/%3E%3Crect x='4' y='40' width='24' height='8' fill='%23306028'/%3E%3Crect x='4' y='32' width='24' height='8' fill='%23387030'/%3E%3Crect x='8' y='24' width='16' height='8' fill='%23306028'/%3E%3Crect x='8' y='16' width='16' height='8' fill='%23387030'/%3E%3Crect x='10' y='8' width='12' height='8' fill='%23408838'/%3E%3Crect x='12' y='0' width='8' height='8' fill='%2348a040'/%3E%3Crect x='52' y='56' width='8' height='16' fill='%23804020'/%3E%3Crect x='36' y='48' width='40' height='8' fill='%23285020'/%3E%3Crect x='40' y='40' width='32' height='8' fill='%23285020'/%3E%3Crect x='40' y='32' width='32' height='8' fill='%23306028'/%3E%3Crect x='44' y='24' width='24' height='8' fill='%23387030'/%3E%3Crect x='44' y='16' width='24' height='8' fill='%23408838'/%3E%3Crect x='48' y='8' width='16' height='8' fill='%2348a040'/%3E%3Crect x='100' y='64' width='16' height='8' fill='%23285020'/%3E%3Crect x='96' y='56' width='24' height='8' fill='%23306028'/%3E%3Crect x='100' y='48' width='16' height='8' fill='%23387030'/%3E%3Crect x='104' y='40' width='8' height='8' fill='%23408838'/%3E%3Crect x='132' y='56' width='8' height='16' fill='%23804020'/%3E%3Crect x='124' y='48' width='24' height='8' fill='%23285020'/%3E%3Crect x='128' y='40' width='16' height='8' fill='%23306028'/%3E%3Crect x='128' y='32' width='16' height='8' fill='%23387030'/%3E%3Crect x='130' y='24' width='12' height='8' fill='%23306028'/%3E%3Crect x='130' y='16' width='12' height='8' fill='%23408838'/%3E%3Crect x='132' y='8' width='8' height='8' fill='%2348a040'/%3E%3Crect x='134' y='0' width='4' height='8' fill='%2358b848'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
-  background-size: 128px 48px;
+  background-size: 160px 72px;
 }
 
 /* Pixel flowers & grass tufts near tree line */
@@ -866,8 +920,11 @@ body {
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .hide-mobile { display: none; }
   .sky-clouds { height: 80px; }
-  .pixel-trees { height: 32px; background-size: 96px 32px; }
-  .pixel-trees::before { bottom: -12px; height: 12px; }
+  /* Mobile: rescale tree stack heights and recompute bottom offsets */
+  .pixel-trees { height: 48px; background-size: 120px 48px; }
+  .hill-layer { height: 36px; background-size: 192px 36px; bottom: 48px; }
+  .mountain-layer { height: 56px; background-size: 240px 56px; bottom: 84px; }
+  .main-content { padding-bottom: 72px; }
   .pixel-trees::after { bottom: -40px; }
 }
 

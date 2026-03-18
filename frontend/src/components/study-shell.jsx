@@ -5,7 +5,9 @@ export default function StudyShell({ children }) {
     <div className="grass-world">
       <NavbarComp />
       <div className="sky-clouds" aria-hidden="true" />
-      <div className="pixel-trees" />
+      <div className="mountain-layer" aria-hidden="true" />
+      <div className="hill-layer" aria-hidden="true" />
+      <div className="pixel-trees" aria-hidden="true" />
       <div className="poke-container main-content">
         {children}
       </div>
