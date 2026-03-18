@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import {
   Alert,
   AlertIcon,
@@ -17,13 +18,14 @@ import {
 } from "@chakra-ui/react";
 import { NavbarComp } from "@/components/navbar";
 
-export default function RegisterForm() {
-  const [username, setUsername] = useState("");
+export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,22 +36,44 @@ export default function RegisterForm() {
       return;
     }
 
-    try {
-      const response = await axios.post("/api/register", {
-        username,
-        email,
-        password,
-      });
+    if (password.length < 6) {
+      setIsError(true);
+      setMessage("Password must be at least 6 characters.");
+      return;
+    }
 
+    setLoading(true);
+    setMessage("");
+
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      setLoading(false);
+      setIsError(true);
+      setMessage(error.message);
+      return;
+    }
+
+    if (data.session) {
+      // signUp returned a session directly — already logged in, go to app
+      router.push("/");
+      return;
+    }
+
+    // No session yet — attempt immediate sign-in.
+    // This works when email confirmation is disabled in Supabase.
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+
+    if (!signInError) {
+      router.push("/");
+    } else {
+      // Email confirmation is required — ask the user to check their inbox
       setIsError(false);
-      setMessage(response.data.msg ?? "Registration successful.");
-      setUsername("");
+      setMessage("Account created! Check your email to confirm your account before logging in.");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      setIsError(true);
-      setMessage(error?.response?.data?.msg ?? "Registration failed.");
     }
   };
 
@@ -72,17 +96,12 @@ export default function RegisterForm() {
 
           <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
             <FormControl isRequired>
-              <FormLabel color="study.ink">Username</FormLabel>
-              <Input value={username} onChange={(e) => setUsername(e.target.value)} />
-            </FormControl>
-
-            <FormControl isRequired>
               <FormLabel color="study.ink">Email</FormLabel>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel color="study.ink">Password</FormLabel>
+              <FormLabel color="study.ink">Password (min 6 characters)</FormLabel>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </FormControl>
 
@@ -95,16 +114,16 @@ export default function RegisterForm() {
               />
             </FormControl>
 
-            <Button type="submit" colorScheme="brand" size="lg" mt={2}>
-              Register
+            <Button type="submit" colorScheme="brand" size="lg" mt={2} isLoading={loading}>
+              Create Account
             </Button>
 
-            {message ? (
+            {message && (
               <Alert status={isError ? "error" : "success"} borderRadius="lg">
                 <AlertIcon />
                 {message}
               </Alert>
-            ) : null}
+            )}
           </VStack>
         </Box>
       </Container>
