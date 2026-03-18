@@ -3,21 +3,51 @@
 import { useState } from "react";
 import TimerComp from "@/components/timer";
 
-const DEFAULT_SETTINGS = { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15 };
+const DEFAULTS = { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15 };
+
+const toStrDraft = (s) => ({
+  focusMinutes:      String(s.focusMinutes),
+  shortBreakMinutes: String(s.shortBreakMinutes),
+  longBreakMinutes:  String(s.longBreakMinutes),
+});
 
 export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroComplete }) {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [draft, setDraft] = useState(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(DEFAULTS);
+  // draft stores raw strings so the user can clear a field and retype freely
+  const [draft, setDraft]       = useState(toStrDraft(DEFAULTS));
+  const [errors, setErrors]     = useState({});
   const [showSettings, setShowSettings] = useState(false);
 
   const openSettings = () => {
-    setDraft({ ...settings });
+    setDraft(toStrDraft(settings));
+    setErrors({});
     setShowSettings(true);
+  };
+
+  const restoreDefaults = () => {
+    setDraft(toStrDraft(DEFAULTS));
+    setErrors({});
   };
 
   const saveSettings = (e) => {
     e.preventDefault();
-    setSettings({ ...draft });
+
+    const focus      = parseInt(draft.focusMinutes, 10);
+    const shortBreak = parseInt(draft.shortBreakMinutes, 10);
+    const longBreak  = parseInt(draft.longBreakMinutes, 10);
+
+    const newErrors = {};
+    if (!draft.focusMinutes      || isNaN(focus)      || focus      < 1) newErrors.focusMinutes      = "Must be ≥ 1";
+    if (!draft.shortBreakMinutes || isNaN(shortBreak) || shortBreak < 1) newErrors.shortBreakMinutes = "Must be ≥ 1";
+    if (!draft.longBreakMinutes  || isNaN(longBreak)  || longBreak  < 1) newErrors.longBreakMinutes  = "Must be ≥ 1";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setSettings({ focusMinutes: focus, shortBreakMinutes: shortBreak, longBreakMinutes: longBreak });
+    setErrors({});
     setShowSettings(false);
   };
 
@@ -41,21 +71,29 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
             <SettingRow
               label="Focus"
               value={draft.focusMinutes}
-              onChange={(v) => setDraft((d) => ({ ...d, focusMinutes: v }))}
+              error={errors.focusMinutes}
+              onChange={(v) => { setDraft((d) => ({ ...d, focusMinutes: v })); setErrors((e) => ({ ...e, focusMinutes: undefined })); }}
             />
             <SettingRow
               label="Short Break"
               value={draft.shortBreakMinutes}
-              onChange={(v) => setDraft((d) => ({ ...d, shortBreakMinutes: v }))}
+              error={errors.shortBreakMinutes}
+              onChange={(v) => { setDraft((d) => ({ ...d, shortBreakMinutes: v })); setErrors((e) => ({ ...e, shortBreakMinutes: undefined })); }}
             />
             <SettingRow
               label="Long Break"
               value={draft.longBreakMinutes}
-              onChange={(v) => setDraft((d) => ({ ...d, longBreakMinutes: v }))}
+              error={errors.longBreakMinutes}
+              onChange={(v) => { setDraft((d) => ({ ...d, longBreakMinutes: v })); setErrors((e) => ({ ...e, longBreakMinutes: undefined })); }}
             />
-            <button type="submit" className="pokemon-btn pokemon-btn-red mt-2">
-              Save
-            </button>
+            <div className="flex gap-3 mt-2">
+              <button type="submit" className="pokemon-btn pokemon-btn-red">
+                Save
+              </button>
+              <button type="button" className="pokemon-btn" onClick={restoreDefaults}>
+                Restore Defaults
+              </button>
+            </div>
           </form>
         </div>
       ) : (
@@ -93,22 +131,33 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
   );
 }
 
-function SettingRow({ label, value, onChange }) {
+function SettingRow({ label, value, error, onChange }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <p className="pixel-text-sm" style={{ minWidth: "100px" }}>{label}</p>
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          min="1"
-          max="120"
-          value={value}
-          onChange={(e) => onChange(Math.max(1, Math.min(120, Number(e.target.value))))}
-          className="pokemon-input"
-          style={{ width: "70px", textAlign: "center" }}
-        />
-        <span className="pixel-text-sm text-muted">min</span>
+    <div className="flex-col" style={{ display: "flex", gap: "4px" }}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="pixel-text-sm" style={{ minWidth: "100px" }}>{label}</p>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min="1"
+            max="120"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="pokemon-input"
+            style={{
+              width: "70px",
+              textAlign: "center",
+              borderColor: error ? "var(--poke-red)" : undefined,
+            }}
+          />
+          <span className="pixel-text-sm text-muted">min</span>
+        </div>
       </div>
+      {error && (
+        <p className="pixel-text-sm" style={{ color: "var(--poke-red)", textAlign: "right" }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
