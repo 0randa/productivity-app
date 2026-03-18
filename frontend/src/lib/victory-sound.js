@@ -45,6 +45,17 @@ export function playBreakMusic(breakType) {
   breakAudio.play().catch(() => {});
 }
 
+export function pauseBreakMusic() {
+  if (!breakAudio) return;
+  breakAudio.pause();
+  // currentTime intentionally preserved so resume continues from same spot
+}
+
+export function resumeBreakMusic() {
+  if (!breakAudio) return;
+  breakAudio.play().catch(() => {});
+}
+
 export function stopBreakMusic() {
   if (!breakAudio) return;
   breakAudio.pause();

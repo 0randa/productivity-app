@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { playVictorySound, stopVictorySound, playBreakMusic, stopBreakMusic, stopAllAudio, playHealSound } from "@/lib/victory-sound";
+import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound } from "@/lib/victory-sound";
 
 const TESTING = false;
 const TEST_FOCUS_SECS = 10;
@@ -93,8 +93,13 @@ export default function TimerComp({
   };
 
   const toggleTimer = () => {
-    if (isRunning) { setIsRunning(false); return; }
+    if (isRunning) {
+      setIsRunning(false);
+      if (mode !== "focus") pauseBreakMusic();
+      return;
+    }
     if (mode === "focus" && canStartBreak) { startBreak(isLongBreakDue ? "long" : "short"); return; }
+    if (mode !== "focus") { resumeBreakMusic(); }
     if (mode === "focus" && (secondsLeft === focusSecs || secondsLeft === 0)) { onPomodoroStart?.(); }
     setIsRunning(true);
   };
