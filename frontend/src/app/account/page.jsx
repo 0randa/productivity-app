@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/auth-context";
 import { clearGuestData } from "@/lib/guest-storage";
+import { loadUserProgress } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
+import { getPokemonAssets } from "@/lib/pokemon";
 
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth();
@@ -14,6 +16,16 @@ export default function AccountPage() {
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const [party, setParty] = useState([]);
+  const [activePokemon, setActivePokemonLocal] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    loadUserProgress().then(({ activePokemon: ap, caughtPokemon }) => {
+      setActivePokemonLocal(ap);
+      setParty(caughtPokemon ?? []);
+    });
+  }, [user]);
 
   if (loading) {
     return (
@@ -72,6 +84,59 @@ export default function AccountPage() {
           <p className="pixel-heading-sm">Trainer Info</p>
           <p className="pixel-text mt-2" style={{ color: "var(--poke-blue)" }}>
             {user.email}
+          </p>
+        </div>
+
+        {/* Party */}
+        <div className="pokemon-window-inner mt-4">
+          <p className="pixel-heading-sm">Your Party</p>
+          {party.length === 0 ? (
+            <p className="pixel-text mt-2 text-muted">
+              No caught Pokémon yet. Complete pomodoros to encounter wild Pokémon!
+            </p>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "12px",
+                marginTop: "12px",
+              }}
+            >
+              {party.map((pokemon, i) => {
+                const isActive = activePokemon?.speciesName === pokemon.speciesName;
+                return (
+                  <div
+                    key={i}
+                    className="pokemon-window-inner"
+                    style={{
+                      textAlign: "center",
+                      padding: "8px",
+                      borderColor: isActive ? "var(--poke-blue)" : undefined,
+                      position: "relative",
+                    }}
+                  >
+                    {isActive && (
+                      <span
+                        className="pokemon-badge"
+                        style={{ fontSize: "9px", marginBottom: "4px", display: "inline-block" }}
+                      >
+                        Active
+                      </span>
+                    )}
+                    <img
+                      src={pokemon.sprite}
+                      alt={pokemon.label}
+                      style={{ width: "64px", height: "64px", imageRendering: "pixelated", margin: "0 auto", display: "block" }}
+                    />
+                    <p className="pixel-text-sm" style={{ marginTop: "4px" }}>{pokemon.label}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <p className="pixel-text-sm mt-3 text-muted">
+            {party.length}/6 party slots filled. Switch your active Pokémon from the main screen after catching one.
           </p>
         </div>
 

@@ -4,14 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import StarterSelection from "@/components/starter-selection";
 import StudyDashboard from "@/components/study-dashboard";
 import StudyShell from "@/components/study-shell";
+import { WildEncounterModal } from "@/components/wild-encounter-modal";
 import { useAuth } from "@/context/auth-context";
 import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
 import { useSessionState } from "@/hooks/use-session-state";
 import { useStarterSelection } from "@/hooks/use-starter-selection";
+import { useWildEncounter } from "@/hooks/use-wild-encounter";
 import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
-import { loadUserProgress, saveUserProgress } from "@/lib/user-progress";
+import { loadUserProgress, saveUserProgress, addCaughtPokemon } from "@/lib/user-progress";
 import {
   MAX_LEVEL,
+  MAX_PARTY_SIZE,
   STARTERS,
   START_LEVEL,
   XP_PER_TASK,
@@ -22,6 +25,7 @@ export default function App() {
   const { user, loading: authLoading } = useAuth();
 
   const [activePokemon, setActivePokemon] = useState(null);
+  const [caughtPokemon, setCaughtPokemon] = useState([]);
   const [progressLoaded, setProgressLoaded] = useState(false);
 
   const {
@@ -49,21 +53,26 @@ export default function App() {
     handleTaskComplete,
   } = useSessionState();
 
+  const { wildPokemon, catchResult, triggerEncounterChance, attemptCatch, dismissEncounter } =
+    useWildEncounter({ partySize: caughtPokemon.length });
+
   // Load progress once auth resolves, resetting state first on every change
   useEffect(() => {
     if (authLoading) return;
 
     // Always reset to a clean slate before loading (handles logout correctly)
     setActivePokemon(null);
+    setCaughtPokemon([]);
     setTotalXp(0);
     setPomodorosCompleted(0);
     setProgressLoaded(false);
 
     if (user) {
-      loadUserProgress().then(({ activePokemon: ap, totalXp: xp, pomodorosCompleted: pc }) => {
+      loadUserProgress().then(({ activePokemon: ap, totalXp: xp, pomodorosCompleted: pc, caughtPokemon: caught }) => {
         if (ap) setActivePokemon(ap);
         setTotalXp(xp);
         setPomodorosCompleted(pc);
+        setCaughtPokemon(caught ?? []);
         setProgressLoaded(true);
       });
     } else {
@@ -71,6 +80,7 @@ export default function App() {
       if (saved?.activePokemon) setActivePokemon(saved.activePokemon);
       if (saved?.totalXp) setTotalXp(saved.totalXp);
       if (saved?.pomodorosCompleted) setPomodorosCompleted(saved.pomodorosCompleted);
+      setCaughtPokemon(saved?.caughtPokemon ?? []);
       setProgressLoaded(true);
     }
   }, [user, authLoading]);
@@ -82,9 +92,9 @@ export default function App() {
     if (user) {
       saveUserProgress({ activePokemon, totalXp, pomodorosCompleted });
     } else {
-      saveGuestData({ activePokemon, totalXp, pomodorosCompleted });
+      saveGuestData({ activePokemon, totalXp, pomodorosCompleted, caughtPokemon });
     }
-  }, [activePokemon, totalXp, pomodorosCompleted, user, progressLoaded]);
+  }, [activePokemon, totalXp, pomodorosCompleted, caughtPokemon, user, progressLoaded]);
 
   const {
     level,
@@ -120,6 +130,30 @@ export default function App() {
       currentLevel: level,
       resolveLevelForEarnedXp: getLevelForEarnedXp,
     });
+  };
+
+  const onPomodoroComplete = () => {
+    handlePomodoroComplete();
+    // Only trigger encounters once the user has an active Pokemon
+    if (activePokemon) {
+      triggerEncounterChance();
+    }
+  };
+
+  const handleCatch = () => {
+    const caught = attemptCatch();
+    if (caught) {
+      const newParty = [...caughtPokemon, caught];
+      setCaughtPokemon(newParty);
+      if (user) addCaughtPokemon(caught);
+    }
+  };
+
+  const handleSetCaughtActive = () => {
+    if (wildPokemon) {
+      setActivePokemon(wildPokemon);
+    }
+    dismissEncounter();
   };
 
   const canEvolveByLevel =
@@ -188,7 +222,7 @@ export default function App() {
         availableTaskClaims={availableTaskClaims}
         statusMessage={statusMessage}
         onPomodoroStart={handlePomodoroStart}
-        onPomodoroComplete={handlePomodoroComplete}
+        onPomodoroComplete={onPomodoroComplete}
         companionProps={{
           activePokemon,
           level,
@@ -218,6 +252,15 @@ export default function App() {
             currentLevel: level,
           },
         }}
+      />
+
+      <WildEncounterModal
+        wildPokemon={wildPokemon}
+        catchResult={catchResult}
+        partyFull={caughtPokemon.length >= MAX_PARTY_SIZE}
+        onAttemptCatch={handleCatch}
+        onSetActive={handleSetCaughtActive}
+        onDismiss={dismissEncounter}
       />
     </StudyShell>
   );

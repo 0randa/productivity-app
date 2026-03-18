@@ -45,6 +45,108 @@
   --pixel: 3px;
 }
 
+/* ================================================
+   Dark Mode — Night-time Pokemon Theme
+   ================================================ */
+[data-theme="dark"] {
+  /* Sky — night */
+  --sky-top: #0a0a2a;
+  --sky-mid: #101840;
+  --sky-bottom: #1a2858;
+
+  /* Grass & Nature — night */
+  --grass: #1a3018;
+  --grass-dark: #102010;
+  --grass-light: #243c20;
+  --path: #5a4830;
+  --path-dark: #402e18;
+
+  /* UI Windows — dark */
+  --window-bg: #1a1c2e;
+  --window-border: #5060a0;
+  --window-highlight: #2a2e50;
+  --window-shadow: #0a0c18;
+
+  /* Text */
+  --text-dark: #d8d8f0;
+  --text-muted: #7878a8;
+  --text-light: #f0f0ff;
+}
+
+[data-theme="dark"] .pokemon-btn {
+  background: #22263a;
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .pokemon-btn:hover:not(:disabled) {
+  background: #2c3050;
+}
+
+[data-theme="dark"] .pokemon-chip {
+  background: #22263a;
+}
+
+[data-theme="dark"] .pokemon-input {
+  background: #22263a;
+  color: var(--text-dark);
+  box-shadow: inset 2px 2px 0 #0e1020;
+}
+
+[data-theme="dark"] .pokemon-input:focus {
+  box-shadow: inset 2px 2px 0 #0e1020, 0 0 0 2px rgba(88, 136, 208, 0.4);
+}
+
+[data-theme="dark"] .sprite-frame {
+  background: #22263a;
+  box-shadow: inset 2px 2px 0 #2a2e50, inset -2px -2px 0 #0a0c18;
+}
+
+[data-theme="dark"] .starter-card {
+  background: #22263a;
+  box-shadow:
+    inset 2px 2px 0 #2a2e50,
+    inset -2px -2px 0 #0a0c18,
+    3px 3px 0 rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .starter-card:hover {
+  box-shadow:
+    inset 2px 2px 0 #2a2e50,
+    inset -2px -2px 0 #0a0c18,
+    5px 5px 0 rgba(0,0,0,0.5);
+}
+
+[data-theme="dark"] .starter-card-selected {
+  background: #2a1e30;
+  border-color: var(--poke-red);
+  box-shadow:
+    inset 2px 2px 0 #3a2840,
+    inset -2px -2px 0 #180e1c,
+    5px 5px 0 rgba(224, 64, 56, 0.3);
+}
+
+[data-theme="dark"] .starter-sprite-box {
+  background: #2a2e4a;
+}
+
+[data-theme="dark"] .starter-card-selected .starter-sprite-box {
+  background: #3a2030;
+}
+
+[data-theme="dark"] .evolution-box {
+  background: rgba(88, 136, 208, 0.1);
+}
+
+[data-theme="dark"] .pokeball-dot {
+  box-shadow: 0 0 0 2px #22263a, 0 0 0 4px var(--window-border);
+}
+
+/* Night sky stars */
+[data-theme="dark"] .sky-clouds::before,
+[data-theme="dark"] .sky-clouds::after {
+  opacity: 0.15;
+}
+
 * {
   box-sizing: border-box;
   image-rendering: pixelated;

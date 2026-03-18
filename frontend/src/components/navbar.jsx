@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { clearGuestData } from "@/lib/guest-storage";
+import { useTheme } from "@/hooks/use-theme";
 
 export function NavbarComp() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const { dark, toggle } = useTheme();
 
   const handleSignOut = async () => {
     await signOut();
@@ -26,6 +28,14 @@ export function NavbarComp() {
           </Link>
         </div>
         <div className="pokemon-nav-links">
+          <button
+            onClick={toggle}
+            className="pokemon-nav-link"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {dark ? "☀" : "☾"}
+          </button>
           {!loading && (
             user ? (
               <>
