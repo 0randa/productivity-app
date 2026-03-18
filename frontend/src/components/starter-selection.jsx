@@ -11,7 +11,7 @@ export default function StarterSelection({
       <span className="pokemon-badge pokemon-badge-blue">First Session Setup</span>
       <h2 className="pixel-heading-lg mt-4">Choose your starter!</h2>
       <p className="pixel-text mt-3 text-muted">
-        This choice is session-only for now. Refreshing the page will reset progress.
+        Your progress is saved locally in this browser. Sign up to sync across devices.
       </p>
 
       <div className="starters-grid mt-6">
