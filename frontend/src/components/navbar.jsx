@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { clearGuestData } from "@/lib/guest-storage";
 
 export function NavbarComp() {
   const { user, loading, signOut } = useAuth();
@@ -10,6 +11,7 @@ export function NavbarComp() {
 
   const handleSignOut = async () => {
     await signOut();
+    clearGuestData();
     router.push("/");
   };
 

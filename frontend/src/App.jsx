@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import StarterSelection from "@/components/starter-selection";
 import StudyDashboard from "@/components/study-dashboard";
 import StudyShell from "@/components/study-shell";
+import { useAuth } from "@/context/auth-context";
 import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
 import { useSessionState } from "@/hooks/use-session-state";
 import { useStarterSelection } from "@/hooks/use-starter-selection";
 import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
+import { loadUserProgress, saveUserProgress } from "@/lib/user-progress";
 import {
   MAX_LEVEL,
   STARTERS,
@@ -17,10 +19,11 @@ import {
 } from "@/lib/pokemon";
 
 export default function App() {
-  // Lazy-load saved guest data once on mount (client-only)
-  const saved = useMemo(() => loadGuestData(), []);
+  const { user, loading: authLoading } = useAuth();
 
-  const [activePokemon, setActivePokemon] = useState(() => saved?.activePokemon ?? null);
+  const [activePokemon, setActivePokemon] = useState(null);
+  const [progressLoaded, setProgressLoaded] = useState(false);
+
   const {
     previewStarter,
     previewStarterData,
@@ -32,9 +35,11 @@ export default function App() {
     tasks,
     pomodorosStarted,
     pomodorosCompleted,
+    setPomodorosCompleted,
     tasksCompleted,
     availableTaskClaims,
     totalXp,
+    setTotalXp,
     statusMessage,
     setWelcomeMessage,
     updateStatusMessage,
@@ -42,15 +47,44 @@ export default function App() {
     handlePomodoroComplete,
     handleTaskCreate,
     handleTaskComplete,
-  } = useSessionState({
-    initialTotalXp: saved?.totalXp ?? 0,
-    initialPomodorosCompleted: saved?.pomodorosCompleted ?? 0,
-  });
+  } = useSessionState();
 
-  // Persist guest progress to localStorage whenever key values change
+  // Load progress once auth resolves, resetting state first on every change
   useEffect(() => {
-    saveGuestData({ activePokemon, totalXp, pomodorosCompleted });
-  }, [activePokemon, totalXp, pomodorosCompleted]);
+    if (authLoading) return;
+
+    // Always reset to a clean slate before loading (handles logout correctly)
+    setActivePokemon(null);
+    setTotalXp(0);
+    setPomodorosCompleted(0);
+    setProgressLoaded(false);
+
+    if (user) {
+      loadUserProgress().then(({ activePokemon: ap, totalXp: xp, pomodorosCompleted: pc }) => {
+        if (ap) setActivePokemon(ap);
+        setTotalXp(xp);
+        setPomodorosCompleted(pc);
+        setProgressLoaded(true);
+      });
+    } else {
+      const saved = loadGuestData();
+      if (saved?.activePokemon) setActivePokemon(saved.activePokemon);
+      if (saved?.totalXp) setTotalXp(saved.totalXp);
+      if (saved?.pomodorosCompleted) setPomodorosCompleted(saved.pomodorosCompleted);
+      setProgressLoaded(true);
+    }
+  }, [user, authLoading]);
+
+  // Persist progress whenever it changes
+  useEffect(() => {
+    if (!progressLoaded) return;
+
+    if (user) {
+      saveUserProgress({ activePokemon, totalXp, pomodorosCompleted });
+    } else {
+      saveGuestData({ activePokemon, totalXp, pomodorosCompleted });
+    }
+  }, [activePokemon, totalXp, pomodorosCompleted, user, progressLoaded]);
 
   const {
     level,
@@ -66,12 +100,8 @@ export default function App() {
 
   const greetingLabel = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 12) {
-      return "Morning Momentum";
-    }
-    if (hour < 18) {
-      return "Afternoon Flow";
-    }
+    if (hour < 12) return "Morning Momentum";
+    if (hour < 18) return "Afternoon Flow";
     return "Evening Deep Focus";
   }, []);
 
@@ -98,9 +128,7 @@ export default function App() {
     level >= nextEvolution.minLevel;
 
   const handleEvolve = () => {
-    if (!nextEvolution) {
-      return;
-    }
+    if (!nextEvolution) return;
 
     if (typeof nextEvolution.minLevel !== "number") {
       updateStatusMessage(
@@ -129,6 +157,11 @@ export default function App() {
       `${activePokemon?.label ?? "Your Pokemon"} evolved into ${nextEvolution.label}!`,
     );
   };
+
+  // Wait for auth + progress before rendering
+  if (authLoading || !progressLoaded) {
+    return null;
+  }
 
   if (!activePokemon) {
     return (
