@@ -68,22 +68,24 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  /* Sky from top through sky-zone (navbar~50px + sky 120px = 170px), then grass */
   background: linear-gradient(
     to bottom,
-    var(--sky-top) 0%,
-    var(--sky-mid) 20%,
-    var(--sky-bottom) 32%,
-    var(--grass-light) 36%,
-    var(--grass) 40%,
-    var(--grass) 100%
+    var(--sky-top)    0px,
+    var(--sky-mid)    80px,
+    var(--sky-bottom) 160px,
+    var(--grass-light) 175px,
+    var(--grass)      210px,
+    var(--grass)      100%
   );
 }
 
-/* Grass checkerboard — confined to the bottom grass zone */
+/* Grass checkerboard — covers the entire area below the tree line */
 .grass-world::after {
   content: '';
   position: absolute;
-  top: 36%;
+  /* navbar ~50px + sky-zone 120px + trees 48px = ~218px */
+  top: 218px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -95,30 +97,28 @@ body {
   z-index: 0;
 }
 
-/* Horizon path strip */
+/* Horizon path strip — sits between sky-zone and trees */
 .grass-world::before {
   content: '';
   display: block;
-  height: 8px;
+  height: 6px;
   background: repeating-linear-gradient(
     90deg,
     var(--path) 0px, var(--path) 16px,
     var(--path-dark) 16px, var(--path-dark) 32px
   );
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 /* ===== ANIMATED PIXEL CLOUDS ===== */
+/* Sky zone sits in normal flow — always visible below navbar, above trees */
 .sky-clouds {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 220px;
-  pointer-events: none;
-  z-index: 0;
+  position: relative;
+  height: 120px;
   overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Large clouds — slow drift */
@@ -700,7 +700,7 @@ body {
   .pixel-heading-lg { font-size: 14px; }
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .hide-mobile { display: none; }
-  .sky-clouds { height: 150px; }
+  .sky-clouds { height: 80px; }
   .pixel-trees { height: 32px; background-size: 96px 32px; }
   .pixel-trees::before { bottom: -12px; height: 12px; }
   .pixel-trees::after { bottom: -40px; }

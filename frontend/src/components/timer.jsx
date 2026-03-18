@@ -5,7 +5,7 @@ import { playVictorySound, stopVictorySound, playBreakMusic, stopBreakMusic, sto
 
 // ─── TEST MODE ────────────────────────────────────────────────────────────────
 // Set to true for quick iteration; overrides the settings-panel values.
-const TESTING = true;
+const TESTING = false;
 const TEST_FOCUS_SECS = 10;
 const TEST_BREAK_SECS = 2;
 // ─────────────────────────────────────────────────────────────────────────────
