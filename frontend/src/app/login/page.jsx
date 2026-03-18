@@ -16,7 +16,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { NavbarComp } from "@/components/navbar";
+import StudyShell from "@/components/study-shell";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -43,30 +43,28 @@ export default function LoginPage() {
   };
 
   return (
-    <Box minH="100vh" bg="study.cream" bgGradient="linear(to-b, #f5f3ef 0%, #faf9f7 50%, #ebe8e2 100%)">
-      <NavbarComp />
+    <StudyShell>
       <Container maxW="md" py={10}>
         <Box
           p={8}
-          borderRadius="card"
-          bg="study.paper"
+          borderRadius="lg"
+          bg="var(--window-bg)"
           border="1px solid"
-          borderColor="study.border"
-          boxShadow="card"
+          borderColor="var(--window-border)"
         >
-          <Heading size="lg" color="study.ink">Welcome back</Heading>
-          <Text color="study.inkMuted" mt={2} mb={6}>
+          <Heading size="lg" color="var(--text-dark)">Welcome back</Heading>
+          <Text color="var(--text-muted)" mt={2} mb={6}>
             Continue your focus streak.
           </Text>
 
           <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
             <FormControl isRequired>
-              <FormLabel color="study.ink">Email</FormLabel>
+              <FormLabel color="var(--text-dark)">Email</FormLabel>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel color="study.ink">Password</FormLabel>
+              <FormLabel color="var(--text-dark)">Password</FormLabel>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </FormControl>
 
@@ -83,6 +81,6 @@ export default function LoginPage() {
           </VStack>
         </Box>
       </Container>
-    </Box>
+    </StudyShell>
   );
 }

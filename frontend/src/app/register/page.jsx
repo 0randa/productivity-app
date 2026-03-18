@@ -16,7 +16,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { NavbarComp } from "@/components/navbar";
+import StudyShell from "@/components/study-shell";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -78,35 +78,33 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box minH="100vh" bg="study.cream" bgGradient="linear(to-b, #f5f3ef 0%, #faf9f7 50%, #ebe8e2 100%)">
-      <NavbarComp />
+    <StudyShell>
       <Container maxW="md" py={10}>
         <Box
           p={8}
-          borderRadius="card"
-          bg="study.paper"
+          borderRadius="lg"
+          bg="var(--window-bg)"
           border="1px solid"
-          borderColor="study.border"
-          boxShadow="card"
+          borderColor="var(--window-border)"
         >
-          <Heading size="lg" color="study.ink">Create your account</Heading>
-          <Text color="study.inkMuted" mt={2} mb={6}>
+          <Heading size="lg" color="var(--text-dark)">Create your account</Heading>
+          <Text color="var(--text-muted)" mt={2} mb={6}>
             Join PomoPet to track focused sessions and task progress.
           </Text>
 
           <VStack as="form" spacing={4} align="stretch" onSubmit={handleSubmit}>
             <FormControl isRequired>
-              <FormLabel color="study.ink">Email</FormLabel>
+              <FormLabel color="var(--text-dark)">Email</FormLabel>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel color="study.ink">Password (min 6 characters)</FormLabel>
+              <FormLabel color="var(--text-dark)">Password (min 6 characters)</FormLabel>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel color="study.ink">Confirm Password</FormLabel>
+              <FormLabel color="var(--text-dark)">Confirm Password</FormLabel>
               <Input
                 type="password"
                 value={confirmPassword}
@@ -127,6 +125,6 @@ export default function RegisterPage() {
           </VStack>
         </Box>
       </Container>
-    </Box>
+    </StudyShell>
   );
 }
