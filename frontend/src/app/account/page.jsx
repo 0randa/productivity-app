@@ -29,12 +29,19 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (!user) return;
-    loadUserProgress().then(({ activePokemon: ap, caughtPokemon, totalXp: xp, pomodorosCompleted: pc }) => {
-      setActivePokemonLocal(ap);
-      setParty(caughtPokemon ?? []);
-      setTotalXp(xp ?? 0);
-      setPomodorosCompleted(pc ?? 0);
-    });
+    loadUserProgress().then(
+      ({
+        activePokemon: ap,
+        caughtPokemon,
+        totalXp: xp,
+        pomodorosCompleted: pc,
+      }) => {
+        setActivePokemonLocal(ap);
+        setParty(caughtPokemon ?? []);
+        setTotalXp(xp ?? 0);
+        setPomodorosCompleted(pc ?? 0);
+      },
+    );
   }, [user]);
 
   const { partyPokemon, boxedPokemon } = useMemo(() => {
@@ -70,7 +77,9 @@ export default function AccountPage() {
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="pt-5">
-              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">Loading…</p>
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+                Loading…
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -84,10 +93,15 @@ export default function AccountPage() {
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="pt-5">
-              <p className="font-pixel text-[11px] text-[var(--text-dark)]">Not logged in</p>
+              <p className="font-pixel text-[11px] text-[var(--text-dark)]">
+                Not logged in
+              </p>
               <p className="font-pixel-body text-[20px] text-[var(--text-muted)] mt-3">
                 Please{" "}
-                <Link href="/login" className="text-[var(--poke-blue)] hover:underline">
+                <Link
+                  href="/login"
+                  className="text-[var(--poke-blue)] hover:underline"
+                >
                   log in
                 </Link>{" "}
                 to access account settings.
@@ -104,7 +118,11 @@ export default function AccountPage() {
     setDeleting(true);
     setError("");
     const { error: rpcError } = await supabase.rpc("delete_own_account");
-    if (rpcError) { setDeleting(false); setError(rpcError.message); return; }
+    if (rpcError) {
+      setDeleting(false);
+      setError(rpcError.message);
+      return;
+    }
     await signOut();
     clearGuestData();
     router.push("/");
@@ -124,7 +142,10 @@ export default function AccountPage() {
             <CardTitle>Trainer Info</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-pixel-body text-[22px]" style={{ color: "var(--poke-blue)" }}>
+            <p
+              className="font-pixel-body text-[22px]"
+              style={{ color: "var(--poke-blue)" }}
+            >
               {user.email}
             </p>
           </CardContent>
@@ -135,18 +156,22 @@ export default function AccountPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Your Party</CardTitle>
-              <Badge variant={partyPokemon.length >= 6 ? "red" : "outline"}>{partyPokemon.length}/6</Badge>
+              <Badge variant={partyPokemon.length >= 6 ? "red" : "outline"}>
+                {partyPokemon.length}/6
+              </Badge>
             </div>
           </CardHeader>
           <CardContent>
             {partyPokemon.length === 0 ? (
               <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-                No caught Pokémon yet. Complete pomodoros to encounter wild Pokémon!
+                No caught Pokémon yet. Complete pomodoros to encounter wild
+                Pokémon!
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 {partyPokemon.map((pokemon, i) => {
-                  const isActive = activePokemon?.speciesName === pokemon.speciesName;
+                  const isActive =
+                    activePokemon?.speciesName === pokemon.speciesName;
                   return (
                     <div
                       key={i}
@@ -171,7 +196,9 @@ export default function AccountPage() {
                       }}
                     >
                       {isActive && (
-                        <Badge variant="blue" className="mb-2 text-[7px]">Active</Badge>
+                        <Badge variant="blue" className="mb-2 text-[7px]">
+                          Active
+                        </Badge>
                       )}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -180,7 +207,9 @@ export default function AccountPage() {
                         className="w-16 h-16 object-contain"
                         style={{ imageRendering: "pixelated" }}
                       />
-                      <p className="font-pixel-body text-[18px] text-[var(--text-dark)] mt-1">{pokemon.label}</p>
+                      <p className="font-pixel-body text-[18px] text-[var(--text-dark)] mt-1">
+                        {pokemon.label}
+                      </p>
                     </div>
                   );
                 })}
@@ -193,14 +222,20 @@ export default function AccountPage() {
             {boxedPokemon.length > 0 ? (
               <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-1">
                 {boxedPokemon.length} Pokémon in your{" "}
-                <Link href="/box" className="text-[var(--poke-blue)] hover:underline">
+                <Link
+                  href="/box"
+                  className="text-[var(--poke-blue)] hover:underline"
+                >
                   Box
                 </Link>
                 .
               </p>
             ) : null}
             {error ? (
-              <p className="font-pixel-body text-[16px] mt-2" style={{ color: "var(--poke-red)" }}>
+              <p
+                className="font-pixel-body text-[16px] mt-2"
+                style={{ color: "var(--poke-red)" }}
+              >
                 {error}
               </p>
             ) : null}
@@ -210,16 +245,23 @@ export default function AccountPage() {
         {/* Danger Zone */}
         <Card className="border-[var(--poke-red)]!">
           <CardHeader>
-            <CardTitle style={{ color: "var(--poke-red)" }}>Danger Zone</CardTitle>
+            <CardTitle style={{ color: "var(--poke-red)" }}>
+              Danger Zone
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-              Permanently delete your account and all saved data. This cannot be undone.
+              Permanently delete your account and all saved data. This cannot be
+              undone.
             </p>
             <Separator />
             <div className="space-y-2">
               <Label>
-                Type <span className="font-pixel text-[8px] text-[var(--poke-red)]">DELETE</span> to confirm:
+                Type{" "}
+                <span className="font-pixel text-[8px] text-[var(--poke-red)]">
+                  DELETE
+                </span>{" "}
+                to confirm:
               </Label>
               <Input
                 type="text"
@@ -227,11 +269,19 @@ export default function AccountPage() {
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder="DELETE"
                 className="max-w-[200px]"
-                style={{ borderColor: confirmText === "DELETE" ? "var(--poke-red)" : undefined }}
+                style={{
+                  borderColor:
+                    confirmText === "DELETE" ? "var(--poke-red)" : undefined,
+                }}
               />
             </div>
             {error && (
-              <p className="font-pixel-body text-[18px]" style={{ color: "var(--poke-red)" }}>{error}</p>
+              <p
+                className="font-pixel-body text-[18px]"
+                style={{ color: "var(--poke-red)" }}
+              >
+                {error}
+              </p>
             )}
             <Button
               variant="destructive"

@@ -3,7 +3,6 @@ import {
   WILD_POKEMON,
   WILD_ENCOUNTER_CHANCE,
   CATCH_RATE,
-  MAX_PARTY_SIZE,
   getPokemonAssets,
   formatPokemonName,
 } from "@/lib/pokemon";
@@ -17,13 +16,12 @@ function pickRandomWild() {
   };
 }
 
-export function useWildEncounter({ partySize, testingMode = false }) {
+export function useWildEncounter({ testingMode = false, partySize: _partySize } = {}) {
+  void _partySize;
   const [wildPokemon, setWildPokemon] = useState(null);
   const [catchResult, setCatchResult] = useState(null); // null | "success" | "fail"
 
   const triggerEncounterChance = () => {
-    if (!testingMode && partySize >= MAX_PARTY_SIZE) return;
-
     // In testing mode we force an encounter every time.
     if (testingMode || Math.random() < WILD_ENCOUNTER_CHANCE) {
       setWildPokemon(pickRandomWild());

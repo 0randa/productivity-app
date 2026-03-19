@@ -35,7 +35,9 @@ export default function BoxPage() {
         <div className="max-w-3xl mx-auto">
           <Card>
             <CardContent className="pt-5">
-              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">Loading…</p>
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+                Loading…
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -49,10 +51,15 @@ export default function BoxPage() {
         <div className="max-w-3xl mx-auto">
           <Card>
             <CardContent className="pt-5">
-              <p className="font-pixel text-[11px] text-[var(--text-dark)]">Not logged in</p>
+              <p className="font-pixel text-[11px] text-[var(--text-dark)]">
+                Not logged in
+              </p>
               <p className="font-pixel-body text-[20px] text-[var(--text-muted)] mt-3">
                 Please{" "}
-                <Link href="/login" className="text-[var(--poke-blue)] hover:underline">
+                <Link
+                  href="/login"
+                  className="text-[var(--poke-blue)] hover:underline"
+                >
                   log in
                 </Link>{" "}
                 to view your Box.
@@ -74,7 +81,10 @@ export default function BoxPage() {
               Extra Pokémon beyond your party of 6 live here.
             </p>
           </div>
-          <Link href="/account" className="text-[var(--poke-blue)] hover:underline font-pixel text-[10px]">
+          <Link
+            href="/account"
+            className="text-[var(--poke-blue)] hover:underline font-pixel text-[10px]"
+          >
             Back to Account
           </Link>
         </div>
@@ -94,7 +104,8 @@ export default function BoxPage() {
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 {boxedPokemon.map((pokemon, i) => {
-                  const isActive = activePokemon?.speciesName === pokemon.speciesName;
+                  const isActive =
+                    activePokemon?.speciesName === pokemon.speciesName;
                   return (
                     <div
                       key={`${pokemon.speciesName ?? pokemon.key ?? "p"}-${i}`}
@@ -138,4 +149,3 @@ export default function BoxPage() {
     </StudyShell>
   );
 }
-

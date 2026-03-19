@@ -31,7 +31,9 @@ export default function App() {
   const [activePokemon, setActivePokemon] = useState(null);
   const [caughtPokemon, setCaughtPokemon] = useState([]);
   const [progressLoaded, setProgressLoaded] = useState(false);
-  const [testingMode, setTestingMode] = useState(() => Boolean(loadGuestData()?.testingMode));
+  const [testingMode, setTestingMode] = useState(() =>
+    Boolean(loadGuestData()?.testingMode),
+  );
 
   const { previewStarter, previewStarterData, playingStarter, playStarterCry } =
     useStarterSelection(STARTERS);
@@ -60,7 +62,7 @@ export default function App() {
     triggerEncounterChance,
     attemptCatch,
     dismissEncounter,
-  } = useWildEncounter({ partySize: caughtPokemon.length, testingMode });
+  } = useWildEncounter({ testingMode, partySize: Math.min(caughtPokemon.length, MAX_PARTY_SIZE) });
 
   useEffect(() => {
     const onToggle = (e) => setTestingMode(Boolean(e.detail?.enabled));
@@ -193,11 +195,11 @@ export default function App() {
 
   const handleCatch = () => {
     const caught = attemptCatch();
-    if (caught) {
-      const newParty = [...caughtPokemon, caught];
-      setCaughtPokemon(newParty);
-      if (user) addCaughtPokemon(caught);
-    }
+    if (!caught) return;
+
+    const nextCaught = [...caughtPokemon, caught];
+    setCaughtPokemon(nextCaught);
+    if (user) addCaughtPokemon(caught);
   };
 
   const handleSetCaughtActive = () => {
