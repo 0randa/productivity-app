@@ -6,7 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/auth-context";
 import { clearGuestData } from "@/lib/guest-storage";
-import { loadUserProgress } from "@/lib/user-progress";
+import { loadUserProgress, saveUserProgress } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,17 +20,41 @@ export default function AccountPage() {
   const router = useRouter();
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [savingActive, setSavingActive] = useState(false);
   const [error, setError] = useState("");
   const [party, setParty] = useState([]);
   const [activePokemon, setActivePokemonLocal] = useState(null);
+  const [totalXp, setTotalXp] = useState(0);
+  const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
 
   useEffect(() => {
     if (!user) return;
-    loadUserProgress().then(({ activePokemon: ap, caughtPokemon }) => {
+    loadUserProgress().then(({ activePokemon: ap, caughtPokemon, totalXp: xp, pomodorosCompleted: pc }) => {
       setActivePokemonLocal(ap);
       setParty(caughtPokemon ?? []);
+      setTotalXp(xp ?? 0);
+      setPomodorosCompleted(pc ?? 0);
     });
   }, [user]);
+
+  const setActivePokemon = async (pokemon) => {
+    if (!pokemon) return;
+    setActivePokemonLocal(pokemon);
+
+    setSavingActive(true);
+    setError("");
+    try {
+      await saveUserProgress({
+        activePokemon: pokemon,
+        totalXp,
+        pomodorosCompleted,
+      });
+    } catch (e) {
+      setError(e?.message ?? "Could not update active Pokémon.");
+    } finally {
+      setSavingActive(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -124,7 +148,19 @@ export default function AccountPage() {
                         isActive
                           ? "border-[var(--poke-blue)] bg-[rgba(56,104,176,0.06)]"
                           : "border-[var(--window-border)] bg-[var(--window-bg)]",
+                        "cursor-pointer select-none",
                       ].join(" ")}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isActive}
+                      aria-label={`Set ${pokemon.label} as active Pokémon`}
+                      onClick={() => setActivePokemon(pokemon)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setActivePokemon(pokemon);
+                        }
+                      }}
                     >
                       {isActive && (
                         <Badge variant="blue" className="mb-2 text-[7px]">Active</Badge>
@@ -143,8 +179,14 @@ export default function AccountPage() {
               </div>
             )}
             <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-3">
-              Switch your active Pokémon from the main screen after catching one.
+              Click a Pokémon to set it as your active companion.
+              {savingActive ? " Saving…" : ""}
             </p>
+            {error ? (
+              <p className="font-pixel-body text-[16px] mt-2" style={{ color: "var(--poke-red)" }}>
+                {error}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
 
