@@ -6,6 +6,17 @@
 
 let victoryAudio = null;
 let breakAudio = null;
+let muted = false;
+
+// ── Mute ───────────────────────────────────────────────────────────────────────
+
+export function getMuted() { return muted; }
+
+export function setMuted(val) {
+  muted = val;
+  if (victoryAudio) victoryAudio.volume = muted ? 0 : 0.8;
+  if (breakAudio)   breakAudio.volume   = muted ? 0 : 0.6;
+}
 
 // ── Victory ────────────────────────────────────────────────────────────────────
 
@@ -14,7 +25,7 @@ export function playVictorySound() {
 
   stopVictorySound();
   victoryAudio = new Audio("/victory-trainer.mp3");
-  victoryAudio.volume = 0.8;
+  victoryAudio.volume = muted ? 0 : 0.8;
   victoryAudio.play().catch(() => {});
 }
 
@@ -40,7 +51,7 @@ export function playBreakMusic(breakType) {
 
   stopBreakMusic();
   breakAudio = new Audio(src);
-  breakAudio.volume = 0.6;
+  breakAudio.volume = muted ? 0 : 0.6;
   breakAudio.loop = true;
   breakAudio.play().catch(() => {});
 }

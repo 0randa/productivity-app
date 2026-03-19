@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound } from "@/lib/victory-sound";
+import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound, getMuted, setMuted } from "@/lib/victory-sound";
 
-const TESTING = false;
-const TEST_FOCUS_SECS = 10;
+const TESTING = true;
+const TEST_FOCUS_SECS = 5;
 const TEST_BREAK_SECS = 2;
 
 export default function TimerComp({
@@ -27,7 +28,14 @@ export default function TimerComp({
   const [isRunning, setIsRunning]     = useState(false);
   const [canStartBreak, setCanStartBreak] = useState(false);
   const [pomodoroCount, setPomodoroCount] = useState(0);
+  const [isMuted, setIsMuted]         = useState(() => getMuted());
   const completionFired = useRef(false);
+
+  const toggleMute = () => {
+    const next = !isMuted;
+    setMuted(next);
+    setIsMuted(next);
+  };
 
   useEffect(() => {
     setIsRunning(false);
@@ -217,6 +225,17 @@ export default function TimerComp({
         )}
         <Button variant="ghost" onClick={resetTimer}>
           Reset
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMute}
+          aria-label={isMuted ? "Unmute music" : "Mute music"}
+        >
+          {isMuted
+            ? <VolumeX size={16} aria-hidden="true" />
+            : <Volume2 size={16} aria-hidden="true" />
+          }
         </Button>
       </div>
 
