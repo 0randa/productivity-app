@@ -64,7 +64,10 @@ export default function App() {
     triggerEncounterChance,
     attemptCatch,
     dismissEncounter,
-  } = useWildEncounter({ testingMode, partySize: Math.min(caughtPokemon.length, MAX_PARTY_SIZE) });
+  } = useWildEncounter({
+    testingMode,
+    partySize: Math.min(caughtPokemon.length, MAX_PARTY_SIZE),
+  });
 
   useEffect(() => {
     const onToggle = (e) => setTestingMode(Boolean(e.detail?.enabled));
@@ -172,6 +175,28 @@ export default function App() {
       );
       return alreadyInParty ? prev : [previewStarterData, ...prev];
     });
+
+    // Persist the starter as a real caught_pokemon row so it survives active-pokemon switches.
+    if (user) {
+      const alreadyPersisted = caughtPokemon.some(
+        (p) => p?.speciesName === previewStarterData?.speciesName && p?.id,
+      );
+      if (!alreadyPersisted) {
+        // Shift existing pokemon storage indices up by 1 to make room at slot 0.
+        const existingWithIds = caughtPokemon.filter((p) => p?.id);
+        if (existingWithIds.length > 0) {
+          reorderCaughtPokemon(
+            existingWithIds.map((p) => ({
+              id: p.id,
+              speciesName: p.speciesName,
+              storageIndex: (p.storageIndex ?? 0) + 1,
+            })),
+          );
+        }
+        addCaughtPokemon(previewStarterData, { storageIndex: 0 });
+      }
+    }
+
     setWelcomeMessage({
       starterLabel: previewStarterData.label,
       startLevel: START_LEVEL,
@@ -237,7 +262,11 @@ export default function App() {
         reorderCaughtPokemon(
           normalized
             .filter((p) => p?.id)
-            .map((p) => ({ id: p.id, speciesName: p.speciesName, storageIndex: p.storageIndex })),
+            .map((p) => ({
+              id: p.id,
+              speciesName: p.speciesName,
+              storageIndex: p.storageIndex,
+            })),
         );
       }
     }
