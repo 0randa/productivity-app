@@ -30,11 +30,21 @@ export async function loadUserProgress() {
     ...getPokemonAssets(row.pokemon_id),
   }));
 
+  // Ensure the starter (activePokemon) appears in the party list for UI/account display,
+  // even if it hasn't been inserted into `caught_pokemon` yet.
+  const caughtWithStarter = activePokemon
+    ? (
+        caughtPokemon.some((p) => p?.speciesName === activePokemon.speciesName)
+          ? caughtPokemon
+          : [activePokemon, ...caughtPokemon]
+      )
+    : caughtPokemon;
+
   return {
     activePokemon,
     totalXp: progress?.total_xp ?? 0,
     pomodorosCompleted: progress?.pomodoros_completed ?? 0,
-    caughtPokemon,
+    caughtPokemon: caughtWithStarter,
   };
 }
 

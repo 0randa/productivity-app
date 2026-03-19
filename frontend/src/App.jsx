@@ -31,6 +31,7 @@ export default function App() {
   const [activePokemon, setActivePokemon] = useState(null);
   const [caughtPokemon, setCaughtPokemon] = useState([]);
   const [progressLoaded, setProgressLoaded] = useState(false);
+  const [testingMode, setTestingMode] = useState(() => Boolean(loadGuestData()?.testingMode));
 
   const { previewStarter, previewStarterData, playingStarter, playStarterCry } =
     useStarterSelection(STARTERS);
@@ -59,7 +60,25 @@ export default function App() {
     triggerEncounterChance,
     attemptCatch,
     dismissEncounter,
-  } = useWildEncounter({ partySize: caughtPokemon.length });
+  } = useWildEncounter({ partySize: caughtPokemon.length, testingMode });
+
+  useEffect(() => {
+    const onToggle = (e) => setTestingMode(Boolean(e.detail?.enabled));
+    const onStorage = (e) => {
+      if (e.key !== "pomopet_guest") return;
+      try {
+        const next = e.newValue ? JSON.parse(e.newValue) : null;
+        setTestingMode(Boolean(next?.testingMode));
+      } catch {}
+    };
+
+    window.addEventListener("pomopet:testing-mode", onToggle);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("pomopet:testing-mode", onToggle);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
 
   // Load progress once auth resolves, resetting state first on every change
   useEffect(() => {
@@ -142,6 +161,13 @@ export default function App() {
 
   const beginSession = () => {
     setActivePokemon(previewStarterData);
+    // Starter should always appear in the party list (guest + logged-in UI state).
+    setCaughtPokemon((prev) => {
+      const alreadyInParty = prev.some(
+        (p) => p?.speciesName === previewStarterData?.speciesName,
+      );
+      return alreadyInParty ? prev : [previewStarterData, ...prev];
+    });
     setWelcomeMessage({
       starterLabel: previewStarterData.label,
       startLevel: START_LEVEL,

@@ -30,6 +30,7 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
     return saved?.timerSettings ?? DEFAULTS;
   });
   const [draft, setDraft] = useState(() => toStrDraft(loadGuestData()?.timerSettings ?? DEFAULTS));
+  const [testingMode, setTestingMode] = useState(() => Boolean(loadGuestData()?.testingMode));
   const [showSettings, setShowSettings] = useState(false);
 
   const canSave = isValidMinutes(draft.focusMinutes)
@@ -51,6 +52,18 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
     const existing = loadGuestData() ?? {};
     saveGuestData({ ...existing, timerSettings: newSettings });
     setShowSettings(false);
+  };
+
+  const toggleTestingMode = () => {
+    setTestingMode((prev) => {
+      const next = !prev;
+      const existing = loadGuestData() ?? {};
+      saveGuestData({ ...existing, testingMode: next });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("pomopet:testing-mode", { detail: { enabled: next } }));
+      }
+      return next;
+    });
   };
 
   return (
@@ -102,6 +115,26 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
                 </Button>
               </div>
             </form>
+
+            <Separator className="my-4" />
+
+            <div className="space-y-2">
+              <p className="font-pixel text-[9px] tracking-widest uppercase text-[var(--text-dark)]">
+                Testing
+              </p>
+              <Button
+                type="button"
+                variant={testingMode ? "destructive" : "secondary"}
+                size="lg"
+                className="w-full"
+                onClick={toggleTestingMode}
+              >
+                {testingMode ? "Disable Testing Mode" : "Enable Testing Mode"}
+              </Button>
+              <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
+                Testing mode runs focus as 5 seconds and breaks as 2 seconds.
+              </p>
+            </div>
           </div>
         ) : (
           <div>
@@ -130,6 +163,7 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
           focusMinutes={settings.focusMinutes}
           shortBreakMinutes={settings.shortBreakMinutes}
           longBreakMinutes={settings.longBreakMinutes}
+          testingMode={testingMode}
           onPomodoroStart={onPomodoroStart}
           onPomodoroComplete={onPomodoroComplete}
         />

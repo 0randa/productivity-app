@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound, getMuted, setMuted } from "@/lib/victory-sound";
 
-const TESTING = true;
 const TEST_FOCUS_SECS = 5;
 const TEST_BREAK_SECS = 2;
 
@@ -15,13 +14,14 @@ export default function TimerComp({
   focusMinutes = 25,
   shortBreakMinutes = 5,
   longBreakMinutes = 15,
+  testingMode = false,
   onPomodoroStart,
   onPomodoroComplete,
   onPomodoroSkip,
 }) {
-  const focusSecs      = TESTING ? TEST_FOCUS_SECS : focusMinutes * 60;
-  const shortBreakSecs = TESTING ? TEST_BREAK_SECS : shortBreakMinutes * 60;
-  const longBreakSecs  = TESTING ? TEST_BREAK_SECS : longBreakMinutes * 60;
+  const focusSecs      = testingMode ? TEST_FOCUS_SECS : focusMinutes * 60;
+  const shortBreakSecs = testingMode ? TEST_BREAK_SECS : shortBreakMinutes * 60;
+  const longBreakSecs  = testingMode ? TEST_BREAK_SECS : longBreakMinutes * 60;
 
   const [mode, setMode]               = useState("focus");
   const [secondsLeft, setSecondsLeft] = useState(focusSecs);
@@ -239,9 +239,9 @@ export default function TimerComp({
         </Button>
       </div>
 
-      {TESTING && (
+      {testingMode && (
         <p className="font-pixel-body text-[16px] mt-3" style={{ color: "var(--poke-blue)", opacity: 0.7 }}>
-          ⚠ TEST MODE: {TEST_FOCUS_SECS}s focus / {TEST_BREAK_SECS}s breaks
+          TEST MODE: {TEST_FOCUS_SECS}s focus / {TEST_BREAK_SECS}s breaks
         </p>
       )}
     </div>

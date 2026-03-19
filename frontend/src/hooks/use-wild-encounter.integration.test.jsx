@@ -62,5 +62,25 @@ describe("useWildEncounter integration (many blackbox cases)", () => {
     // 120 iterations * 2 expects
     expect(asserts).toBe(240);
   });
+
+  test("testingMode: encounter always triggers + catch always succeeds", () => {
+    // even when party is full, testingMode should still show the encounter and guarantee a catch
+    vi.spyOn(Math, "random").mockReturnValue(0.9999);
+    const { result } = renderHook(() =>
+      useWildEncounter({ partySize: MAX_PARTY_SIZE, testingMode: true }),
+    );
+
+    act(() => result.current.triggerEncounterChance());
+    expect(result.current.wildPokemon).not.toBe(null);
+
+    let caught;
+    act(() => {
+      caught = result.current.attemptCatch();
+    });
+    expect(caught).not.toBe(null);
+    expect(result.current.catchResult).toBe("success");
+
+    vi.restoreAllMocks();
+  });
 });
 
