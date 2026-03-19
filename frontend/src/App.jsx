@@ -196,10 +196,26 @@ export default function App() {
   const handleCatch = () => {
     const caught = attemptCatch();
     if (!caught) return;
+    // Party has room — add directly
+    if (caughtPokemon.length < MAX_PARTY_SIZE) {
+      const nextCaught = [...caughtPokemon, caught];
+      setCaughtPokemon(nextCaught);
+      if (user) addCaughtPokemon(caught, { storageIndex: nextCaught.length - 1 });
+    }
+    // Party full — catch result is recorded; user picks a replacement via handleReplace
+  };
 
-    const nextCaught = [...caughtPokemon, caught];
-    setCaughtPokemon(nextCaught);
-    if (user) addCaughtPokemon(caught);
+  const handleReplace = (replaceIndex) => {
+    if (!wildPokemon) return;
+    const newParty = [...caughtPokemon];
+    const replaced = newParty[replaceIndex];
+    newParty[replaceIndex] = wildPokemon;
+    setCaughtPokemon(newParty);
+    if (user) addCaughtPokemon(wildPokemon, { storageIndex: replaceIndex });
+    if (activePokemon?.speciesName === replaced?.speciesName) {
+      setActivePokemon(wildPokemon);
+    }
+    dismissEncounter();
   };
 
   const handleSetCaughtActive = () => {
@@ -311,8 +327,10 @@ export default function App() {
         wildPokemon={wildPokemon}
         catchResult={catchResult}
         partyFull={caughtPokemon.length >= MAX_PARTY_SIZE}
+        party={caughtPokemon}
         onAttemptCatch={handleCatch}
         onSetActive={handleSetCaughtActive}
+        onReplace={handleReplace}
         onDismiss={dismissEncounter}
       />
     </StudyShell>

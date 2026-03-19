@@ -3,31 +3,101 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
-import { loadUserProgress } from "@/lib/user-progress";
+import {
+  loadUserProgress,
+  normalizeStorageOrder,
+  reorderCaughtPokemon,
+} from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const MAX_PARTY_SIZE = 6;
+const MAX_BOX_SIZE = 30;
 
 export default function BoxPage() {
   const { user, loading } = useAuth();
   const [caughtPokemon, setCaughtPokemon] = useState([]);
   const [activePokemon, setActivePokemon] = useState(null);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [dragSource, setDragSource] = useState(null); // { kind: "party"|"box", index: number }
+  const [activeBoxIndex, setActiveBoxIndex] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     loadUserProgress().then(({ activePokemon: ap, caughtPokemon: caught }) => {
       setActivePokemon(ap);
-      setCaughtPokemon(caught ?? []);
+      setCaughtPokemon(normalizeStorageOrder(caught ?? []));
     });
   }, [user]);
 
   const { partyPokemon, boxedPokemon } = useMemo(() => {
     const all = Array.isArray(caughtPokemon) ? caughtPokemon : [];
     return {
-      partyPokemon: all.slice(0, 6),
-      boxedPokemon: all.slice(6),
+      partyPokemon: all.slice(0, MAX_PARTY_SIZE),
+      boxedPokemon: all.slice(MAX_PARTY_SIZE),
     };
   }, [caughtPokemon]);
+
+  const boxes = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < boxedPokemon.length; i += MAX_BOX_SIZE) {
+      result.push(boxedPokemon.slice(i, i + MAX_BOX_SIZE));
+    }
+    return result.length ? result : [[]];
+  }, [boxedPokemon]);
+
+  useEffect(() => {
+    setActiveBoxIndex((prev) => Math.min(prev, boxes.length - 1));
+  }, [boxes.length]);
+
+  const currentBox = boxes[activeBoxIndex] ?? [];
+
+  const persistOrder = async (nextList) => {
+    setSavingOrder(true);
+    setSaveError("");
+    try {
+      const normalized = normalizeStorageOrder(nextList);
+      setCaughtPokemon(normalized);
+      await reorderCaughtPokemon(
+        normalized
+          .filter((p) => p?.id)
+          .map((p) => ({
+            id: p.id,
+            speciesName: p.speciesName,
+            storageIndex: p.storageIndex,
+          })),
+      );
+    } catch (e) {
+      setSaveError(e?.message ?? "Could not save order.");
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
+  const toGlobalIndex = (loc) => {
+    if (!loc) return null;
+    if (loc.kind === "party") return loc.index;
+    return MAX_PARTY_SIZE + activeBoxIndex * MAX_BOX_SIZE + loc.index;
+  };
+
+  const handleDrop = async (targetLoc) => {
+    const from = dragSource;
+    setDragSource(null);
+    if (!from) return;
+    const fromIndex = toGlobalIndex(from);
+    const toIndex = toGlobalIndex(targetLoc);
+    if (fromIndex == null || toIndex == null) return;
+    if (fromIndex === toIndex) return;
+
+    const next = [...caughtPokemon];
+    if (!next[fromIndex] || !next[toIndex]) return;
+    const tmp = next[fromIndex];
+    next[fromIndex] = next[toIndex];
+    next[toIndex] = tmp;
+    await persistOrder(next);
+  };
 
   if (loading) {
     return (
@@ -78,7 +148,7 @@ export default function BoxPage() {
           <div className="flex items-center gap-3">
             <Badge variant="outline">Box</Badge>
             <p className="font-pixel-body text-[18px] text-[var(--text-muted)]">
-              Extra Pokémon beyond your party of 6 live here.
+              Drag and swap to edit your party. Each box holds up to {MAX_BOX_SIZE}.
             </p>
           </div>
           <Link
@@ -92,25 +162,33 @@ export default function BoxPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Stored Pokémon</CardTitle>
-              <Badge variant="outline">{boxedPokemon.length}</Badge>
+              <CardTitle>Your Party</CardTitle>
+              <Badge variant="outline">
+                {partyPokemon.length}/{MAX_PARTY_SIZE}
+              </Badge>
             </div>
           </CardHeader>
           <CardContent>
-            {boxedPokemon.length === 0 ? (
+            {partyPokemon.length === 0 ? (
               <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-                Your Box is empty. Catch more Pokémon to store extras here.
+                No party Pokémon yet. Catch one to begin.
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-3">
-                {boxedPokemon.map((pokemon, i) => {
+                {partyPokemon.map((pokemon, i) => {
                   const isActive =
                     activePokemon?.speciesName === pokemon.speciesName;
                   return (
                     <div
-                      key={`${pokemon.speciesName ?? pokemon.key ?? "p"}-${i}`}
+                      key={`${pokemon.speciesName ?? pokemon.key ?? "p"}-party-${i}`}
+                      draggable
+                      onDragStart={() =>
+                        setDragSource({ kind: "party", index: i })
+                      }
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => handleDrop({ kind: "party", index: i })}
                       className={[
-                        "flex flex-col items-center p-3 text-center",
+                        "flex flex-col items-center p-3 text-center cursor-move",
                         "border-[2px] shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
                         isActive
                           ? "border-[var(--poke-blue)] bg-[rgba(56,104,176,0.06)]"
@@ -140,7 +218,109 @@ export default function BoxPage() {
 
             <div className="mt-3">
               <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
-                Party: {partyPokemon.length}/6 · Box: {boxedPokemon.length}
+                Tip: drag a party Pokémon onto another to swap.
+                {savingOrder ? " Saving…" : ""}
+              </p>
+              {saveError ? (
+                <p
+                  className="font-pixel-body text-[16px] mt-1"
+                  style={{ color: "var(--poke-red)" }}
+                >
+                  {saveError}
+                </p>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Stored Pokémon</CardTitle>
+              <Badge variant="outline">
+                {boxedPokemon.length} · {boxes.length}{" "}
+                {boxes.length === 1 ? "box" : "boxes"}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {boxedPokemon.length === 0 ? (
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+                Your Box is empty. Catch more Pokémon to store extras here.
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {boxes.map((box, index) => {
+                    const isSelected = index === activeBoxIndex;
+                    const label = `Box ${index + 1}`;
+                    return (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => setActiveBoxIndex(index)}
+                        className={[
+                          "font-pixel text-[10px] px-2 py-1 border-[2px]",
+                          "shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
+                          isSelected
+                            ? "border-[var(--poke-blue)] bg-[rgba(56,104,176,0.06)]"
+                            : "border-[var(--window-border)] bg-[var(--window-bg)]",
+                        ].join(" ")}
+                        aria-pressed={isSelected}
+                      >
+                        {label} ({box.length}/{MAX_BOX_SIZE})
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  {currentBox.map((pokemon, i) => {
+                    const isActive =
+                      activePokemon?.speciesName === pokemon.speciesName;
+                    return (
+                      <div
+                        key={`${pokemon.speciesName ?? pokemon.key ?? "p"}-box-${activeBoxIndex}-${i}`}
+                        draggable
+                        onDragStart={() =>
+                          setDragSource({ kind: "box", index: i })
+                        }
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleDrop({ kind: "box", index: i })}
+                        className={[
+                          "flex flex-col items-center p-3 text-center cursor-move",
+                          "border-[2px] shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
+                          isActive
+                            ? "border-[var(--poke-blue)] bg-[rgba(56,104,176,0.06)]"
+                            : "border-[var(--window-border)] bg-[var(--window-bg)]",
+                        ].join(" ")}
+                      >
+                        {isActive && (
+                          <Badge variant="blue" className="mb-2 text-[7px]">
+                            Active
+                          </Badge>
+                        )}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={pokemon.sprite}
+                          alt={pokemon.label}
+                          className="w-16 h-16 object-contain"
+                          style={{ imageRendering: "pixelated" }}
+                        />
+                        <p className="font-pixel-body text-[18px] text-[var(--text-dark)] mt-1">
+                          {pokemon.label}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            <div className="mt-3">
+              <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
+                Party: {partyPokemon.length}/{MAX_PARTY_SIZE} · Stored:{" "}
+                {boxedPokemon.length}
               </p>
             </div>
           </CardContent>
