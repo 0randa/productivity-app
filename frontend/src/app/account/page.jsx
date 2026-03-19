@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/auth-context";
-import { clearGuestData } from "@/lib/guest-storage";
+import { clearGuestData, loadGuestData, saveGuestData } from "@/lib/guest-storage";
 import { loadUserProgress, saveUserProgress } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
 import { Badge } from "@/components/ui/badge";
@@ -28,21 +28,24 @@ export default function AccountPage() {
   const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
 
   useEffect(() => {
-    if (!user) return;
-    loadUserProgress().then(
-      ({
-        activePokemon: ap,
-        caughtPokemon,
-        totalXp: xp,
-        pomodorosCompleted: pc,
-      }) => {
-        setActivePokemonLocal(ap);
-        setParty(caughtPokemon ?? []);
-        setTotalXp(xp ?? 0);
-        setPomodorosCompleted(pc ?? 0);
-      },
-    );
-  }, [user]);
+    if (loading) return;
+    if (user) {
+      loadUserProgress().then(
+        ({ activePokemon: ap, caughtPokemon, totalXp: xp, pomodorosCompleted: pc }) => {
+          setActivePokemonLocal(ap);
+          setParty(caughtPokemon ?? []);
+          setTotalXp(xp ?? 0);
+          setPomodorosCompleted(pc ?? 0);
+        },
+      );
+    } else {
+      const saved = loadGuestData();
+      setActivePokemonLocal(saved?.activePokemon ?? null);
+      setParty(saved?.caughtPokemon ?? []);
+      setTotalXp(saved?.totalXp ?? 0);
+      setPomodorosCompleted(saved?.pomodorosCompleted ?? 0);
+    }
+  }, [user, loading]);
 
   const { partyPokemon, boxedPokemon } = useMemo(() => {
     const all = Array.isArray(party) ? party : [];
@@ -56,18 +59,19 @@ export default function AccountPage() {
     if (!pokemon) return;
     setActivePokemonLocal(pokemon);
 
-    setSavingActive(true);
-    setError("");
-    try {
-      await saveUserProgress({
-        activePokemon: pokemon,
-        totalXp,
-        pomodorosCompleted,
-      });
-    } catch (e) {
-      setError(e?.message ?? "Could not update active Pokémon.");
-    } finally {
-      setSavingActive(false);
+    if (user) {
+      setSavingActive(true);
+      setError("");
+      try {
+        await saveUserProgress({ activePokemon: pokemon, totalXp, pomodorosCompleted });
+      } catch (e) {
+        setError(e?.message ?? "Could not update active Pokémon.");
+      } finally {
+        setSavingActive(false);
+      }
+    } else {
+      const existing = loadGuestData() ?? {};
+      saveGuestData({ ...existing, activePokemon: pokemon });
     }
   };
 
@@ -77,35 +81,7 @@ export default function AccountPage() {
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="pt-5">
-              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-                Loading…
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </StudyShell>
-    );
-  }
-
-  if (!user) {
-    return (
-      <StudyShell>
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardContent className="pt-5">
-              <p className="font-pixel text-[11px] text-[var(--text-dark)]">
-                Not logged in
-              </p>
-              <p className="font-pixel-body text-[20px] text-[var(--text-muted)] mt-3">
-                Please{" "}
-                <Link
-                  href="/login"
-                  className="text-[var(--poke-blue)] hover:underline"
-                >
-                  log in
-                </Link>{" "}
-                to access account settings.
-              </p>
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">Loading…</p>
             </CardContent>
           </Card>
         </div>
@@ -133,23 +109,37 @@ export default function AccountPage() {
       <div className="max-w-2xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Badge variant="red">Account Settings</Badge>
+          <Badge variant="red">{user ? "Account Settings" : "Guest Trainer"}</Badge>
         </div>
 
         {/* Trainer Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Trainer Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p
-              className="font-pixel-body text-[22px]"
-              style={{ color: "var(--poke-blue)" }}
-            >
-              {user.email}
-            </p>
-          </CardContent>
-        </Card>
+        {user ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Trainer Info</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="font-pixel-body text-[22px]" style={{ color: "var(--poke-blue)" }}>
+                {user.email}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Trainer Info</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+                Playing as a guest.{" "}
+                <Link href="/login" className="text-[var(--poke-blue)] hover:underline">
+                  Log in
+                </Link>{" "}
+                to save your progress permanently.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Party */}
         <Card>
@@ -164,14 +154,12 @@ export default function AccountPage() {
           <CardContent>
             {partyPokemon.length === 0 ? (
               <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-                No caught Pokémon yet. Complete pomodoros to encounter wild
-                Pokémon!
+                No caught Pokémon yet. Complete pomodoros to encounter wild Pokémon!
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 {partyPokemon.map((pokemon, i) => {
-                  const isActive =
-                    activePokemon?.speciesName === pokemon.speciesName;
+                  const isActive = activePokemon?.speciesName === pokemon.speciesName;
                   return (
                     <div
                       key={i}
@@ -222,76 +210,61 @@ export default function AccountPage() {
             {boxedPokemon.length > 0 ? (
               <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-1">
                 {boxedPokemon.length} Pokémon in your{" "}
-                <Link
-                  href="/box"
-                  className="text-[var(--poke-blue)] hover:underline"
-                >
+                <Link href="/box" className="text-[var(--poke-blue)] hover:underline">
                   Box
                 </Link>
                 .
               </p>
             ) : null}
             {error ? (
-              <p
-                className="font-pixel-body text-[16px] mt-2"
-                style={{ color: "var(--poke-red)" }}
-              >
+              <p className="font-pixel-body text-[16px] mt-2" style={{ color: "var(--poke-red)" }}>
                 {error}
               </p>
             ) : null}
           </CardContent>
         </Card>
 
-        {/* Danger Zone */}
-        <Card className="border-[var(--poke-red)]!">
-          <CardHeader>
-            <CardTitle style={{ color: "var(--poke-red)" }}>
-              Danger Zone
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-              Permanently delete your account and all saved data. This cannot be
-              undone.
-            </p>
-            <Separator />
-            <div className="space-y-2">
-              <Label>
-                Type{" "}
-                <span className="font-pixel text-[8px] text-[var(--poke-red)]">
-                  DELETE
-                </span>{" "}
-                to confirm:
-              </Label>
-              <Input
-                type="text"
-                value={confirmText}
-                onChange={(e) => setConfirmText(e.target.value)}
-                placeholder="DELETE"
-                className="max-w-[200px]"
-                style={{
-                  borderColor:
-                    confirmText === "DELETE" ? "var(--poke-red)" : undefined,
-                }}
-              />
-            </div>
-            {error && (
-              <p
-                className="font-pixel-body text-[18px]"
-                style={{ color: "var(--poke-red)" }}
-              >
-                {error}
+        {/* Danger Zone — logged-in only */}
+        {user && (
+          <Card className="border-[var(--poke-red)]!">
+            <CardHeader>
+              <CardTitle style={{ color: "var(--poke-red)" }}>Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
+                Permanently delete your account and all saved data. This cannot be undone.
               </p>
-            )}
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={confirmText !== "DELETE" || deleting}
-            >
-              {deleting ? "Deleting…" : "Delete My Account"}
-            </Button>
-          </CardContent>
-        </Card>
+              <Separator />
+              <div className="space-y-2">
+                <Label>
+                  Type{" "}
+                  <span className="font-pixel text-[8px] text-[var(--poke-red)]">DELETE</span>{" "}
+                  to confirm:
+                </Label>
+                <Input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="max-w-[200px]"
+                  style={{ borderColor: confirmText === "DELETE" ? "var(--poke-red)" : undefined }}
+                />
+              </div>
+              {error && (
+                <p className="font-pixel-body text-[18px]" style={{ color: "var(--poke-red)" }}>
+                  {error}
+                </p>
+              )}
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={confirmText !== "DELETE" || deleting}
+              >
+                {deleting ? "Deleting…" : "Delete My Account"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </StudyShell>
   );

@@ -98,6 +98,20 @@ export function NavbarComp() {
                 <>
                   <Tooltip>
                     <TooltipTrigger asChild>
+                      <Link
+                        href="/box"
+                        className="pokemon-nav-link"
+                        aria-label="Box"
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        <Archive size={16} aria-hidden="true" />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>Box</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <Link href="/register" className="pokemon-nav-link" aria-label="Register" style={{ display: "flex", alignItems: "center" }}>
                         <UserPlus size={16} aria-hidden="true" />
                       </Link>

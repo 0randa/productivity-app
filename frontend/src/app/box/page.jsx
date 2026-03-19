@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
+import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
 import {
   loadUserProgress,
   normalizeStorageOrder,
   reorderCaughtPokemon,
+  saveUserProgress,
 } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
 import { Badge } from "@/components/ui/badge";
@@ -19,18 +21,30 @@ export default function BoxPage() {
   const { user, loading } = useAuth();
   const [caughtPokemon, setCaughtPokemon] = useState([]);
   const [activePokemon, setActivePokemon] = useState(null);
+  const [totalXp, setTotalXp] = useState(0);
+  const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
   const [savingOrder, setSavingOrder] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [dragSource, setDragSource] = useState(null); // { kind: "party"|"box", index: number }
   const [activeBoxIndex, setActiveBoxIndex] = useState(0);
 
   useEffect(() => {
-    if (!user) return;
-    loadUserProgress().then(({ activePokemon: ap, caughtPokemon: caught }) => {
-      setActivePokemon(ap);
-      setCaughtPokemon(normalizeStorageOrder(caught ?? []));
-    });
-  }, [user]);
+    if (loading) return;
+    if (user) {
+      loadUserProgress().then(({ activePokemon: ap, caughtPokemon: caught, totalXp: xp, pomodorosCompleted: pc }) => {
+        setActivePokemon(ap);
+        setCaughtPokemon(normalizeStorageOrder(caught ?? []));
+        setTotalXp(xp ?? 0);
+        setPomodorosCompleted(pc ?? 0);
+      });
+    } else {
+      const saved = loadGuestData();
+      setActivePokemon(saved?.activePokemon ?? null);
+      setCaughtPokemon(normalizeStorageOrder(saved?.caughtPokemon ?? []));
+      setTotalXp(saved?.totalXp ?? 0);
+      setPomodorosCompleted(saved?.pomodorosCompleted ?? 0);
+    }
+  }, [user, loading]);
 
   const { partyPokemon, boxedPokemon } = useMemo(() => {
     const all = Array.isArray(caughtPokemon) ? caughtPokemon : [];
@@ -60,19 +74,35 @@ export default function BoxPage() {
     try {
       const normalized = normalizeStorageOrder(nextList);
       setCaughtPokemon(normalized);
-      await reorderCaughtPokemon(
-        normalized
-          .filter((p) => p?.id)
-          .map((p) => ({
-            id: p.id,
-            speciesName: p.speciesName,
-            storageIndex: p.storageIndex,
-          })),
-      );
+      if (user) {
+        await reorderCaughtPokemon(
+          normalized
+            .filter((p) => p?.id)
+            .map((p) => ({ id: p.id, speciesName: p.speciesName, storageIndex: p.storageIndex })),
+        );
+      } else {
+        const existing = loadGuestData() ?? {};
+        saveGuestData({ ...existing, caughtPokemon: normalized });
+      }
     } catch (e) {
       setSaveError(e?.message ?? "Could not save order.");
     } finally {
       setSavingOrder(false);
+    }
+  };
+
+  const setActivePokemonPersisted = async (pokemon) => {
+    if (!pokemon) return;
+    setActivePokemon(pokemon);
+    if (user) {
+      try {
+        await saveUserProgress({ activePokemon: pokemon, totalXp, pomodorosCompleted });
+      } catch (e) {
+        setSaveError(e?.message ?? "Could not update active Pokémon.");
+      }
+    } else {
+      const existing = loadGuestData() ?? {};
+      saveGuestData({ ...existing, activePokemon: pokemon });
     }
   };
 
@@ -105,35 +135,7 @@ export default function BoxPage() {
         <div className="max-w-3xl mx-auto">
           <Card>
             <CardContent className="pt-5">
-              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
-                Loading…
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </StudyShell>
-    );
-  }
-
-  if (!user) {
-    return (
-      <StudyShell>
-        <div className="max-w-3xl mx-auto">
-          <Card>
-            <CardContent className="pt-5">
-              <p className="font-pixel text-[11px] text-[var(--text-dark)]">
-                Not logged in
-              </p>
-              <p className="font-pixel-body text-[20px] text-[var(--text-muted)] mt-3">
-                Please{" "}
-                <Link
-                  href="/login"
-                  className="text-[var(--poke-blue)] hover:underline"
-                >
-                  log in
-                </Link>{" "}
-                to view your Box.
-              </p>
+              <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">Loading…</p>
             </CardContent>
           </Card>
         </div>
@@ -176,17 +178,25 @@ export default function BoxPage() {
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 {partyPokemon.map((pokemon, i) => {
-                  const isActive =
-                    activePokemon?.speciesName === pokemon.speciesName;
+                  const isActive = activePokemon?.speciesName === pokemon.speciesName;
                   return (
                     <div
                       key={`${pokemon.speciesName ?? pokemon.key ?? "p"}-party-${i}`}
                       draggable
-                      onDragStart={() =>
-                        setDragSource({ kind: "party", index: i })
-                      }
+                      onDragStart={() => setDragSource({ kind: "party", index: i })}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => handleDrop({ kind: "party", index: i })}
+                      onClick={() => setActivePokemonPersisted(pokemon)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setActivePokemonPersisted(pokemon);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isActive}
+                      aria-label={`Set ${pokemon.label} as active Pokémon`}
                       className={[
                         "flex flex-col items-center p-3 text-center cursor-move",
                         "border-[2px] shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
@@ -276,15 +286,12 @@ export default function BoxPage() {
 
                 <div className="grid grid-cols-3 gap-3">
                   {currentBox.map((pokemon, i) => {
-                    const isActive =
-                      activePokemon?.speciesName === pokemon.speciesName;
+                    const isActive = activePokemon?.speciesName === pokemon.speciesName;
                     return (
                       <div
                         key={`${pokemon.speciesName ?? pokemon.key ?? "p"}-box-${activeBoxIndex}-${i}`}
                         draggable
-                        onDragStart={() =>
-                          setDragSource({ kind: "box", index: i })
-                        }
+                        onDragStart={() => setDragSource({ kind: "box", index: i })}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={() => handleDrop({ kind: "box", index: i })}
                         className={[
@@ -319,8 +326,7 @@ export default function BoxPage() {
 
             <div className="mt-3">
               <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
-                Party: {partyPokemon.length}/{MAX_PARTY_SIZE} · Stored:{" "}
-                {boxedPokemon.length}
+                Party: {partyPokemon.length}/{MAX_PARTY_SIZE} · Stored: {boxedPokemon.length}
               </p>
             </div>
           </CardContent>
