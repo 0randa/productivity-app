@@ -14,10 +14,8 @@ export function WildEncounterModal({
   wildPokemon,
   catchResult,
   partyFull,
-  party = [],
   onAttemptCatch,
   onSetActive,
-  onReplace,
   onDismiss,
 }) {
   if (!wildPokemon) return null;
@@ -29,8 +27,6 @@ export function WildEncounterModal({
         ? `Oh no! ${wildPokemon.label} broke free!`
         : `A wild ${wildPokemon.label} appeared!`;
 
-  const showReplacePicker = catchResult === "success" && partyFull;
-
   return (
     <Dialog open onOpenChange={(open) => !open && onDismiss()}>
       <DialogContent className="max-w-sm">
@@ -38,12 +34,12 @@ export function WildEncounterModal({
           <DialogTitle>{title}</DialogTitle>
           {!catchResult && partyFull ? (
             <DialogDescription>
-              Your party is full. Catch it and choose who to swap out.
+              Your party is full. If you catch it, it will be sent to your Box.
             </DialogDescription>
           ) : null}
-          {showReplacePicker ? (
+          {catchResult === "success" && partyFull ? (
             <DialogDescription>
-              Choose a Pokemon to release to make room.
+              {wildPokemon.label} was sent to your Box.
             </DialogDescription>
           ) : null}
         </DialogHeader>
@@ -64,37 +60,6 @@ export function WildEncounterModal({
           </p>
         </div>
 
-        {/* Party picker — shown after a successful catch when party is full */}
-        {showReplacePicker && (
-          <div className="space-y-2">
-            <p className="font-pixel text-[9px] tracking-widest uppercase text-[var(--text-dark)]">
-              Release which Pokemon?
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {party.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => onReplace(i)}
-                  className="flex items-center gap-2 p-2 border-[2px] border-[var(--window-border)] bg-white hover:bg-[var(--window-bg)] transition-colors text-left"
-                >
-                  {p?.sprite && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={p.sprite}
-                      alt={p.label}
-                      className="w-8 h-8 object-contain flex-shrink-0"
-                      style={{ imageRendering: "pixelated" }}
-                    />
-                  )}
-                  <span className="font-pixel text-[8px] tracking-wide text-[var(--text-dark)] truncate">
-                    {p?.label ?? "???"}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         <DialogFooter>
           {!catchResult && (
             <>
@@ -106,7 +71,7 @@ export function WildEncounterModal({
               </Button>
             </>
           )}
-          {catchResult === "success" && !partyFull && (
+          {catchResult === "success" && (
             <>
               <Button variant="primary" onClick={onSetActive}>
                 Set as Active
@@ -115,11 +80,6 @@ export function WildEncounterModal({
                 Keep Current
               </Button>
             </>
-          )}
-          {showReplacePicker && (
-            <Button variant="ghost" onClick={onDismiss}>
-              Release {wildPokemon.label}
-            </Button>
           )}
           {catchResult === "fail" && (
             <Button variant="secondary" onClick={onDismiss}>
