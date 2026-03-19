@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogIn, LogOut, Moon, Sun, UserPlus, UserRound } from "lucide-react";
+import { Archive, LogIn, LogOut, Moon, Sun, UserPlus, UserRound } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { clearGuestData } from "@/lib/guest-storage";
 import { useTheme } from "@/hooks/use-theme";
@@ -57,6 +57,20 @@ export function NavbarComp() {
             {!loading && (
               user ? (
                 <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href="/box"
+                        className="pokemon-nav-link"
+                        aria-label="Box"
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        <Archive size={16} aria-hidden="true" />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>Box</TooltipContent>
+                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link href="/account" className="pokemon-nav-link" aria-label="Account" style={{ display: "flex", alignItems: "center" }}>

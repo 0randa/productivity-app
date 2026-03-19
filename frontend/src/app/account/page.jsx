@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -36,6 +36,14 @@ export default function AccountPage() {
       setPomodorosCompleted(pc ?? 0);
     });
   }, [user]);
+
+  const { partyPokemon, boxedPokemon } = useMemo(() => {
+    const all = Array.isArray(party) ? party : [];
+    return {
+      partyPokemon: all.slice(0, 6),
+      boxedPokemon: all.slice(6),
+    };
+  }, [party]);
 
   const setActivePokemon = async (pokemon) => {
     if (!pokemon) return;
@@ -127,17 +135,17 @@ export default function AccountPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Your Party</CardTitle>
-              <Badge variant={party.length >= 6 ? "red" : "outline"}>{party.length}/6</Badge>
+              <Badge variant={partyPokemon.length >= 6 ? "red" : "outline"}>{partyPokemon.length}/6</Badge>
             </div>
           </CardHeader>
           <CardContent>
-            {party.length === 0 ? (
+            {partyPokemon.length === 0 ? (
               <p className="font-pixel-body text-[20px] text-[var(--text-muted)]">
                 No caught Pokémon yet. Complete pomodoros to encounter wild Pokémon!
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-3">
-                {party.map((pokemon, i) => {
+                {partyPokemon.map((pokemon, i) => {
                   const isActive = activePokemon?.speciesName === pokemon.speciesName;
                   return (
                     <div
@@ -182,6 +190,15 @@ export default function AccountPage() {
               Click a Pokémon to set it as your active companion.
               {savingActive ? " Saving…" : ""}
             </p>
+            {boxedPokemon.length > 0 ? (
+              <p className="font-pixel-body text-[16px] text-[var(--text-muted)] mt-1">
+                {boxedPokemon.length} Pokémon in your{" "}
+                <Link href="/box" className="text-[var(--poke-blue)] hover:underline">
+                  Box
+                </Link>
+                .
+              </p>
+            ) : null}
             {error ? (
               <p className="font-pixel-body text-[16px] mt-2" style={{ color: "var(--poke-red)" }}>
                 {error}
