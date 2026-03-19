@@ -15,6 +15,8 @@ import {
   loadUserProgress,
   saveUserProgress,
   addCaughtPokemon,
+  reorderCaughtPokemon,
+  normalizeStorageOrder,
 } from "@/lib/user-progress";
 import {
   MAX_LEVEL,
@@ -203,9 +205,44 @@ export default function App() {
   };
 
   const handleSetCaughtActive = () => {
-    if (wildPokemon) {
-      setActivePokemon(wildPokemon);
+    if (!wildPokemon) {
+      dismissEncounter();
+      return;
     }
+
+    const partyFull = caughtPokemon.length >= MAX_PARTY_SIZE;
+
+    if (partyFull && activePokemon) {
+      // Find current active's slot in party (first 6).
+      let activeIdx = caughtPokemon.findIndex(
+        (p) => p?.speciesName === activePokemon.speciesName,
+      );
+      // Fallback: if active isn't in party, use last party slot.
+      if (activeIdx < 0 || activeIdx >= MAX_PARTY_SIZE) {
+        activeIdx = MAX_PARTY_SIZE - 1;
+      }
+
+      // The newly caught Pokémon is at the end (just appended by handleCatch).
+      const newIdx = caughtPokemon.length - 1;
+
+      // Swap: new catch takes active's party slot; old active goes to end (Box).
+      const next = [...caughtPokemon];
+      next[activeIdx] = next[newIdx];
+      next[newIdx] = caughtPokemon[activeIdx];
+
+      const normalized = normalizeStorageOrder(next);
+      setCaughtPokemon(normalized);
+
+      if (user) {
+        reorderCaughtPokemon(
+          normalized
+            .filter((p) => p?.id)
+            .map((p) => ({ id: p.id, speciesName: p.speciesName, storageIndex: p.storageIndex })),
+        );
+      }
+    }
+
+    setActivePokemon(wildPokemon);
     dismissEncounter();
   };
 

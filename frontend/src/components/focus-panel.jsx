@@ -132,7 +132,7 @@ export default function FocusPanel({ statusMessage, onPomodoroStart, onPomodoroC
                 {testingMode ? "Disable Testing Mode" : "Enable Testing Mode"}
               </Button>
               <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
-                Testing mode runs focus as 5 seconds and breaks as 2 seconds.
+                Testing mode runs focus as 2 seconds and breaks as 1 second.
               </p>
             </div>
           </div>

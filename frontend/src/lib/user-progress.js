@@ -46,8 +46,9 @@ export async function loadUserProgress() {
           {
             ...activePokemon,
             // Synthetic entry (starter not yet in caught_pokemon).
+            // Use -1 so normalizeStorageOrder always places the starter first.
             id: null,
-            storageIndex: null,
+            storageIndex: -1,
           },
           ...caughtPokemon,
         ]

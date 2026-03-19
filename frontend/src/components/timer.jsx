@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound, getMuted, setMuted } from "@/lib/victory-sound";
 
-const TEST_FOCUS_SECS = 5;
-const TEST_BREAK_SECS = 2;
+const TEST_FOCUS_SECS = 2;
+const TEST_BREAK_SECS = 1;
 
 export default function TimerComp({
   focusMinutes = 25,
