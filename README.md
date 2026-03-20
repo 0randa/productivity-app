@@ -49,9 +49,43 @@ Example register body:
 ```
 
 ## Docker
-From project root:
+
+> The container always uses **Node 22 + its bundled npm** — no need for `nvm use` on the host.
+
+### Dev (hot reload)
+
+From the project root:
+
 ```bash
+# First run — builds the image and starts the dev server
 docker compose up --build
+
+# Subsequent runs — skip the build step
+docker compose up
+```
+
+The dev server starts on `http://localhost:3000` with hot reload via a volume mount.
+Source changes in `./frontend` are reflected immediately inside the container.
+
+### Production image
+
+Build and run a self-contained production image:
+
+```bash
+cd frontend
+docker build -t pomopet-frontend .
+docker run -p 3000:3000 pomopet-frontend
+```
+
+App runs on `http://localhost:3000`.
+
+Pass runtime env vars with `-e`:
+
+```bash
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key \
+  pomopet-frontend
 ```
 
 ## Notes
