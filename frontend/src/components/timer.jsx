@@ -46,13 +46,17 @@ export default function TimerComp({
     completionFired.current = false;
   }, [focusSecs, shortBreakSecs, longBreakSecs]);
 
+  const deadlineRef = useRef(null);
+
   useEffect(() => {
     if (!isRunning) return undefined;
+    deadlineRef.current = Date.now() + secondsLeft * 1000;
     const interval = setInterval(() => {
-      setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
+      const remaining = Math.round((deadlineRef.current - Date.now()) / 1000);
+      setSecondsLeft(remaining <= 0 ? 0 : remaining);
+    }, 500);
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (secondsLeft > 0) {
