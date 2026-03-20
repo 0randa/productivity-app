@@ -4,16 +4,29 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Stage 2: Build the application
+# Stage 2: Development (used by docker compose — no build step)
+FROM node:22-alpine AS dev
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+ENV NODE_ENV=development
+EXPOSE 3000
+CMD ["npx", "next", "dev", "--turbopack", "--hostname", "0.0.0.0"]
+
+# Stage 3: Build (requires NEXT_PUBLIC_* env vars passed as --build-arg)
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 RUN npm run build
 
-# Stage 3: Production runner
+# Stage 4: Production runner
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production

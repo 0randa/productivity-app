@@ -1,13 +1,15 @@
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: dev        # stops at the dev stage — skips the Next.js build step
     ports:
       - "3000:3000"
-    # Dev: hot reload bound to all interfaces so it's reachable from the host
-    command: sh -c "npm install && npx next dev --turbopack --hostname 0.0.0.0"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - /app/node_modules  # preserves container node_modules over the host mount
+    env_file:
+      - ./frontend/.env.local
     environment:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1

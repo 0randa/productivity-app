@@ -69,24 +69,31 @@ Source changes in `./frontend` are reflected immediately inside the container.
 
 ### Production image
 
-Build and run a self-contained production image:
+`NEXT_PUBLIC_*` env vars are baked into the bundle at build time, so they must be available when building the image:
 
 ```bash
 cd frontend
-docker build -t pomopet-frontend .
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key \
+  -t pomopet-frontend .
+docker run -p 3000:3000 pomopet-frontend
+```
+
+Or export them first:
+
+```bash
+export NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+export NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key
+
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY \
+  -t pomopet-frontend .
 docker run -p 3000:3000 pomopet-frontend
 ```
 
 App runs on `http://localhost:3000`.
-
-Pass runtime env vars with `-e`:
-
-```bash
-docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co \
-  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key \
-  pomopet-frontend
-```
 
 ## Notes
 - Starter selection happens on first dashboard visit for guests.
