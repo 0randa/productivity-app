@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound, getMuted, setMuted } from "@/lib/victory-sound";
+import { requestNotificationPermission, sendTimerNotification } from "@/lib/notifications";
 
 const TEST_FOCUS_SECS = 2;
 const TEST_BREAK_SECS = 1;
@@ -47,6 +48,7 @@ export default function TimerComp({
   }, [focusSecs, shortBreakSecs, longBreakSecs]);
 
   const deadlineRef = useRef(null);
+  const originalTitle = useRef(null);
 
   useEffect(() => {
     if (!isRunning) return undefined;
@@ -57,6 +59,24 @@ export default function TimerComp({
     }, 500);
     return () => clearInterval(interval);
   }, [isRunning]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update browser tab title with countdown while running
+  useEffect(() => {
+    if (!isRunning) {
+      if (originalTitle.current != null) {
+        document.title = originalTitle.current;
+        originalTitle.current = null;
+      }
+      return;
+    }
+    if (originalTitle.current == null) {
+      originalTitle.current = document.title;
+    }
+    const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+    const ss = String(secondsLeft % 60).padStart(2, "0");
+    const label = mode === "focus" ? "Focus" : "Break";
+    document.title = `${mm}:${ss} — ${label} | PomoPet`;
+  }, [isRunning, secondsLeft, mode]);
 
   useEffect(() => {
     if (secondsLeft > 0) {
@@ -69,12 +89,14 @@ export default function TimerComp({
 
     if (mode === "focus") {
       playVictorySound();
+      sendTimerNotification("Focus session complete!", "Great work, Trainer! Time to take a break.");
       setPomodoroCount((c) => c + 1);
       setCanStartBreak(true);
       onPomodoroComplete?.();
     } else {
       stopBreakMusic();
       playHealSound();
+      sendTimerNotification("Break's over!", "You're healed up — time to get back to it.");
       if (mode === "longBreak") setPomodoroCount(0);
       setMode("focus");
       setCanStartBreak(false);
@@ -113,6 +135,7 @@ export default function TimerComp({
     if (mode === "focus" && canStartBreak) { startBreak(isLongBreakDue ? "long" : "short"); return; }
     if (mode !== "focus") { resumeBreakMusic(); }
     if (mode === "focus" && (secondsLeft === focusSecs || secondsLeft === 0)) { onPomodoroStart?.(); }
+    requestNotificationPermission();
     setIsRunning(true);
   };
 
