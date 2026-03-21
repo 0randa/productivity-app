@@ -1,56 +1,4 @@
-const GEN5_SPRITE_BASE =
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated";
-
-export const STARTERS = [
-  {
-    key: "bulbasaur",
-    speciesName: "bulbasaur",
-    pokemonId: 1,
-    label: "Bulbasaur",
-    sprite: `${GEN5_SPRITE_BASE}/1.gif`,
-    cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/1.ogg",
-  },
-  {
-    key: "charmander",
-    speciesName: "charmander",
-    pokemonId: 4,
-    label: "Charmander",
-    sprite: `${GEN5_SPRITE_BASE}/4.gif`,
-    cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/4.ogg",
-  },
-  {
-    key: "squirtle",
-    speciesName: "squirtle",
-    pokemonId: 7,
-    label: "Squirtle",
-    sprite: `${GEN5_SPRITE_BASE}/7.gif`,
-    cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/7.ogg",
-  },
-];
-
-// Wild Pokemon that can appear in encounters (curated Gen 1 common Pokemon)
-export const WILD_POKEMON = [
-  { key: "pidgey",     speciesName: "pidgey",     pokemonId: 16  },
-  { key: "rattata",    speciesName: "rattata",     pokemonId: 19  },
-  { key: "geodude",    speciesName: "geodude",     pokemonId: 74  },
-  { key: "gastly",     speciesName: "gastly",      pokemonId: 92  },
-  { key: "magikarp",   speciesName: "magikarp",    pokemonId: 129 },
-  { key: "eevee",      speciesName: "eevee",       pokemonId: 133 },
-  { key: "snorlax",    speciesName: "snorlax",     pokemonId: 143 },
-  { key: "ditto",      speciesName: "ditto",       pokemonId: 132 },
-  { key: "psyduck",    speciesName: "psyduck",     pokemonId: 54  },
-  { key: "meowth",     speciesName: "meowth",      pokemonId: 52  },
-  { key: "growlithe",  speciesName: "growlithe",   pokemonId: 58  },
-  { key: "abra",       speciesName: "abra",        pokemonId: 63  },
-  { key: "machop",     speciesName: "machop",      pokemonId: 66  },
-  { key: "ponyta",     speciesName: "ponyta",      pokemonId: 77  },
-  { key: "slowpoke",   speciesName: "slowpoke",    pokemonId: 79  },
-  { key: "magnemite",  speciesName: "magnemite",   pokemonId: 81  },
-  { key: "haunter",    speciesName: "haunter",     pokemonId: 93  },
-  { key: "jigglypuff", speciesName: "jigglypuff",  pokemonId: 39  },
-  { key: "clefairy",   speciesName: "clefairy",    pokemonId: 35  },
-  { key: "vulpix",     speciesName: "vulpix",      pokemonId: 37  },
-];
+// Starters and wild pool are now region-specific — see src/lib/regions.js.
 
 export const WILD_ENCOUNTER_CHANCE = 0.4; // 40% chance per pomodoro
 export const CATCH_RATE = 0.7;            // 70% base catch rate
@@ -66,10 +14,24 @@ export const createTaskId = () =>
     ? crypto.randomUUID()
     : `task-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-export const getPokemonAssets = (pokemonId) => ({
-  sprite: `${GEN5_SPRITE_BASE}/${pokemonId}.gif`,
-  cry: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemonId}.ogg`,
-});
+export const getPokemonAssets = (pokemonId, regionId) => {
+  // Import inline to avoid a circular dep — regions.js is a pure data file.
+  // Dynamic require not available in ESM; use a lazy import map instead.
+  const SPRITE_ROOT =
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions";
+  const PRESETS = {
+    kanto:  { base: `${SPRITE_ROOT}/generation-iii/firered-leafgreen`,   ext: "png" },
+    johto:  { base: `${SPRITE_ROOT}/generation-iv/heartgold-soulsilver`, ext: "png" },
+    hoenn:  { base: `${SPRITE_ROOT}/generation-iii/emerald`,             ext: "png" },
+    sinnoh: { base: `${SPRITE_ROOT}/generation-iv/platinum`,             ext: "png" },
+    unova:  { base: `${SPRITE_ROOT}/generation-v/black-white/animated`,  ext: "gif" },
+  };
+  const { base, ext } = PRESETS[regionId] ?? PRESETS.unova;
+  return {
+    sprite: `${base}/${pokemonId}.${ext}`,
+    cry: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemonId}.ogg`,
+  };
+};
 
 export const getPokemonIdFromResourceUrl = (resourceUrl) => {
   const idMatch = resourceUrl?.match(/\/(\d+)\/?$/);

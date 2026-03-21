@@ -10,6 +10,7 @@ import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
 import { useSessionState } from "@/hooks/use-session-state";
 import { useStarterSelection } from "@/hooks/use-starter-selection";
 import { useWildEncounter } from "@/hooks/use-wild-encounter";
+import { useWildPool } from "@/hooks/use-wild-pool";
 import { loadGuestData, saveGuestData } from "@/lib/guest-storage";
 import {
   loadUserProgress,
@@ -21,11 +22,11 @@ import {
 import {
   MAX_LEVEL,
   MAX_PARTY_SIZE,
-  STARTERS,
   START_LEVEL,
   XP_PER_TASK,
   getPokemonAssets,
 } from "@/lib/pokemon";
+import { REGIONS } from "@/lib/regions";
 
 export default function App() {
   const { user, loading: authLoading } = useAuth();
@@ -36,9 +37,15 @@ export default function App() {
   const [testingMode, setTestingMode] = useState(() =>
     Boolean(loadGuestData()?.testingMode),
   );
+  const [selectedRegion, setSelectedRegion] = useState(null);
+
+  const regionData = REGIONS.find((r) => r.regionId === selectedRegion);
+  const starters = regionData?.starters ?? [];
+
+  const { wildPool } = useWildPool(selectedRegion);
 
   const { previewStarter, previewStarterData, playingStarter, playStarterCry } =
-    useStarterSelection(STARTERS);
+    useStarterSelection(starters);
 
   const {
     tasks,
@@ -67,6 +74,8 @@ export default function App() {
   } = useWildEncounter({
     testingMode,
     partySize: Math.min(caughtPokemon.length, MAX_PARTY_SIZE),
+    wildPool,
+    regionId: selectedRegion,
   });
 
   useEffect(() => {
@@ -96,6 +105,7 @@ export default function App() {
     setCaughtPokemon([]);
     setTotalXp(0);
     setPomodorosCompleted(0);
+    setSelectedRegion(null);
     setProgressLoaded(false);
 
     if (user) {
@@ -105,11 +115,13 @@ export default function App() {
           totalXp: xp,
           pomodorosCompleted: pc,
           caughtPokemon: caught,
+          regionId: rid,
         }) => {
           if (ap) setActivePokemon(ap);
           setTotalXp(xp);
           setPomodorosCompleted(pc);
           setCaughtPokemon(caught ?? []);
+          if (rid) setSelectedRegion(rid);
           setProgressLoaded(true);
         },
       );
@@ -120,6 +132,7 @@ export default function App() {
       if (saved?.pomodorosCompleted)
         setPomodorosCompleted(saved.pomodorosCompleted);
       setCaughtPokemon(saved?.caughtPokemon ?? []);
+      if (saved?.regionId) setSelectedRegion(saved.regionId);
       setProgressLoaded(true);
     }
   }, [user, authLoading]);
@@ -129,13 +142,14 @@ export default function App() {
     if (!progressLoaded) return;
 
     if (user) {
-      saveUserProgress({ activePokemon, totalXp, pomodorosCompleted });
+      saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, regionId: selectedRegion });
     } else {
       saveGuestData({
         activePokemon,
         totalXp,
         pomodorosCompleted,
         caughtPokemon,
+        regionId: selectedRegion,
       });
     }
   }, [
@@ -143,6 +157,7 @@ export default function App() {
     totalXp,
     pomodorosCompleted,
     caughtPokemon,
+    selectedRegion,
     user,
     progressLoaded,
   ]);
@@ -302,7 +317,7 @@ export default function App() {
       speciesName: nextEvolution.speciesName,
       pokemonId: nextEvolution.pokemonId,
       label: nextEvolution.label,
-      ...getPokemonAssets(nextEvolution.pokemonId),
+      ...getPokemonAssets(nextEvolution.pokemonId, selectedRegion),
     };
 
     setActivePokemon(evolvedPokemon);
@@ -320,12 +335,16 @@ export default function App() {
     return (
       <StudyShell>
         <StarterSelection
-          starters={STARTERS}
+          regions={REGIONS}
+          selectedRegion={selectedRegion}
+          onSelectRegion={setSelectedRegion}
+          onClearRegion={() => setSelectedRegion(null)}
+          starters={starters}
           previewStarterKey={previewStarter}
           playingStarterKey={playingStarter}
           onPreviewStarter={playStarterCry}
           onBeginSession={beginSession}
-          previewStarterLabel={previewStarterData.label}
+          previewStarterLabel={previewStarterData?.label ?? ""}
         />
       </StudyShell>
     );

@@ -3,6 +3,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 export function useStarterSelection(starters) {
   const [previewStarter, setPreviewStarter] = useState(starters[0]?.key ?? "");
   const [playingStarter, setPlayingStarter] = useState("");
+
+  // Reset selection whenever the starters list changes (e.g. region switch).
+  const firstKey = starters[0]?.key ?? "";
+  useEffect(() => {
+    setPreviewStarter(firstKey);
+    setPlayingStarter("");
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstKey]);
   const audioRef = useRef(null);
 
   const previewStarterData = useMemo(

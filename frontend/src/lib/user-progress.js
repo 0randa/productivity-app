@@ -10,13 +10,15 @@ export async function loadUserProgress() {
     supabase.from("progress").select("*").single(),
   ]);
 
+  const regionId = profile?.game_region ?? null;
+
   const activePokemon = profile
     ? {
         key: profile.starter_key,
         speciesName: profile.starter_key,
         pokemonId: profile.starter_pokemon_id,
         label: profile.starter_label,
-        ...getPokemonAssets(profile.starter_pokemon_id),
+        ...getPokemonAssets(profile.starter_pokemon_id, regionId),
       }
     : null;
 
@@ -34,7 +36,7 @@ export async function loadUserProgress() {
     pokemonId: row.pokemon_id,
     label: row.label,
     storageIndex: row.storage_index ?? null,
-    ...getPokemonAssets(row.pokemon_id),
+    ...getPokemonAssets(row.pokemon_id, regionId),
   }));
 
   // Ensure the starter (activePokemon) appears in the party list for UI/account display,
@@ -63,6 +65,7 @@ export async function loadUserProgress() {
     totalXp: progress?.total_xp ?? 0,
     pomodorosCompleted: progress?.pomodoros_completed ?? 0,
     caughtPokemon: normalizedCaught,
+    regionId,
   };
 }
 
@@ -99,7 +102,7 @@ export async function reorderCaughtPokemon(order) {
   await supabase.from("caught_pokemon").upsert(rows, { onConflict: "id" });
 }
 
-export async function saveUserProgress({ activePokemon, totalXp, pomodorosCompleted }) {
+export async function saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, regionId }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
@@ -113,6 +116,7 @@ export async function saveUserProgress({ activePokemon, totalXp, pomodorosComple
         starter_pokemon_id: activePokemon.pokemonId,
         starter_label: activePokemon.label,
         starter_sprite: activePokemon.sprite,
+        ...(regionId ? { game_region: regionId } : {}),
       })
     );
   }

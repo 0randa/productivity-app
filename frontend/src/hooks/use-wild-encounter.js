@@ -1,30 +1,35 @@
 import { useState } from "react";
 import {
-  WILD_POKEMON,
   WILD_ENCOUNTER_CHANCE,
   CATCH_RATE,
   getPokemonAssets,
   formatPokemonName,
 } from "@/lib/pokemon";
 
-function pickRandomWild() {
-  const entry = WILD_POKEMON[Math.floor(Math.random() * WILD_POKEMON.length)];
+function pickRandomWild(wildPool, regionId) {
+  if (!wildPool?.length) return null;
+  const entry = wildPool[Math.floor(Math.random() * wildPool.length)];
   return {
     ...entry,
     label: formatPokemonName(entry.speciesName),
-    ...getPokemonAssets(entry.pokemonId),
+    ...getPokemonAssets(entry.pokemonId, regionId),
   };
 }
 
-export function useWildEncounter({ testingMode = false, partySize: _partySize } = {}) {
+export function useWildEncounter({
+  testingMode = false,
+  partySize: _partySize,
+  wildPool,
+  regionId,
+} = {}) {
   void _partySize;
   const [wildPokemon, setWildPokemon] = useState(null);
   const [catchResult, setCatchResult] = useState(null); // null | "success" | "fail"
 
   const triggerEncounterChance = () => {
-    // In testing mode we force an encounter every time.
+    if (!wildPool?.length) return; // skip if pool not loaded yet
     if (testingMode || Math.random() < WILD_ENCOUNTER_CHANCE) {
-      setWildPokemon(pickRandomWild());
+      setWildPokemon(pickRandomWild(wildPool, regionId));
       setCatchResult(null);
     }
   };

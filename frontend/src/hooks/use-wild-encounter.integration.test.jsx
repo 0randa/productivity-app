@@ -3,10 +3,18 @@ import { renderHook, act } from "@testing-library/react";
 import { useWildEncounter } from "@/hooks/use-wild-encounter";
 import { CATCH_RATE, MAX_PARTY_SIZE, WILD_ENCOUNTER_CHANCE } from "@/lib/pokemon";
 
+const KANTO_FALLBACK = [
+  { key: "pidgey",   speciesName: "pidgey",   pokemonId: 16 },
+  { key: "rattata",  speciesName: "rattata",  pokemonId: 19 },
+  { key: "geodude",  speciesName: "geodude",  pokemonId: 74 },
+];
+
 describe("useWildEncounter integration (many blackbox cases)", () => {
-  test("does not trigger encounter when party is full", () => {
+  test("does not trigger encounter when wildPool is empty or absent", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
-    const { result } = renderHook(() => useWildEncounter({ partySize: MAX_PARTY_SIZE }));
+    const { result } = renderHook(() =>
+      useWildEncounter({ partySize: 0, wildPool: [] }),
+    );
     act(() => result.current.triggerEncounterChance());
     expect(result.current.wildPokemon).toBe(null);
     vi.restoreAllMocks();
@@ -19,7 +27,9 @@ describe("useWildEncounter integration (many blackbox cases)", () => {
 
     for (const r of values) {
       vi.spyOn(Math, "random").mockReturnValueOnce(r);
-      const { result, unmount } = renderHook(() => useWildEncounter({ partySize: 0 }));
+      const { result, unmount } = renderHook(() =>
+        useWildEncounter({ partySize: 0, wildPool: KANTO_FALLBACK, regionId: "kanto" }),
+      );
       act(() => result.current.triggerEncounterChance());
       const shouldTrigger = r < WILD_ENCOUNTER_CHANCE;
       expect(Boolean(result.current.wildPokemon)).toBe(shouldTrigger);
@@ -42,7 +52,9 @@ describe("useWildEncounter integration (many blackbox cases)", () => {
         .mockReturnValueOnce(0) // pickRandomWild index
         .mockReturnValueOnce(r); // attempt catch
 
-      const { result, unmount } = renderHook(() => useWildEncounter({ partySize: 0 }));
+      const { result, unmount } = renderHook(() =>
+        useWildEncounter({ partySize: 0, wildPool: KANTO_FALLBACK, regionId: "kanto" }),
+      );
       act(() => result.current.triggerEncounterChance());
       expect(result.current.wildPokemon).not.toBe(null);
 
@@ -64,10 +76,14 @@ describe("useWildEncounter integration (many blackbox cases)", () => {
   });
 
   test("testingMode: encounter always triggers + catch always succeeds", () => {
-    // even when party is full, testingMode should still show the encounter and guarantee a catch
     vi.spyOn(Math, "random").mockReturnValue(0.9999);
     const { result } = renderHook(() =>
-      useWildEncounter({ partySize: MAX_PARTY_SIZE, testingMode: true }),
+      useWildEncounter({
+        partySize: MAX_PARTY_SIZE,
+        testingMode: true,
+        wildPool: KANTO_FALLBACK,
+        regionId: "kanto",
+      }),
     );
 
     act(() => result.current.triggerEncounterChance());
@@ -83,4 +99,3 @@ describe("useWildEncounter integration (many blackbox cases)", () => {
     vi.restoreAllMocks();
   });
 });
-
