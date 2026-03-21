@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { XP_PER_TASK, createTaskId } from "@/lib/pokemon";
-
-const INITIAL_TASKS = [];
+import { loadSessionData, saveSessionData } from "@/lib/session-storage";
 
 export function useSessionState() {
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
-  const [pomodorosStarted, setPomodorosStarted] = useState(0);
+  const [tasks, setTasks] = useState(() => loadSessionData()?.tasks ?? []);
+  const [pomodorosStarted, setPomodorosStarted] = useState(() => loadSessionData()?.pomodorosStarted ?? 0);
   const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
-  const [tasksCompleted, setTasksCompleted] = useState(0);
-  const [availableTaskClaims, setAvailableTaskClaims] = useState(0);
+  const [tasksCompleted, setTasksCompleted] = useState(() => loadSessionData()?.tasksCompleted ?? 0);
+  const [availableTaskClaims, setAvailableTaskClaims] = useState(() => loadSessionData()?.availableTaskClaims ?? 0);
   const [totalXp, setTotalXp] = useState(0);
   const [statusMessage, setStatusMessage] = useState("");
+
+  // Persist session-scoped data across page refreshes
+  useEffect(() => {
+    saveSessionData({ tasks, pomodorosStarted, tasksCompleted, availableTaskClaims });
+  }, [tasks, pomodorosStarted, tasksCompleted, availableTaskClaims]);
 
   const setWelcomeMessage = ({ starterLabel, startLevel }) => {
     setStatusMessage(

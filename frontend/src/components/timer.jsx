@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound, getMuted, setMuted } from "@/lib/victory-sound";
 import { requestNotificationPermission, sendTimerNotification } from "@/lib/notifications";
+import { loadSessionData, saveSessionData } from "@/lib/session-storage";
 
 const TEST_FOCUS_SECS = 2;
 const TEST_BREAK_SECS = 1;
@@ -24,13 +25,31 @@ export default function TimerComp({
   const shortBreakSecs = testingMode ? TEST_BREAK_SECS : shortBreakMinutes * 60;
   const longBreakSecs  = testingMode ? TEST_BREAK_SECS : longBreakMinutes * 60;
 
-  const [mode, setMode]               = useState("focus");
-  const [secondsLeft, setSecondsLeft] = useState(focusSecs);
-  const [isRunning, setIsRunning]     = useState(false);
-  const [canStartBreak, setCanStartBreak] = useState(false);
-  const [pomodoroCount, setPomodoroCount] = useState(0);
+  // Restore saved timer state (only if timer settings still match)
+  const savedTimerRef = useRef(undefined);
+  if (savedTimerRef.current === undefined) {
+    const t = loadSessionData()?.timer;
+    if (t && t.focusSecs === focusSecs && t.shortBreakSecs === shortBreakSecs && t.longBreakSecs === longBreakSecs) {
+      if (t.isRunning && t.deadline) {
+        const remaining = Math.round((t.deadline - Date.now()) / 1000);
+        savedTimerRef.current = { ...t, secondsLeft: remaining > 0 ? remaining : 0, isRunning: true };
+      } else {
+        savedTimerRef.current = t;
+      }
+    } else {
+      savedTimerRef.current = null;
+    }
+  }
+  const _st = savedTimerRef.current;
+
+  const [mode, setMode]               = useState(_st?.mode ?? "focus");
+  const [secondsLeft, setSecondsLeft] = useState(_st?.secondsLeft ?? focusSecs);
+  const [isRunning, setIsRunning]     = useState(_st?.isRunning ?? false);
+  const [canStartBreak, setCanStartBreak] = useState(_st?.canStartBreak ?? false);
+  const [pomodoroCount, setPomodoroCount] = useState(_st?.pomodoroCount ?? 0);
   const [isMuted, setIsMuted]         = useState(() => getMuted());
   const completionFired = useRef(false);
+  const didMount = useRef(false);
 
   const toggleMute = () => {
     const next = !isMuted;
@@ -38,7 +57,12 @@ export default function TimerComp({
     setIsMuted(next);
   };
 
+  // Reset when timer settings change (skip first mount to preserve restored state)
   useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return () => { didMount.current = false; }; // reset for StrictMode remount cycle
+    }
     setIsRunning(false);
     setMode("focus");
     setCanStartBreak(false);
@@ -46,6 +70,23 @@ export default function TimerComp({
     setPomodoroCount(0);
     completionFired.current = false;
   }, [focusSecs, shortBreakSecs, longBreakSecs]);
+
+  // Persist timer state on key transitions
+  useEffect(() => {
+    saveSessionData({
+      timer: {
+        mode,
+        secondsLeft,
+        isRunning,
+        pomodoroCount,
+        canStartBreak,
+        deadline: isRunning ? Date.now() + secondsLeft * 1000 : null,
+        focusSecs,
+        shortBreakSecs,
+        longBreakSecs,
+      },
+    });
+  }, [mode, isRunning, pomodoroCount, canStartBreak, focusSecs, shortBreakSecs, longBreakSecs]);
 
   const deadlineRef = useRef(null);
   const originalTitle = useRef(null);
