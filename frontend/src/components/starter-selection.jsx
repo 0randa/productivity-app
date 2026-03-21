@@ -5,35 +5,35 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 // Step A: pick a region
 function RegionGrid({ regions, onSelectRegion }) {
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <CardTitle>Choose Your Region!</CardTitle>
+          <CardTitle className="text-xl">Choose Your Region!</CardTitle>
           <Badge variant="blue">First Session Setup</Badge>
         </div>
-        <CardDescription>
+        <CardDescription className="text-base">
           Your region determines which Pokémon you can catch and the art style used.
         </CardDescription>
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {regions.map((region) => (
             <button
               key={region.regionId}
               type="button"
               onClick={() => onSelectRegion(region.regionId)}
               className={[
-                "w-full text-left p-4 border-[3px] transition-all duration-100 cursor-pointer",
+                "w-full text-left p-6 border-[3px] transition-all duration-100 cursor-pointer min-h-[96px]",
                 "shadow-[inset_2px_2px_0_var(--window-highlight),inset_-2px_-2px_0_var(--window-shadow),3px_3px_0_rgba(0,0,0,0.12)]",
                 "border-[var(--window-border)] bg-white hover:-translate-x-0.5 hover:-translate-y-0.5",
                 "hover:shadow-[inset_2px_2px_0_var(--window-highlight),inset_-2px_-2px_0_var(--window-shadow),5px_5px_0_rgba(0,0,0,0.18)]",
               ].join(" ")}
             >
-              <p className="font-pixel text-[10px] tracking-wide text-[var(--text-dark)]">
+              <p className="font-pixel text-[13px] tracking-wide text-[var(--text-dark)]">
                 {region.label}
               </p>
-              <p className="font-pixel-body text-[14px] text-[var(--text-muted)] mt-1">
+              <p className="font-pixel-body text-[18px] text-[var(--text-muted)] mt-2">
                 {region.starters.map((s) => s.label).join(" · ")}
               </p>
             </button>
