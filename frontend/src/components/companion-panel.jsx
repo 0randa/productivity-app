@@ -15,11 +15,12 @@ export default function CompanionPanel({
   isGrowthDataLoading,
   growthDataError,
   nextEvolution,
-  canEvolveByLevel,
+  canEvolve,
   onEvolve,
   xpPerTask,
   availableTaskClaims,
   totalXp,
+  pokedollars,
 }) {
   return (
     <Card>
@@ -87,17 +88,21 @@ export default function CompanionPanel({
           <div className="border-[2px] border-[var(--poke-blue)] bg-[rgba(88,160,232,0.08)] p-3 flex items-center justify-between gap-3 flex-wrap">
             <p className="font-pixel-body text-[18px] text-[var(--text-dark)]">
               → <strong>{nextEvolution.label}</strong>
-              {typeof nextEvolution.minLevel === "number"
-                ? ` at Lv.${nextEvolution.minLevel}`
-                : " (special)"}
+              {nextEvolution.requiredShopItem
+                ? ` (${nextEvolution.requiredShopItem.label})`
+                : typeof nextEvolution.minLevel === "number"
+                  ? ` at Lv.${nextEvolution.minLevel}`
+                  : " (special)"}
             </p>
             <Button
               variant="secondary"
               size="sm"
               onClick={onEvolve}
-              disabled={!canEvolveByLevel}
+              disabled={!canEvolve}
             >
-              Evolve!
+              {nextEvolution.requiredShopItem && !canEvolve
+                ? `Need ${nextEvolution.requiredShopItem.label}`
+                : "Evolve!"}
             </Button>
           </div>
         )}
@@ -105,11 +110,12 @@ export default function CompanionPanel({
         <Separator />
 
         {/* Stats grid */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
             { label: "XP / Task", value: xpPerTask },
             { label: "Claims", value: availableTaskClaims },
             { label: "Total XP", value: totalXp },
+            { label: "Pokédollars", value: `₽${(pokedollars ?? 0).toLocaleString()}` },
           ].map(({ label, value }) => (
             <div
               key={label}

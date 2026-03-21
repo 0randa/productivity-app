@@ -70,13 +70,22 @@ export const getNextEvolutionEntry = (chainNode, currentSpeciesName) => {
 
     const sortedCandidates = chainNode.evolves_to
       .map((candidate) => {
-        const minLevel = candidate.evolution_details?.find(
+        const details = candidate.evolution_details ?? [];
+        const firstDetail = details[0] ?? {};
+
+        const minLevel = details.find(
           (detail) => typeof detail.min_level === "number",
         )?.min_level;
 
         return {
           candidate,
           minLevel: typeof minLevel === "number" ? minLevel : null,
+          // Full evolution method data for shop item matching
+          evolutionDetails: details,
+          trigger: firstDetail.trigger?.name ?? null,
+          item: firstDetail.item?.name ?? null,
+          heldItem: firstDetail.held_item?.name ?? null,
+          minHappiness: typeof firstDetail.min_happiness === "number" ? firstDetail.min_happiness : null,
         };
       })
       .sort(

@@ -18,6 +18,8 @@ import {
   addCaughtPokemon,
   reorderCaughtPokemon,
   normalizeStorageOrder,
+  loadInventory,
+  saveInventoryItem,
 } from "@/lib/user-progress";
 import {
   MAX_LEVEL,
@@ -27,6 +29,7 @@ import {
   getPokemonAssets,
 } from "@/lib/pokemon";
 import { REGIONS } from "@/lib/regions";
+import { POKEDOLLARS_PER_POMODORO, getRequiredItem } from "@/lib/shop";
 
 export default function App() {
   const { user, loading: authLoading } = useAuth();
@@ -38,6 +41,8 @@ export default function App() {
     Boolean(loadGuestData()?.testingMode),
   );
   const [selectedRegion, setSelectedRegion] = useState(null);
+  const [pokedollars, setPokedollars] = useState(0);
+  const [inventory, setInventory] = useState([]);
 
   const regionData = REGIONS.find((r) => r.regionId === selectedRegion);
   const starters = regionData?.starters ?? [];
@@ -106,21 +111,26 @@ export default function App() {
     setTotalXp(0);
     setPomodorosCompleted(0);
     setSelectedRegion(null);
+    setPokedollars(0);
+    setInventory([]);
     setProgressLoaded(false);
 
     if (user) {
-      loadUserProgress().then(
-        ({
+      Promise.all([loadUserProgress(), loadInventory()]).then(
+        ([{
           activePokemon: ap,
           totalXp: xp,
           pomodorosCompleted: pc,
+          pokedollars: pd,
           caughtPokemon: caught,
           regionId: rid,
-        }) => {
+        }, inv]) => {
           if (ap) setActivePokemon(ap);
           setTotalXp(xp);
           setPomodorosCompleted(pc);
+          setPokedollars(pd ?? 0);
           setCaughtPokemon(caught ?? []);
+          setInventory(inv ?? []);
           if (rid) setSelectedRegion(rid);
           setProgressLoaded(true);
         },
@@ -133,6 +143,8 @@ export default function App() {
         setPomodorosCompleted(saved.pomodorosCompleted);
       setCaughtPokemon(saved?.caughtPokemon ?? []);
       if (saved?.regionId) setSelectedRegion(saved.regionId);
+      setPokedollars(saved?.pokedollars ?? 0);
+      setInventory(saved?.inventory ?? []);
       setProgressLoaded(true);
     }
   }, [user, authLoading]);
@@ -142,12 +154,14 @@ export default function App() {
     if (!progressLoaded) return;
 
     if (user) {
-      saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, regionId: selectedRegion });
+      saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, pokedollars, regionId: selectedRegion });
     } else {
       saveGuestData({
         activePokemon,
         totalXp,
         pomodorosCompleted,
+        pokedollars,
+        inventory,
         caughtPokemon,
         regionId: selectedRegion,
       });
@@ -156,6 +170,8 @@ export default function App() {
     activePokemon,
     totalXp,
     pomodorosCompleted,
+    pokedollars,
+    inventory,
     caughtPokemon,
     selectedRegion,
     user,
@@ -229,6 +245,7 @@ export default function App() {
 
   const onPomodoroComplete = () => {
     handlePomodoroComplete();
+    setPokedollars((prev) => prev + POKEDOLLARS_PER_POMODORO);
     // Only trigger encounters once the user has an active Pokemon
     if (activePokemon) {
       triggerEncounterChance();
@@ -295,21 +312,55 @@ export default function App() {
     typeof nextEvolution.minLevel === "number" &&
     level >= nextEvolution.minLevel;
 
+  const hasRequiredItem = Boolean(
+    nextEvolution?.requiredShopItem &&
+    inventory.some(
+      (i) => i.itemId === nextEvolution.requiredShopItem.id && i.quantity > 0,
+    ),
+  );
+
+  const canEvolve = nextEvolution
+    ? nextEvolution.requiredShopItem
+      ? hasRequiredItem
+      : canEvolveByLevel
+    : false;
+
   const handleEvolve = () => {
     if (!nextEvolution) return;
 
-    if (typeof nextEvolution.minLevel !== "number") {
-      updateStatusMessage(
-        `${activePokemon?.label ?? "Your Pokemon"} cannot evolve by level in this line.`,
-      );
-      return;
-    }
+    // Item-based evolution (stone, link cable, soothe bell)
+    if (nextEvolution.requiredShopItem) {
+      if (!hasRequiredItem) {
+        updateStatusMessage(
+          `You need a ${nextEvolution.requiredShopItem.label} to evolve ${activePokemon?.label ?? "your Pokémon"}. Visit the PokéMart!`,
+        );
+        return;
+      }
 
-    if (level < nextEvolution.minLevel) {
-      updateStatusMessage(
-        `${activePokemon?.label ?? "Your Pokemon"} evolves at level ${nextEvolution.minLevel}.`,
-      );
-      return;
+      // Consume the item
+      const itemId = nextEvolution.requiredShopItem.id;
+      const entry = inventory.find((i) => i.itemId === itemId);
+      const newQuantity = (entry?.quantity ?? 1) - 1;
+      const newInventory = newQuantity <= 0
+        ? inventory.filter((i) => i.itemId !== itemId)
+        : inventory.map((i) => i.itemId === itemId ? { ...i, quantity: newQuantity } : i);
+      setInventory(newInventory);
+      if (user) saveInventoryItem(itemId, newQuantity);
+    } else {
+      // Level-based evolution
+      if (typeof nextEvolution.minLevel !== "number") {
+        updateStatusMessage(
+          `${activePokemon?.label ?? "Your Pokémon"} cannot evolve by level in this line.`,
+        );
+        return;
+      }
+
+      if (level < nextEvolution.minLevel) {
+        updateStatusMessage(
+          `${activePokemon?.label ?? "Your Pokémon"} evolves at level ${nextEvolution.minLevel}.`,
+        );
+        return;
+      }
     }
 
     const evolvedPokemon = {
@@ -322,7 +373,7 @@ export default function App() {
 
     setActivePokemon(evolvedPokemon);
     updateStatusMessage(
-      `${activePokemon?.label ?? "Your Pokemon"} evolved into ${nextEvolution.label}!`,
+      `${activePokemon?.label ?? "Your Pokémon"} evolved into ${nextEvolution.label}!`,
     );
   };
 
@@ -372,11 +423,12 @@ export default function App() {
           isGrowthDataLoading,
           growthDataError,
           nextEvolution,
-          canEvolveByLevel,
+          canEvolve,
           onEvolve: handleEvolve,
           xpPerTask: XP_PER_TASK,
           availableTaskClaims,
           totalXp,
+          pokedollars,
         }}
         taskBoardProps={{
           tasks,

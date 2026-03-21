@@ -9,6 +9,7 @@ import {
   getNextEvolutionEntry,
   getPokemonIdFromResourceUrl,
 } from "@/lib/pokemon";
+import { getRequiredItem } from "@/lib/shop";
 
 export function usePokemonProgress({ activePokemon, totalXp }) {
   const [growthLevels, setGrowthLevels] = useState([]);
@@ -108,11 +109,17 @@ export function usePokemonProgress({ activePokemon, totalXp }) {
           return;
         }
 
+        const requiredShopItem = getRequiredItem(nextEvolutionEntry.evolutionDetails ?? []);
+
         setNextEvolution({
           pokemonId,
           speciesName: nextEvolutionEntry.candidate.species.name,
           label: formatPokemonName(nextEvolutionEntry.candidate.species.name),
           minLevel: nextEvolutionEntry.minLevel,
+          trigger: nextEvolutionEntry.trigger,
+          item: nextEvolutionEntry.item,
+          minHappiness: nextEvolutionEntry.minHappiness,
+          requiredShopItem,
         });
       } catch (error) {
         if (!isActive || error.name === "AbortError") {

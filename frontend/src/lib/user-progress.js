@@ -64,6 +64,7 @@ export async function loadUserProgress() {
     activePokemon,
     totalXp: progress?.total_xp ?? 0,
     pomodorosCompleted: progress?.pomodoros_completed ?? 0,
+    pokedollars: progress?.pokedollars ?? 0,
     caughtPokemon: normalizedCaught,
     regionId,
   };
@@ -102,7 +103,7 @@ export async function reorderCaughtPokemon(order) {
   await supabase.from("caught_pokemon").upsert(rows, { onConflict: "id" });
 }
 
-export async function saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, regionId }) {
+export async function saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, pokedollars, regionId }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
@@ -126,11 +127,40 @@ export async function saveUserProgress({ activePokemon, totalXp, pomodorosComple
       id: user.id,
       total_xp: totalXp,
       pomodoros_completed: pomodorosCompleted,
+      pokedollars: pokedollars ?? 0,
       updated_at: new Date().toISOString(),
     })
   );
 
   await Promise.all(promises);
+}
+
+// ── Inventory (shop items) ──────────────────────────────────────────────────
+
+export async function loadInventory() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("inventory")
+    .select("item_id, quantity")
+    .eq("user_id", user.id);
+
+  return (data ?? []).map((row) => ({ itemId: row.item_id, quantity: row.quantity }));
+}
+
+export async function saveInventoryItem(itemId, quantity) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  if (quantity <= 0) {
+    await supabase.from("inventory").delete().eq("user_id", user.id).eq("item_id", itemId);
+  } else {
+    await supabase.from("inventory").upsert(
+      { user_id: user.id, item_id: itemId, quantity },
+      { onConflict: "user_id,item_id" },
+    );
+  }
 }
 
 export function normalizeStorageOrder(caughtPokemon) {
