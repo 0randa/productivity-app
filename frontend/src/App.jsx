@@ -66,6 +66,7 @@ export default function App() {
     updateStatusMessage,
     handlePomodoroStart,
     handlePomodoroComplete,
+    handleFlowComplete,
     handleTaskCreate,
     handleTaskComplete,
   } = useSessionState();
@@ -246,10 +247,15 @@ export default function App() {
   const onPomodoroComplete = () => {
     handlePomodoroComplete();
     setPokedollars((prev) => prev + POKEDOLLARS_PER_POMODORO);
-    // Only trigger encounters once the user has an active Pokemon
-    if (activePokemon) {
-      triggerEncounterChance();
-    }
+    if (activePokemon) triggerEncounterChance();
+  };
+
+  const onFlowComplete = (studiedSecs) => {
+    handleFlowComplete(studiedSecs);
+    // Award pokedollars proportional to time studied (same rate as pomodoro)
+    const earned = Math.max(1, Math.round((studiedSecs / (25 * 60)) * POKEDOLLARS_PER_POMODORO));
+    setPokedollars((prev) => prev + earned);
+    if (activePokemon) triggerEncounterChance();
   };
 
   const handleCatch = () => {
@@ -412,6 +418,7 @@ export default function App() {
         statusMessage={statusMessage}
         onPomodoroStart={handlePomodoroStart}
         onPomodoroComplete={onPomodoroComplete}
+        onFlowComplete={onFlowComplete}
         companionProps={{
           activePokemon,
           level,

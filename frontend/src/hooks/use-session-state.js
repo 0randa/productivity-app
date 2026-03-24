@@ -36,6 +36,12 @@ export function useSessionState() {
     setStatusMessage("Pomodoro complete. Mark one task done to claim XP.");
   };
 
+  const handleFlowComplete = (studiedSecs) => {
+    const minutes = Math.floor(studiedSecs / 60);
+    setAvailableTaskClaims((prev) => prev + 1);
+    setStatusMessage(`Flow session complete — ${minutes}m of deep work. Mark a task done to claim XP.`);
+  };
+
   const handleTaskCreate = (taskName) => {
     const normalizedTaskName = taskName.trim();
     if (!normalizedTaskName) {
@@ -128,6 +134,7 @@ export function useSessionState() {
     updateStatusMessage,
     handlePomodoroStart,
     handlePomodoroComplete,
+    handleFlowComplete,
     handleTaskCreate,
     handleTaskComplete,
   };

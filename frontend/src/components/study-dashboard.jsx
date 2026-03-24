@@ -12,6 +12,7 @@ export default function StudyDashboard({
   statusMessage,
   onPomodoroStart,
   onPomodoroComplete,
+  onFlowComplete,
   companionProps,
   taskBoardProps,
 }) {
@@ -30,6 +31,7 @@ export default function StudyDashboard({
           statusMessage={statusMessage}
           onPomodoroStart={onPomodoroStart}
           onPomodoroComplete={onPomodoroComplete}
+          onFlowComplete={onFlowComplete}
         />
         <CompanionPanel {...companionProps} />
       </div>
