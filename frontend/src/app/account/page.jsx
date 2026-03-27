@@ -6,7 +6,6 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/auth-context";
 import { useCheckin } from "@/context/checkin-context";
-import { canActivateShield, todayStr } from "@/lib/checkin";
 import { clearGuestData, loadGuestData, saveGuestData } from "@/lib/guest-storage";
 import { loadUserProgress, saveUserProgress } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
@@ -24,11 +23,9 @@ export default function AccountPage() {
     streak,
     longestStreak,
     shieldsAvailable,
-    lastStreakDate,
     activateShield,
+    canUseShield,
   } = useCheckin();
-
-  const shieldEligible = canActivateShield(shieldsAvailable, lastStreakDate, todayStr());
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [savingActive, setSavingActive] = useState(false);
@@ -273,11 +270,11 @@ export default function AccountPage() {
                     <Button
                       variant="outline"
                       onClick={activateShield}
-                      disabled={!shieldEligible}
+                      disabled={!canUseShield}
                     >
                       Use Shield
                     </Button>
-                    {!shieldEligible && (
+                    {!canUseShield && (
                       <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
                         Shield can only be used after missing exactly one day.
                       </p>
