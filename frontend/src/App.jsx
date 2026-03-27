@@ -158,7 +158,9 @@ export default function App() {
     if (user) {
       saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, pokedollars, regionId: selectedRegion });
     } else {
+      const existingGuestData = loadGuestData() ?? {};
       saveGuestData({
+        ...existingGuestData,
         activePokemon,
         totalXp,
         pomodorosCompleted,

@@ -54,7 +54,7 @@ function Harness() {
   );
 }
 
-test("integration: pomodoro completion enables one task claim", async () => {
+test("integration: pomodoro completion unlocks task claiming", async () => {
   const user = userEvent.setup();
   render(<Harness />);
 
@@ -101,7 +101,7 @@ test("integration: task added while claims are available starts as queued", asyn
   expect(screen.getByText("Write tests")).not.toHaveClass("line-through");
 });
 
-test("integration: task completion consumes claim and marks done", async () => {
+test("integration: task completion keeps claiming unlocked and marks done", async () => {
   const user = userEvent.setup();
   render(<Harness />);
 
@@ -116,8 +116,32 @@ test("integration: task completion consumes claim and marks done", async () => {
   expect(clearBtn).toBeEnabled();
 
   await user.click(clearBtn);
-  expect(screen.getByLabelText("claims")).toHaveTextContent("0");
+  expect(screen.getByLabelText("claims")).toHaveTextContent("1");
   expect(screen.getByText("Done")).toBeVisible();
   expect(screen.getByText("Write tests")).toHaveClass("line-through");
+});
+
+test("integration: one pomodoro allows clearing multiple queued tasks", async () => {
+  const user = userEvent.setup();
+  render(<Harness />);
+
+  const input = screen.getByPlaceholderText("What will you conquer next?");
+  await user.type(input, "Task one");
+  await user.keyboard("{Enter}");
+  await user.type(input, "Task two");
+  await user.keyboard("{Enter}");
+
+  await user.click(screen.getByRole("button", { name: "Complete pomodoro" }));
+  expect(screen.getByLabelText("claims")).toHaveTextContent("1");
+
+  const clearButtons = screen.getAllByRole("button", { name: "Clear!" });
+  await user.click(clearButtons[0]);
+
+  const remainingClear = screen.getByRole("button", { name: "Clear!" });
+  expect(remainingClear).toBeEnabled();
+  await user.click(remainingClear);
+
+  expect(screen.getByLabelText("claims")).toHaveTextContent("1");
+  expect(screen.getAllByText("Done")).toHaveLength(2);
 });
 

@@ -99,15 +99,16 @@ export default function FocusPanel({
   };
 
   const toggleTestingMode = () => {
-    setTestingMode((prev) => {
-      const next = !prev;
-      const existing = loadGuestData() ?? {};
-      saveGuestData({ ...existing, testingMode: next });
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("pomopet:testing-mode", { detail: { enabled: next } }));
-      }
-      return next;
-    });
+    const next = !testingMode;
+    setTestingMode(next);
+
+    const existing = loadGuestData() ?? {};
+    saveGuestData({ ...existing, testingMode: next });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("pomopet:testing-mode", { detail: { enabled: next } }),
+      );
+    }
   };
 
   return (

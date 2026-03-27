@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { XP_PER_TASK, createTaskId } from "@/lib/pokemon";
 import { loadSessionData, saveSessionData } from "@/lib/session-storage";
 
@@ -15,6 +15,9 @@ export function useSessionState() {
   const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
   const [tasksCompleted, setTasksCompleted] = useState(() => loadSessionData()?.tasksCompleted ?? 0);
   const [availableTaskClaims, setAvailableTaskClaims] = useState(() => loadSessionData()?.availableTaskClaims ?? 0);
+  // Ref mirrors availableTaskClaims for synchronous guard checks — prevents
+  // rapid clicks from consuming more claims than earned before re-render.
+  const claimsRef = useRef(loadSessionData()?.availableTaskClaims ?? 0);
   const [totalXp, setTotalXp] = useState(0);
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -38,15 +41,17 @@ export function useSessionState() {
   };
 
   const handlePomodoroComplete = () => {
+    claimsRef.current = 1;
     setPomodorosCompleted((prev) => prev + 1);
-    setAvailableTaskClaims((prev) => prev + 1);
-    setStatusMessage("Pomodoro complete. Mark one task done to claim XP.");
+    setAvailableTaskClaims(1);
+    setStatusMessage("Pomodoro complete. You can now claim XP from all queued tasks.");
   };
 
   const handleFlowComplete = (studiedSecs) => {
     const minutes = Math.floor(studiedSecs / 60);
-    setAvailableTaskClaims((prev) => prev + 1);
-    setStatusMessage(`Flow session complete — ${minutes}m of deep work. Mark a task done to claim XP.`);
+    claimsRef.current = 1;
+    setAvailableTaskClaims(1);
+    setStatusMessage(`Flow session complete — ${minutes}m of deep work. You can now claim XP from all queued tasks.`);
   };
 
   const handleTaskCreate = (taskName) => {
@@ -92,13 +97,12 @@ export function useSessionState() {
       return;
     }
 
-    if (availableTaskClaims <= 0) {
+    if (claimsRef.current <= 0) {
       setStatusMessage(
         "Complete a pomodoro first, then claim XP by finishing a task.",
       );
       return;
     }
-
     setTasks((prev) =>
       prev.map((task) =>
         task.id === taskId
@@ -117,7 +121,6 @@ export function useSessionState() {
         : currentLevel;
     const didLevelUp = nextLevelAfterGain > currentLevel;
 
-    setAvailableTaskClaims((prev) => prev - 1);
     setTasksCompleted((prev) => prev + 1);
     setTotalXp((prev) => prev + XP_PER_TASK);
     setStatusMessage(
