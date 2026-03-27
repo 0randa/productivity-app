@@ -44,7 +44,12 @@ export function CheckinProvider({ children }) {
       .from("progress")
       .select("streak, last_streak_date, shields_available, last_checkin_date, longest_streak")
       .single()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          // Leave loaded = false so showCheckinModal stays false on query failure
+          console.error("[CheckinContext] Failed to load progress:", error.message);
+          return;
+        }
         setStreak(data?.streak ?? 0);
         setLastStreakDate(data?.last_streak_date ?? null);
         setShieldsAvailable(data?.shields_available ?? 0);
