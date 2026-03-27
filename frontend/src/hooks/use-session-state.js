@@ -14,7 +14,9 @@ function today() {
 }
 
 function yesterday() {
-  return new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function normalizeTask(raw) {

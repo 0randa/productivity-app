@@ -265,7 +265,7 @@ export default function AccountPage() {
                   <div className="space-y-2">
                     <p className="font-pixel-body text-[18px] text-[var(--text-muted)]">
                       A streak shield lets you protect your streak for one missed day.
-                      Activate it before a day you plan to miss.
+                      Activate it the day after you missed. You can hold at most 1 shield at a time — a new one is granted on your first check-in each week.
                     </p>
                     <Button
                       variant="outline"

@@ -190,7 +190,7 @@ export function NavbarComp() {
                   {shieldsAvailable > 0 && (
                     <button
                       onClick={() => setShowShieldPopover((v) => !v)}
-                      aria-label="Use streak shield"
+                      aria-label={canUseShield ? "Use streak shield" : "Streak shield available (not yet eligible)"}
                       style={{
                         background: "none",
                         border: "none",
