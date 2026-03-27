@@ -67,6 +67,12 @@ export async function loadUserProgress() {
     pokedollars: progress?.pokedollars ?? 0,
     caughtPokemon: normalizedCaught,
     regionId,
+    // Checkin/streak fields
+    streak: progress?.streak ?? 0,
+    lastStreakDate: progress?.last_streak_date ?? null,
+    shieldsAvailable: progress?.shields_available ?? 0,
+    lastCheckinDate: progress?.last_checkin_date ?? null,
+    longestStreak: progress?.longest_streak ?? 0,
   };
 }
 
@@ -103,7 +109,18 @@ export async function reorderCaughtPokemon(order) {
   await supabase.from("caught_pokemon").upsert(rows, { onConflict: "id" });
 }
 
-export async function saveUserProgress({ activePokemon, totalXp, pomodorosCompleted, pokedollars, regionId }) {
+export async function saveUserProgress({
+  activePokemon,
+  totalXp,
+  pomodorosCompleted,
+  pokedollars,
+  regionId,
+  streak,
+  lastStreakDate,
+  shieldsAvailable,
+  lastCheckinDate,
+  longestStreak,
+}) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
@@ -122,16 +139,22 @@ export async function saveUserProgress({ activePokemon, totalXp, pomodorosComple
     );
   }
 
-  promises.push(
-    supabase.from("progress").upsert({
-      id: user.id,
-      total_xp: totalXp,
-      pomodoros_completed: pomodorosCompleted,
-      pokedollars: pokedollars ?? 0,
-      updated_at: new Date().toISOString(),
-    })
-  );
+  const progressRow = {
+    id: user.id,
+    total_xp: totalXp,
+    pomodoros_completed: pomodorosCompleted,
+    pokedollars: pokedollars ?? 0,
+    updated_at: new Date().toISOString(),
+  };
 
+  // Only include checkin/streak fields when explicitly provided
+  if (typeof streak === 'number')           progressRow.streak = streak;
+  if (lastStreakDate !== undefined)          progressRow.last_streak_date = lastStreakDate;
+  if (typeof shieldsAvailable === 'number') progressRow.shields_available = shieldsAvailable;
+  if (lastCheckinDate !== undefined)         progressRow.last_checkin_date = lastCheckinDate;
+  if (typeof longestStreak === 'number')    progressRow.longest_streak = longestStreak;
+
+  promises.push(supabase.from("progress").upsert(progressRow));
   await Promise.all(promises);
 }
 
