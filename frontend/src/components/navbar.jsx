@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Archive,
+  Flame,
   Home,
   LogIn,
   LogOut,
@@ -19,11 +20,16 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { clearGuestData } from "@/lib/guest-storage";
 import { useTheme } from "@/hooks/use-theme";
+import { useCheckin } from "@/context/checkin-context";
+import { Button } from "@/components/ui/button";
 
 export function NavbarComp() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const { dark, toggle } = useTheme();
+
+  const { streak, shieldsAvailable, canUseShield, activateShield } = useCheckin();
+  const [showShieldPopover, setShowShieldPopover] = useState(false);
 
   const [menuState, setMenuState] = useState("closed"); // "closed" | "open" | "closing"
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -150,6 +156,88 @@ export function NavbarComp() {
           </div>
 
           <div className="pokemon-nav-links">
+            {/* Streak counter — only shown for authenticated users with an active streak */}
+            {user && streak > 0 && (
+              <div style={{ position: "relative" }}>
+                <div
+                  className="pokemon-nav-link"
+                  style={{
+                    background: "rgba(255,255,255,0.15)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    padding: "4px 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    color: "var(--text-light)",
+                  }}
+                  aria-label={`${streak}-day streak`}
+                >
+                  <Flame size={14} aria-hidden="true" style={{ color: "#f97316" }} />
+                  <span className="font-pixel text-[9px]">{streak}</span>
+
+                  {shieldsAvailable > 0 && (
+                    <button
+                      onClick={() => setShowShieldPopover((v) => !v)}
+                      aria-label="Use streak shield"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        paddingLeft: "4px",
+                        color: "var(--text-light)",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      🛡️
+                    </button>
+                  )}
+                </div>
+
+                {showShieldPopover && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "110%",
+                      right: 0,
+                      background: "var(--window-bg)",
+                      border: "2px solid var(--window-border)",
+                      padding: "10px 12px",
+                      zIndex: 100,
+                      minWidth: "220px",
+                      boxShadow: "2px 2px 0 var(--window-shadow)",
+                    }}
+                  >
+                    <p className="font-pixel-body text-[16px] text-[var(--text-dark)] mb-3">
+                      {canUseShield
+                        ? "Use your streak shield? This protects your streak for one missed day."
+                        : "Shield can only be used after missing exactly one day."}
+                    </p>
+                    <div className="flex gap-2">
+                      {canUseShield && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            activateShield();
+                            setShowShieldPopover(false);
+                          }}
+                        >
+                          Use Shield
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowShieldPopover(false)}
+                      >
+                        {canUseShield ? "Cancel" : "Close"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Dark / Light toggle — always accessible */}
             <button
               onClick={toggle}
