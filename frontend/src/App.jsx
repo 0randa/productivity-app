@@ -5,7 +5,9 @@ import StarterSelection from "@/components/starter-selection";
 import StudyDashboard from "@/components/study-dashboard";
 import StudyShell from "@/components/study-shell";
 import { WildEncounterModal } from "@/components/wild-encounter-modal";
+import { CheckinModal } from "@/components/checkin-modal";
 import { useAuth } from "@/context/auth-context";
+import { useCheckin } from "@/context/checkin-context";
 import { usePokemonProgress } from "@/hooks/use-pokemon-progress";
 import { useSessionState } from "@/hooks/use-session-state";
 import { useStarterSelection } from "@/hooks/use-starter-selection";
@@ -32,6 +34,7 @@ import { POKEDOLLARS_PER_POMODORO, getRequiredItem } from "@/lib/shop";
 
 export default function App() {
   const { user, loading: authLoading } = useAuth();
+  const { streak: checkinStreak, showCheckinModal, claimCheckin } = useCheckin();
 
   const [activePokemon, setActivePokemon] = useState(null);
   const [caughtPokemon, setCaughtPokemon] = useState([]);
@@ -73,7 +76,7 @@ export default function App() {
     handleTaskCreate,
     handleTaskComplete,
     handleClearBoard,
-  } = useSessionState();
+  } = useSessionState({ initialStreak: checkinStreak });
 
   const {
     wildPokemon,
@@ -87,6 +90,17 @@ export default function App() {
     wildPool,
     regionId: selectedRegion,
   });
+
+  useEffect(() => {
+    const onCheckinClaimed = (e) => {
+      const { xp = 0, pokedollars: pd = 0 } = e.detail ?? {};
+      if (xp)  setTotalXp((prev) => prev + xp);
+      if (pd)  setPokedollars((prev) => prev + pd);
+    };
+
+    window.addEventListener("pomopet:checkin-claimed", onCheckinClaimed);
+    return () => window.removeEventListener("pomopet:checkin-claimed", onCheckinClaimed);
+  }, []);
 
   useEffect(() => {
     const onToggle = (e) => setTestingMode(Boolean(e.detail?.enabled));
@@ -413,6 +427,12 @@ export default function App() {
           onBeginSession={beginSession}
           previewStarterLabel={previewStarterData?.label ?? ""}
         />
+        {showCheckinModal && (
+          <CheckinModal
+            streak={checkinStreak}
+            onClaim={claimCheckin}
+          />
+        )}
       </StudyShell>
     );
   }
@@ -472,6 +492,12 @@ export default function App() {
         onSetActive={handleSetCaughtActive}
         onDismiss={dismissEncounter}
       />
+      {showCheckinModal && (
+        <CheckinModal
+          streak={checkinStreak}
+          onClaim={claimCheckin}
+        />
+      )}
     </StudyShell>
   );
 }
