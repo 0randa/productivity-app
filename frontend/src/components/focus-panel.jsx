@@ -35,6 +35,7 @@ export default function FocusPanel({
   statusMessage,
   onPomodoroStart,
   onPomodoroComplete,
+  onPomodoroSkip,
   onFlowStart,
   onFlowComplete,
 }) {
@@ -291,6 +292,7 @@ export default function FocusPanel({
             testingMode={testingMode}
             onPomodoroStart={onPomodoroStart}
             onPomodoroComplete={onPomodoroComplete}
+            onPomodoroSkip={onPomodoroSkip}
           />
         ) : (
           <FlowTimerComp

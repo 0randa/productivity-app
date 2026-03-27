@@ -25,7 +25,6 @@ import {
   MAX_LEVEL,
   MAX_PARTY_SIZE,
   START_LEVEL,
-  XP_PER_TASK,
   getPokemonAssets,
 } from "@/lib/pokemon";
 import { REGIONS } from "@/lib/regions";
@@ -62,10 +61,14 @@ export default function App() {
     totalXp,
     setTotalXp,
     statusMessage,
+    streak,
+    dailyXpEarned,
+    dailyXpDate,
     setWelcomeMessage,
     updateStatusMessage,
     handlePomodoroStart,
     handlePomodoroComplete,
+    handlePomodoroSkip,
     handleFlowComplete,
     handleTaskCreate,
     handleTaskComplete,
@@ -253,6 +256,10 @@ export default function App() {
     if (activePokemon) triggerEncounterChance();
   };
 
+  const onPomodoroSkip = (ratio) => {
+    handlePomodoroSkip(ratio);
+  };
+
   const onFlowComplete = (studiedSecs) => {
     handleFlowComplete(studiedSecs);
     // Award pokedollars proportional to time studied (same rate as pomodoro)
@@ -421,6 +428,7 @@ export default function App() {
         statusMessage={statusMessage}
         onPomodoroStart={handlePomodoroStart}
         onPomodoroComplete={onPomodoroComplete}
+        onPomodoroSkip={onPomodoroSkip}
         onFlowComplete={onFlowComplete}
         companionProps={{
           activePokemon,
@@ -435,7 +443,8 @@ export default function App() {
           nextEvolution,
           canEvolve,
           onEvolve: handleEvolve,
-          xpPerTask: XP_PER_TASK,
+          streak,
+          dailyXpEarned,
           availableTaskClaims,
           totalXp,
           pokedollars,

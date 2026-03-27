@@ -17,7 +17,8 @@ export default function CompanionPanel({
   nextEvolution,
   canEvolve,
   onEvolve,
-  xpPerTask,
+  streak,
+  dailyXpEarned,
   availableTaskClaims,
   totalXp,
   pokedollars,
@@ -112,9 +113,9 @@ export default function CompanionPanel({
         {/* Stats grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
-            { label: "XP / Task", value: xpPerTask },
-            { label: "Claims", value: availableTaskClaims },
-            { label: "Total XP", value: totalXp },
+            { label: "Streak",      value: streak === 0 ? "—" : `${streak}d` },
+            { label: "Today XP",   value: dailyXpEarned > 0 ? `${dailyXpEarned}${dailyXpEarned > 300 ? " ↓" : ""}` : "—" },
+            { label: "Total XP",   value: totalXp },
             { label: "Pokédollars", value: `₽${(pokedollars ?? 0).toLocaleString()}` },
           ].map(({ label, value }) => (
             <div

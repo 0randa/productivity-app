@@ -8,13 +8,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { computeXp } from "@/lib/xp";
+
+const DIFFICULTY_LABELS = { easy: "Easy", medium: "Med", hard: "Hard" };
+const DIFFICULTY_COLORS = {
+  easy:   "bg-[var(--window-bg)] border-[var(--poke-green)] text-[var(--poke-green)]",
+  medium: "bg-[var(--window-bg)] border-[var(--window-border)] text-[var(--text-muted)]",
+  hard:   "bg-[var(--window-bg)] border-[var(--poke-red)] text-[var(--poke-red)]",
+};
+const DIFFICULTY_ACTIVE = {
+  easy:   "bg-[var(--poke-green)] border-[var(--poke-green)] text-white",
+  medium: "bg-[var(--window-border)] border-[var(--window-border)] text-white",
+  hard:   "bg-[var(--poke-red)] border-[var(--poke-red)] text-white",
+};
 
 export default function Tasks({ tasks, onAddTask, onCompleteTask, onClearBoard, canCompleteTask, stats }) {
   const [taskDraft, setTaskDraft] = useState("");
+  const [difficulty, setDifficulty] = useState("medium");
 
   const handleAddTask = (event) => {
     event.preventDefault();
-    const wasCreated = onAddTask?.(taskDraft);
+    const wasCreated = onAddTask?.(taskDraft, difficulty);
     if (wasCreated) setTaskDraft("");
   };
 
@@ -48,17 +62,37 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, onClearBoard, 
 
         <CardContent className="space-y-4">
           {/* Add task form */}
-          <form onSubmit={handleAddTask} className="flex gap-2">
-            <Input
-              value={taskDraft}
-              onChange={(e) => setTaskDraft(e.target.value)}
-              placeholder="What will you conquer next?"
-              className="flex-1"
-            />
-            <Button type="submit" variant="primary" size="sm" title="Add quest">
-              <PlusCircle size={14} />
-              <span className="hidden sm:inline">Add</span>
-            </Button>
+          <form onSubmit={handleAddTask} className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Input
+                value={taskDraft}
+                onChange={(e) => setTaskDraft(e.target.value)}
+                placeholder="What will you conquer next?"
+                className="flex-1"
+              />
+              <Button type="submit" variant="primary" size="sm" title="Add quest">
+                <PlusCircle size={14} />
+                <span className="hidden sm:inline">Add</span>
+              </Button>
+            </div>
+
+            {/* Difficulty selector */}
+            <div className="flex gap-1.5">
+              {(["easy", "medium", "hard"]).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDifficulty(d)}
+                  className={[
+                    "font-pixel text-[7px] tracking-widest uppercase px-3 py-1.5",
+                    "border-[2px] transition-colors duration-100",
+                    difficulty === d ? DIFFICULTY_ACTIVE[d] : DIFFICULTY_COLORS[d],
+                  ].join(" ")}
+                >
+                  {DIFFICULTY_LABELS[d]}
+                </button>
+              ))}
+            </div>
           </form>
 
           {/* Empty state */}
@@ -77,6 +111,10 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, onClearBoard, 
           <div className="space-y-2">
             {tasks.map((task) => {
               const isDone = task.done === true;
+              const taskDifficulty = task.difficulty ?? "medium";
+              const estimatedXp = isDone
+                ? (task.xpAwarded ?? computeXp({ difficulty: taskDifficulty }))
+                : computeXp({ difficulty: taskDifficulty });
               return (
                 <div
                   key={task.id}
@@ -106,9 +144,19 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, onClearBoard, 
                     ].join(" ")}>
                       {task.name}
                     </p>
-                    <p className="font-pixel text-[8px] tracking-wide text-[var(--text-muted)] mt-0.5">
-                      +{task.points} XP
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="font-pixel text-[8px] tracking-wide text-[var(--text-muted)]">
+                        {isDone ? `+${estimatedXp}` : `~${estimatedXp}`} XP
+                      </p>
+                      {!isDone && taskDifficulty !== "medium" && (
+                        <span className={[
+                          "font-pixel text-[6px] tracking-widest uppercase px-1.5 py-0.5 border-[2px]",
+                          DIFFICULTY_COLORS[taskDifficulty],
+                        ].join(" ")}>
+                          {DIFFICULTY_LABELS[taskDifficulty]}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Status + action */}
