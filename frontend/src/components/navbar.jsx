@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   Moon,
+  Shield,
   ShoppingBag,
   Sun,
   UserPlus,
@@ -30,6 +31,18 @@ export function NavbarComp() {
 
   const { streak, shieldsAvailable, canUseShield, activateShield } = useCheckin();
   const [showShieldPopover, setShowShieldPopover] = useState(false);
+  const shieldPopoverRef = useRef(null);
+
+  useEffect(() => {
+    if (!showShieldPopover) return;
+    const onClickOutside = (e) => {
+      if (shieldPopoverRef.current && !shieldPopoverRef.current.contains(e.target)) {
+        setShowShieldPopover(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [showShieldPopover]);
 
   const [menuState, setMenuState] = useState("closed"); // "closed" | "open" | "closing"
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -158,7 +171,7 @@ export function NavbarComp() {
           <div className="pokemon-nav-links">
             {/* Streak counter — only shown for authenticated users with an active streak */}
             {user && streak > 0 && (
-              <div style={{ position: "relative" }}>
+              <div role="group" aria-label={`${streak}-day streak`} style={{ position: "relative" }} ref={shieldPopoverRef}>
                 <div
                   className="pokemon-nav-link"
                   style={{
@@ -170,9 +183,8 @@ export function NavbarComp() {
                     gap: "4px",
                     color: "var(--text-light)",
                   }}
-                  aria-label={`${streak}-day streak`}
                 >
-                  <Flame size={14} aria-hidden="true" style={{ color: "#f97316" }} />
+                  <Flame size={14} aria-hidden="true" className="text-orange-500" />
                   <span className="font-pixel text-[9px]">{streak}</span>
 
                   {shieldsAvailable > 0 && (
@@ -189,7 +201,7 @@ export function NavbarComp() {
                         alignItems: "center",
                       }}
                     >
-                      🛡️
+                      <Shield size={12} aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -203,7 +215,7 @@ export function NavbarComp() {
                       background: "var(--window-bg)",
                       border: "2px solid var(--window-border)",
                       padding: "10px 12px",
-                      zIndex: 100,
+                      zIndex: 100, // above nav content, below modals
                       minWidth: "220px",
                       boxShadow: "2px 2px 0 var(--window-shadow)",
                     }}
