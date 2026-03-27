@@ -149,6 +149,7 @@ export async function saveUserProgress({
 
   // Only include checkin/streak fields when explicitly provided
   if (typeof streak === 'number')           progressRow.streak = streak;
+  // null is a valid write — allows callers to clear the date in Supabase
   if (lastStreakDate !== undefined)          progressRow.last_streak_date = lastStreakDate;
   if (typeof shieldsAvailable === 'number') progressRow.shields_available = shieldsAvailable;
   if (lastCheckinDate !== undefined)         progressRow.last_checkin_date = lastCheckinDate;
