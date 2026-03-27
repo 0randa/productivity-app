@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/auth-context";
+import { useCheckin } from "@/context/checkin-context";
+import { canActivateShield, todayStr } from "@/lib/checkin";
 import { clearGuestData, loadGuestData, saveGuestData } from "@/lib/guest-storage";
 import { loadUserProgress, saveUserProgress } from "@/lib/user-progress";
 import StudyShell from "@/components/study-shell";
@@ -18,6 +20,15 @@ import { Separator } from "@/components/ui/separator";
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const {
+    streak,
+    longestStreak,
+    shieldsAvailable,
+    lastStreakDate,
+    activateShield,
+  } = useCheckin();
+
+  const shieldEligible = canActivateShield(shieldsAvailable, lastStreakDate, todayStr());
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [savingActive, setSavingActive] = useState(false);
@@ -223,6 +234,60 @@ export default function AccountPage() {
             ) : null}
           </CardContent>
         </Card>
+
+        {/* Streak — logged-in only */}
+        {user && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Streak</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-6">
+                <div>
+                  <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">Current</p>
+                  <p className="font-pixel-body text-[22px]" style={{ color: "var(--poke-blue)" }}>
+                    🔥 {streak} day{streak !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">Best</p>
+                  <p className="font-pixel-body text-[22px]" style={{ color: "var(--poke-blue)" }}>
+                    {longestStreak} day{longestStreak !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">Shields</p>
+                  <p className="font-pixel-body text-[22px]">
+                    {shieldsAvailable > 0 ? "🛡️" : "—"}
+                  </p>
+                </div>
+              </div>
+              {shieldsAvailable > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <p className="font-pixel-body text-[18px] text-[var(--text-muted)]">
+                      A streak shield lets you protect your streak for one missed day.
+                      Activate it before a day you plan to miss.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={activateShield}
+                      disabled={!shieldEligible}
+                    >
+                      Use Shield
+                    </Button>
+                    {!shieldEligible && (
+                      <p className="font-pixel-body text-[16px] text-[var(--text-muted)]">
+                        Shield can only be used after missing exactly one day.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Danger Zone — logged-in only */}
         {user && (
