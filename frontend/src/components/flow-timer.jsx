@@ -132,7 +132,7 @@ export default function FlowTimerComp({
     setIsRunning(false);
   };
 
-  const stopAndRest = () => {
+  const stopFlow = () => {
     const studied = secondsElapsed;
     if (studied < 60 * timeScale) return; // less than 1 scaled-minute worked
     elapsedAtPause.current = studied;
@@ -152,14 +152,15 @@ export default function FlowTimerComp({
     setBreakSecsTotal(scaledBreakSecs);
     setBreakSecsLeft(scaledBreakSecs);
     completionFired.current = false;
+    setPhase("break");
+  };
 
-    // Small delay so victory sound fires first, then switch to break
-    setTimeout(() => {
-      stopVictorySound();
-      setPhase("break");
-      playBreakMusic("shortBreak");
-      setIsRunning(true);
-    }, 1200);
+  const startBreak = () => {
+    if (phase !== "break" || breakSecsLeft <= 0) return;
+    requestNotificationPermission();
+    stopVictorySound();
+    playBreakMusic("shortBreak");
+    setIsRunning(true);
   };
 
   const skipBreak = () => {
@@ -233,7 +234,9 @@ export default function FlowTimerComp({
             : secondsElapsed > 0
             ? "Paused. Resume when ready."
             : "Go until you can't. No timer, no pressure."
-          : "Recharge. You've earned it."}
+          : isRunning
+          ? "Recharge. You've earned it."
+          : "Recovery is ready. Start your break whenever you want."}
       </p>
 
       {/* Timer display */}
@@ -273,10 +276,10 @@ export default function FlowTimerComp({
               <Button
                 variant="secondary"
                 size="lg"
-                onClick={stopAndRest}
+                onClick={stopFlow}
                 disabled={!hasEnoughToStop}
               >
-                Stop & Rest
+                Stop
               </Button>
             )}
           </>
@@ -284,8 +287,14 @@ export default function FlowTimerComp({
 
         {phase === "break" && (
           <>
-            <Button variant="primary" size="lg" className="flex-1 min-w-[120px]" disabled>
-              Recovering…
+            <Button
+              variant="primary"
+              size="lg"
+              className="flex-1 min-w-[120px]"
+              onClick={startBreak}
+              disabled={isRunning}
+            >
+              {isRunning ? "Recovering…" : "Start Break"}
             </Button>
             <Button variant="secondary" onClick={skipBreak}>
               Skip ▸▸
