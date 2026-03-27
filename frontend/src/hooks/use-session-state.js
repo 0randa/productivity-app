@@ -26,7 +26,7 @@ function normalizeTask(raw) {
   };
 }
 
-export function useSessionState() {
+export function useSessionState({ initialStreak = 0 } = {}) {
   const saved = () => loadSessionData() ?? {};
 
   const [tasks, setTasks] = useState(() => (saved().tasks ?? []).map(normalizeTask));
@@ -41,8 +41,8 @@ export function useSessionState() {
   const [lastSessionQuality, setLastSessionQuality] = useState(() => saved().lastSessionQuality ?? 1.0);
   const [dailyXpEarned,      setDailyXpEarned]      = useState(() => saved().dailyXpEarned      ?? 0);
   const [dailyXpDate,        setDailyXpDate]        = useState(() => saved().dailyXpDate        ?? null);
-  const [streak,             setStreak]             = useState(() => saved().streak             ?? 0);
-  const [lastStreakDate,     setLastStreakDate]     = useState(() => saved().lastStreakDate     ?? null);
+  const [streak,             setStreak]             = useState(initialStreak);
+  const [lastStreakDate,     setLastStreakDate]     = useState(null);
 
   // Ref mirrors availableTaskClaims for synchronous guard checks — prevents
   // rapid clicks from bypassing the claim gate before re-render.
@@ -58,11 +58,9 @@ export function useSessionState() {
       lastSessionQuality,
       dailyXpEarned,
       dailyXpDate,
-      streak,
-      lastStreakDate,
     });
   }, [tasks, pomodorosStarted, tasksCompleted, availableTaskClaims,
-      lastSessionQuality, dailyXpEarned, dailyXpDate, streak, lastStreakDate]);
+      lastSessionQuality, dailyXpEarned, dailyXpDate]);
 
   const setWelcomeMessage = ({ starterLabel, startLevel }) => {
     setStatusMessage(
