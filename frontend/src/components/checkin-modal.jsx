@@ -19,12 +19,13 @@ function milestoneMessage(streak) {
   return null;
 }
 
-export function CheckinModal({ streak, onClaim }) {
+export function CheckinModal({ streak = 0, onClaim }) {
   const milestone = milestoneMessage(streak);
 
   return (
     <Dialog open>
       <DialogContent
+        hideCloseButton
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
