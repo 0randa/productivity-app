@@ -14,10 +14,13 @@ describe('todayStr / yesterdayStr', () => {
   test('todayStr returns YYYY-MM-DD format', () => {
     expect(todayStr()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
-  test('yesterdayStr is one day before todayStr', () => {
-    const today = new Date(todayStr());
-    const yesterday = new Date(yesterdayStr());
-    expect(today - yesterday).toBe(86_400_000);
+  test('yesterdayStr is one calendar day before todayStr', () => {
+    const t = new Date(todayStr() + 'T12:00:00');
+    const y = new Date(yesterdayStr() + 'T12:00:00');
+    const diffMs = t - y;
+    // Should be roughly 1 day (allow for DST: 23h to 25h)
+    expect(diffMs).toBeGreaterThan(22 * 60 * 60 * 1000);
+    expect(diffMs).toBeLessThan(26 * 60 * 60 * 1000);
   });
 });
 
