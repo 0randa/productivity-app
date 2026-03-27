@@ -2,8 +2,15 @@ import { useState, useEffect } from "react";
 import { XP_PER_TASK, createTaskId } from "@/lib/pokemon";
 import { loadSessionData, saveSessionData } from "@/lib/session-storage";
 
+function normalizeTask(raw) {
+  const done = "done" in raw
+    ? raw.done === true
+    : raw.completed === true;
+  return { ...raw, done };
+}
+
 export function useSessionState() {
-  const [tasks, setTasks] = useState(() => loadSessionData()?.tasks ?? []);
+  const [tasks, setTasks] = useState(() => (loadSessionData()?.tasks ?? []).map(normalizeTask));
   const [pomodorosStarted, setPomodorosStarted] = useState(() => loadSessionData()?.pomodorosStarted ?? 0);
   const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
   const [tasksCompleted, setTasksCompleted] = useState(() => loadSessionData()?.tasksCompleted ?? 0);

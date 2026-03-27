@@ -75,56 +75,59 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, onClearBoard, 
 
           {/* Task list */}
           <div className="space-y-2">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className={[
-                  "flex items-center gap-3 px-4 py-3",
-                  "border-[2px] border-[var(--window-border)]",
-                  "shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
-                  "transition-all duration-100",
-                  task.done
-                    ? "opacity-60 bg-[var(--window-bg)]"
-                    : "bg-[var(--window-bg)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow),3px_3px_0_rgba(0,0,0,0.12)]",
-                ].join(" ")}
-              >
-                {/* Status icon */}
-                <span className="flex-shrink-0 text-[var(--text-muted)]">
-                  {task.done
-                    ? <CheckSquare size={16} style={{ color: "var(--poke-green)" }} />
-                    : <Square size={16} />
-                  }
-                </span>
+            {tasks.map((task) => {
+              const isDone = task.done === true;
+              return (
+                <div
+                  key={task.id}
+                  className={[
+                    "flex items-center gap-3 px-4 py-3",
+                    "border-[2px] border-[var(--window-border)]",
+                    "shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow)]",
+                    "transition-all duration-100",
+                    isDone
+                      ? "opacity-60 bg-[var(--window-bg)]"
+                      : "bg-[var(--window-bg)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[inset_1px_1px_0_var(--window-highlight),inset_-1px_-1px_0_var(--window-shadow),3px_3px_0_rgba(0,0,0,0.12)]",
+                  ].join(" ")}
+                >
+                  {/* Status icon */}
+                  <span className="flex-shrink-0 text-[var(--text-muted)]">
+                    {isDone
+                      ? <CheckSquare size={16} style={{ color: "var(--poke-green)" }} />
+                      : <Square size={16} />
+                    }
+                  </span>
 
-                {/* Task info */}
-                <div className="flex-1 min-w-0">
-                  <p className={[
-                    "font-pixel-body text-[20px] leading-tight",
-                    task.done ? "line-through text-[var(--text-muted)]" : "text-[var(--text-dark)]",
-                  ].join(" ")}>
-                    {task.name}
-                  </p>
-                  <p className="font-pixel text-[8px] tracking-wide text-[var(--text-muted)] mt-0.5">
-                    +{task.points} XP
-                  </p>
-                </div>
+                  {/* Task info */}
+                  <div className="flex-1 min-w-0">
+                    <p className={[
+                      "font-pixel-body text-[20px] leading-tight",
+                      isDone ? "line-through text-[var(--text-muted)]" : "text-[var(--text-dark)]",
+                    ].join(" ")}>
+                      {task.name}
+                    </p>
+                    <p className="font-pixel text-[8px] tracking-wide text-[var(--text-muted)] mt-0.5">
+                      +{task.points} XP
+                    </p>
+                  </div>
 
-                {/* Status + action */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant={task.done ? "green" : "yellow"}>
-                    {task.done ? "Done" : "Queued"}
-                  </Badge>
-                  <Button
-                    variant={task.done ? "ghost" : "secondary"}
-                    size="sm"
-                    onClick={() => onCompleteTask(task.id)}
-                    disabled={task.done || !canCompleteTask}
-                  >
-                    {task.done ? "✓" : "Clear!"}
-                  </Button>
+                  {/* Status + action */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge variant={isDone ? "green" : "yellow"}>
+                      {isDone ? "Done" : "Queued"}
+                    </Badge>
+                    <Button
+                      variant={isDone ? "ghost" : "secondary"}
+                      size="sm"
+                      onClick={() => onCompleteTask(task.id)}
+                      disabled={isDone || !canCompleteTask}
+                    >
+                      {isDone ? "✓" : "Clear!"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

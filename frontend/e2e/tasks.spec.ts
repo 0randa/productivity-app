@@ -52,6 +52,28 @@ test.describe("Quest Board (tasks)", () => {
     await expect(page.getByText("0 active")).toBeVisible();
   });
 
+  test("task added during break mode starts as Queued and is not struck through", async ({ page }) => {
+    await goToDashboard(page);
+
+    // Complete a focus session via Skip
+    await page.getByRole("button", { name: "Start" }).click();
+    await page.getByRole("button", { name: /Skip/ }).click();
+
+    // Enter break mode
+    await page.getByRole("button", { name: /Break/ }).click();
+    await expect(page.getByText(/Potion Break|Camp Rest/)).toBeVisible();
+
+    // Add a task during break
+    const input = page.getByPlaceholder("What will you conquer next?");
+    await input.fill("Break-time task");
+    await input.press("Enter");
+
+    // Task must be Queued, not Done
+    await expect(page.getByText("Break-time task", { exact: true })).toBeVisible();
+    await expect(page.getByText("Queued").first()).toBeVisible();
+    await expect(page.getByText("Break-time task", { exact: true })).not.toHaveClass("line-through");
+  });
+
   test("Clear! button is disabled before completing a pomodoro", async ({ page }) => {
     await goToDashboard(page);
 

@@ -2,7 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSessionState } from "@/hooks/use-session-state";
 import Tasks from "@/components/tasks";
-import { test, expect } from "vitest";
+import { test, expect, beforeEach } from "vitest";
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 function Harness() {
   const {
@@ -58,6 +62,43 @@ test("integration: pomodoro completion enables one task claim", async () => {
   await user.click(screen.getByRole("button", { name: "Complete pomodoro" }));
   expect(screen.getByLabelText("claims")).toHaveTextContent("1");
   expect(screen.getByLabelText("status")).toHaveTextContent(/Pomodoro complete/i);
+});
+
+test("integration: malformed/legacy task payloads load as queued", () => {
+  localStorage.setItem(
+    "pomopet_session",
+    JSON.stringify({
+      tasks: [
+        { id: "t1", name: "Truthy number", points: 10, done: 1 },
+        { id: "t2", name: "String true", points: 10, done: "true" },
+        { id: "t3", name: "Legacy completed", points: 10, completed: false },
+      ],
+      tasksCompleted: 0,
+      availableTaskClaims: 0,
+      pomodorosStarted: 0,
+    }),
+  );
+
+  render(<Harness />);
+
+  const badges = screen.getAllByText("Queued");
+  expect(badges).toHaveLength(3);
+});
+
+test("integration: task added while claims are available starts as queued", async () => {
+  const user = userEvent.setup();
+  render(<Harness />);
+
+  // Earn a claim
+  await user.click(screen.getByRole("button", { name: "Complete pomodoro" }));
+  expect(screen.getByLabelText("claims")).toHaveTextContent("1");
+
+  // Add task while a claim is available
+  await user.click(screen.getByRole("button", { name: "Add task" }));
+
+  // Should be Queued, not Done
+  expect(screen.getByText("Queued")).toBeVisible();
+  expect(screen.getByText("Write tests")).not.toHaveClass("line-through");
 });
 
 test("integration: task completion consumes claim and marks done", async () => {
