@@ -69,6 +69,7 @@ export default function App() {
     handleFlowComplete,
     handleTaskCreate,
     handleTaskComplete,
+    handleClearBoard,
   } = useSessionState();
 
   const {
@@ -441,6 +442,7 @@ export default function App() {
           tasks,
           onAddTask: handleTaskCreate,
           onCompleteTask: completeTask,
+          onClearBoard: handleClearBoard,
           canCompleteTask: availableTaskClaims > 0,
           stats: {
             sessionsStarted: pomodorosStarted,

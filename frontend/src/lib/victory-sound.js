@@ -40,7 +40,7 @@ export function stopVictorySound() {
 
 const BREAK_TRACKS = {
   shortBreak: "/pokemon-center.mp3",
-  longBreak:  null, // add a long-break track here when ready
+  longBreak:  "/pallet-town.mp3",
 };
 
 export function playBreakMusic(breakType) {

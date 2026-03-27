@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { CheckSquare, Square, PlusCircle } from "lucide-react";
+import { CheckSquare, Square, PlusCircle, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTask, stats }) {
+export default function Tasks({ tasks, onAddTask, onCompleteTask, onClearBoard, canCompleteTask, stats }) {
   const [taskDraft, setTaskDraft] = useState("");
 
   const handleAddTask = (event) => {
@@ -24,7 +25,21 @@ export default function Tasks({ tasks, onAddTask, onCompleteTask, canCompleteTas
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Quest Board</CardTitle>
-            <Badge variant="outline">{tasks.length} active</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{tasks.length} active</Badge>
+              {tasks.length > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={onClearBoard}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Clear all quests</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
           <p className="font-pixel-body text-[18px] text-[var(--text-muted)]">
             Convert each focus sprint into real XP.

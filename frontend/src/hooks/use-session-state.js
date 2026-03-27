@@ -120,6 +120,11 @@ export function useSessionState() {
     );
   };
 
+  const handleClearBoard = () => {
+    setTasks([]);
+    setStatusMessage("Quest board cleared.");
+  };
+
   return {
     tasks,
     pomodorosStarted,
@@ -137,5 +142,6 @@ export function useSessionState() {
     handleFlowComplete,
     handleTaskCreate,
     handleTaskComplete,
+    handleClearBoard,
   };
 }
