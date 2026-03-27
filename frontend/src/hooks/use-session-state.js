@@ -44,6 +44,11 @@ export function useSessionState({ initialStreak = 0 } = {}) {
   const [streak,             setStreak]             = useState(initialStreak);
   const [lastStreakDate,     setLastStreakDate]     = useState(null);
 
+  // Sync streak when CheckinContext resolves its Supabase load after mount
+  useEffect(() => {
+    if (initialStreak > 0) setStreak(initialStreak);
+  }, [initialStreak]);
+
   // Ref mirrors availableTaskClaims for synchronous guard checks — prevents
   // rapid clicks from bypassing the claim gate before re-render.
   const claimsRef = useRef(saved().availableTaskClaims ?? 0);
