@@ -2,6 +2,7 @@
 
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { AuthProvider } from "@/context/auth-context";
+import { CheckinProvider } from "@/context/checkin-context";
 
 const theme = extendTheme({
   colors: {
@@ -30,7 +31,11 @@ const theme = extendTheme({
 export default function Providers({ children }) {
   return (
     <ChakraProvider theme={theme}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <CheckinProvider>
+          {children}
+        </CheckinProvider>
+      </AuthProvider>
     </ChakraProvider>
   );
 }
