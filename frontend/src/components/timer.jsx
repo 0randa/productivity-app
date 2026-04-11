@@ -251,11 +251,11 @@ export default function TimerComp({
           textShadow: "4px 4px 0 rgba(0,0,0,0.08)",
           fontVariantNumeric: "tabular-nums",
         }}
-        aria-label={`${String(minutes).padStart(2, "0")} minutes and ${String(seconds).padStart(2, "0")} seconds remaining`}
+        aria-label={`${mm} minutes and ${ss} seconds remaining`}
         aria-live="off"
         role="timer"
       >
-        {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+        {mm}:{ss}
       </p>
 
       <Progress
