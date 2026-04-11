@@ -5,6 +5,7 @@ import { Volume2, VolumeX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useTimerTabTitle } from "@/hooks/use-timer-tab-title";
 import { playVictorySound, stopVictorySound, playBreakMusic, pauseBreakMusic, resumeBreakMusic, stopBreakMusic, stopAllAudio, playHealSound, getMuted, setMuted } from "@/lib/victory-sound";
 import { requestNotificationPermission, sendTimerNotification } from "@/lib/notifications";
 import { loadSessionData, saveSessionData } from "@/lib/session-storage";
@@ -89,7 +90,6 @@ export default function TimerComp({
   }, [mode, isRunning, pomodoroCount, canStartBreak, focusSecs, shortBreakSecs, longBreakSecs]);
 
   const deadlineRef = useRef(null);
-  const originalTitle = useRef(null);
 
   useEffect(() => {
     if (!isRunning) return undefined;
@@ -101,23 +101,11 @@ export default function TimerComp({
     return () => clearInterval(interval);
   }, [isRunning]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Update browser tab title with countdown while running
-  useEffect(() => {
-    if (!isRunning) {
-      if (originalTitle.current != null) {
-        document.title = originalTitle.current;
-        originalTitle.current = null;
-      }
-      return;
-    }
-    if (originalTitle.current == null) {
-      originalTitle.current = document.title;
-    }
-    const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-    const ss = String(secondsLeft % 60).padStart(2, "0");
-    const label = mode === "focus" ? "Focus" : "Break";
-    document.title = `${mm}:${ss} — ${label} | PomoPet`;
-  }, [isRunning, secondsLeft, mode]);
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+  const label = mode === "focus" ? "Focus" : "Break";
+  const activeTitle = isRunning ? `${mm}:${ss} — ${label} | PomoPet` : null;
+  const { showCompletionTitle } = useTimerTabTitle(activeTitle);
 
   useEffect(() => {
     if (secondsLeft > 0) {
@@ -131,6 +119,7 @@ export default function TimerComp({
     if (mode === "focus") {
       playVictorySound();
       sendTimerNotification("Focus session complete!", "Great work, Trainer! Time to take a break.");
+      showCompletionTitle("Focus complete! | PomoPet");
       setPomodoroCount((c) => c + 1);
       setCanStartBreak(true);
       onPomodoroComplete?.();
@@ -138,15 +127,14 @@ export default function TimerComp({
       stopBreakMusic();
       playHealSound();
       sendTimerNotification("Break's over!", "You're healed up — time to get back to it.");
+      showCompletionTitle("Break over! | PomoPet");
       if (mode === "longBreak") setPomodoroCount(0);
       setMode("focus");
       setCanStartBreak(false);
       setSecondsLeft(focusSecs);
     }
-  }, [secondsLeft, isRunning, mode, focusSecs, onPomodoroComplete]);
+  }, [secondsLeft, isRunning, mode, focusSecs, onPomodoroComplete, showCompletionTitle]);
 
-  const minutes = Math.floor(secondsLeft / 60);
-  const seconds = secondsLeft % 60;
   const totalForMode = mode === "focus" ? focusSecs : mode === "longBreak" ? longBreakSecs : shortBreakSecs;
   const progress = useMemo(() => {
     const elapsed = totalForMode - secondsLeft;

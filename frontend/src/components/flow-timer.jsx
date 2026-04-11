@@ -5,6 +5,7 @@ import { Volume2, VolumeX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useTimerTabTitle } from "@/hooks/use-timer-tab-title";
 import {
   playVictorySound,
   stopVictorySound,
@@ -45,7 +46,6 @@ export default function FlowTimerComp({
   const elapsedAtPause  = useRef(_st?.secondsElapsed ?? 0); // accumulated before current stint
   const breakDeadline   = useRef(null);
   const completionFired = useRef(false);
-  const originalTitle   = useRef(null);
 
   const toggleMute = () => {
     const next = !isMuted;
@@ -75,6 +75,13 @@ export default function FlowTimerComp({
     return () => clearInterval(interval);
   }, [isRunning, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const mm = String(Math.floor((phase === "focus" ? secondsElapsed : breakSecsLeft) / 60)).padStart(2, "0");
+  const ss = String((phase === "focus" ? secondsElapsed : breakSecsLeft) % 60).padStart(2, "0");
+  const activeTitle = isRunning
+    ? `${mm}:${ss} — ${phase === "focus" ? "Flow" : "Recovery"} | PomoPet`
+    : null;
+  const { showCompletionTitle } = useTimerTabTitle(activeTitle);
+
   // Break completion
   useEffect(() => {
     if (phase !== "break" || breakSecsLeft > 0 || !isRunning || completionFired.current) return;
@@ -83,6 +90,7 @@ export default function FlowTimerComp({
     stopBreakMusic();
     playHealSound();
     sendTimerNotification("Recovery complete!", "You're recharged — dive back in when ready.");
+    showCompletionTitle("Recovery complete! | PomoPet");
     onFlowComplete?.(secondsElapsed);
     // Reset for next session
     setPhase("focus");
@@ -91,28 +99,7 @@ export default function FlowTimerComp({
     setBreakSecsTotal(0);
     setBreakSecsLeft(0);
     breakDeadline.current = null;
-  }, [phase, breakSecsLeft, isRunning, secondsElapsed, onFlowComplete]);
-
-  // Tab title while running
-  useEffect(() => {
-    if (!isRunning) {
-      if (originalTitle.current != null) {
-        document.title = originalTitle.current;
-        originalTitle.current = null;
-      }
-      return;
-    }
-    if (originalTitle.current == null) originalTitle.current = document.title;
-    if (phase === "focus") {
-      const mm = String(Math.floor(secondsElapsed / 60)).padStart(2, "0");
-      const ss = String(secondsElapsed % 60).padStart(2, "0");
-      document.title = `${mm}:${ss} — Flow | PomoPet`;
-    } else {
-      const mm = String(Math.floor(breakSecsLeft / 60)).padStart(2, "0");
-      const ss = String(breakSecsLeft % 60).padStart(2, "0");
-      document.title = `${mm}:${ss} — Recovery | PomoPet`;
-    }
-  }, [isRunning, phase, secondsElapsed, breakSecsLeft]);
+  }, [phase, breakSecsLeft, isRunning, secondsElapsed, onFlowComplete, showCompletionTitle]);
 
   // Persist state
   useEffect(() => {

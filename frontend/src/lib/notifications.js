@@ -3,23 +3,23 @@
  * Falls back silently when the Notifications API is unavailable or denied.
  */
 
-let permissionGranted = typeof Notification !== "undefined" && Notification.permission === "granted";
+export async function requestNotificationPermission() {
+  if (typeof Notification === "undefined") return false;
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") return false;
 
-export function requestNotificationPermission() {
-  if (typeof Notification === "undefined") return;
-  if (Notification.permission === "granted") {
-    permissionGranted = true;
-    return;
+  try {
+    const result = await Notification.requestPermission();
+    return result === "granted";
+  } catch {
+    return false;
   }
-  if (Notification.permission === "denied") return;
-
-  Notification.requestPermission().then((result) => {
-    permissionGranted = result === "granted";
-  });
 }
 
 export function sendTimerNotification(title, body) {
-  if (!permissionGranted) return;
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") {
+    return false;
+  }
 
   try {
     const n = new Notification(title, {
@@ -30,7 +30,9 @@ export function sendTimerNotification(title, body) {
     });
     // Auto-close after 8 seconds
     setTimeout(() => n.close(), 8000);
+    return true;
   } catch {
     // Notification constructor can throw in some environments (e.g. Android WebView)
+    return false;
   }
 }
